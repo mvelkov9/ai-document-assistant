@@ -1,0 +1,26 @@
+flowchart TB
+    User[User or Professor]
+    Browser[Vue Frontend<br/>AuthPanel · UploadSection · DocumentCard]
+    Proxy[Nginx Reverse Proxy<br/>Security Headers · Gzip · TLS]
+    RateLimit[slowapi Rate Limiter<br/>Auth: 5/min · AI: 10/min]
+    Backend[FastAPI Backend<br/>structlog JSON Logging]
+    DB[(PostgreSQL<br/>Alembic Migrations)]
+    Storage[(MinIO S3-Compatible Storage)]
+    AI[AI Provider or Fallback Mode]
+    Jobs[(Processing Jobs<br/>Background Tasks)]
+    VPS[Personal VPS with Docker Compose]
+
+    User --> Browser
+    Browser --> Proxy
+
+    subgraph VPS
+        Proxy --> RateLimit
+        RateLimit --> Backend
+        Backend --> DB
+        Backend --> Storage
+        Backend --> AI
+        Backend --> Jobs
+    end
+
+    Jobs --> Backend
+    Backend --> Browser

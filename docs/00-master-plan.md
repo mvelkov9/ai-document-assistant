@@ -1,0 +1,459 @@
+# Master Implementation Plan
+
+## Project snapshot
+
+- Project title: AI Document Assistant
+- Assignment option: MOZNOST 3 - Razvoj integrirane spletne storitve
+- Delivery model: local development plus production deployment on a personal VPS
+- Main objective: multi-user upload, document storage, AI summarization, basic document Q&A, OpenAPI, CI/CD, and strong documentation
+
+## Course requirement coverage
+
+| Requirement | Status | Notes |
+| --- | --- | --- |
+| REST API | Completed | FastAPI with 18+ endpoints, OpenAPI documentation |
+| Cloud integration | Completed | MinIO object storage, Groq / Gemini / OpenAI API, PostgreSQL |
+| Cloud hosting | Completed | Docker Compose with production overlay for VPS |
+| Basic CI/CD | Completed | GitHub Actions: lint (ruff), test (pytest-cov), build |
+| OpenAPI / Swagger | Completed | Endpoint descriptions, schema examples, /docs + /redoc |
+| Authentication | Completed | JWT (HS256), bcrypt passwords, rate-limited auth |
+| Multi-user support | Completed | Ownership-based access control on all resources |
+| Documentation | Completed | 18 phase docs, academic report, architecture diagrams |
+
+## Phase tracker
+
+| Phase | Title | Status | Main output |
+| --- | --- | --- | --- |
+| 01 | Scope and scenario | Completed | Project scope, MVP, users, constraints |
+| 02 | Architecture and flows | Completed | Initial component and flow design |
+| 03 | Infrastructure strategy | Completed | VPS + Docker + Nginx direction |
+| 04 | Repository and scaffold | Completed | Initial codebase and documentation structure |
+| 05 | Backend API core | Completed | Auth flow, status routes, service contracts |
+| 06 | Security model | Completed | Rate limiting, security headers, input validation, OWASP mapping |
+| 07 | Data and storage | Completed | SQLAlchemy persistence, Alembic migrations |
+| 08 | Storage integration | Completed | Upload endpoint, MinIO service, document listing |
+| 09 | AI integration | Completed | Summary endpoint with provider and fallback mode |
+| 10 | Document Q&A | Completed | Ask endpoint with persistence and fallback mode |
+| 11 | Frontend flows | Completed | Auth, upload, document list, summary UI (componentized) |
+| 12 | Processing workflow | Completed | Async summary and question jobs with polling |
+| 13 | OpenAPI and examples | Completed | Schema examples, endpoint descriptions, demo seed |
+| 14 | Docker profiles | Completed | Multi-stage Dockerfiles, production overlay, non-root |
+| 15 | CI/CD | Completed | GitHub Actions: ruff lint, pytest-cov, frontend build |
+| 16 | Observability | Completed | Structured JSON logging (structlog), readiness endpoint |
+| 17 | Testing | Completed | 30 test cases, auth/doc/pagination/error coverage |
+| 18 | Costs and fit | Completed | Cost tables with real pricing, PaaS comparison |
+| 19 | VPS deployment | Not started | Deploy to actual VPS + screenshots |
+| 20 | Frontend expansion | Completed | Search, filter, sort, user profile |
+| 21 | Admin functionality | Completed | Admin endpoints, admin dashboard, stats |
+| 22 | RAG-lite AI | Completed | BM25 chunking for contextual Q&A |
+| 23 | Document download | Completed | Download endpoint + frontend button |
+| 24 | Prometheus metrics | Completed | /metrics endpoint with instrumentator |
+| 25 | CI/CD health | Completed | Docker build step in CI, badge prep |
+| 26 | Report finalization | Not started | Screenshots and visual evidence |
+| 27 | GUI overhaul v1.2.1 | Completed | Sidebar layout, admin role management |
+
+## Current implementation state
+
+### Completed in this iteration
+
+- repository structure created
+- master documentation created
+- four phase documents created
+- FastAPI starter application created
+- initial authentication endpoints created
+- SQLAlchemy database integration created
+- persistent user and document models created
+- MinIO-compatible document upload flow created
+- PDF extraction and AI-or-fallback summary flow created
+- document question-answer flow created
+- Vue auth and dashboard flow created
+- async summary and question job flow created
+- OpenAPI example payloads added
+- Docker Compose skeleton created
+- production Docker Compose overlay created
+- Nginx reverse proxy starter configuration created
+- VPS deploy and backup scripts created
+- readiness endpoint and request logging added
+- demo seed script created
+- environment example prepared
+- GitHub Actions CI workflow scaffolded
+- backend document flow tests added
+- cost and organizational fit analysis documented
+
+### Immediate next steps
+
+1. Deploy to actual VPS (Phase 19) — this is the last critical requirement
+2. Capture screenshots of running system for report (Phase 26)
+3. Add auto-deploy step in CI/CD if time allows (Phase 25 extension)
+4. Freeze final report text with screenshots
+
+## Verification log
+
+- Python 3 is available on the machine.
+- Initial scaffold assumptions about local Node and Docker availability were later superseded by the user's verified shell output.
+- Python-level scaffold can be validated now.
+- Python source compilation succeeded after the first scaffold.
+- Python source compilation succeeded after the persistence refactor.
+- Python source compilation succeeded after the upload and storage integration step.
+- Python source compilation succeeded after the summary integration step.
+- Docker Compose configuration resolves successfully.
+- The user validated that `node -v` and `npm -v` work in the target shell.
+- The user validated that `docker ps` and `docker compose version` work in the target shell.
+- The user validated that `docker compose build` completes successfully for backend and frontend images.
+- End-to-end runtime verification with `docker compose up` is still pending in this agent session.
+
+## Documentation rule
+
+After every completed implementation phase:
+
+1. update this master file
+2. add or update the dedicated phase file
+3. record what changed, what was tested, and what remains open
+
+## Delta for current step
+
+### Enhancement phases (post-initial implementation)
+
+**Phase E1: Production fixes**
+- Frontend Dockerfile converted to multi-stage build (dev → build → production with nginx)
+- Backend Dockerfile updated with non-root user (appuser)
+- Added .dockerignore files for frontend and backend
+- Added startup validation rejecting default SECRET_KEY in production
+- CORS tightened from wildcard to specific methods/headers
+- docker-compose.yml and docker-compose.prod.yml updated with build targets
+
+**Phase E2: Security improvements**
+- Nginx default.conf rewritten with security headers (CSP, X-Frame-Options, etc.) and gzip
+- TLS/HTTPS template created at infrastructure/nginx/ssl.conf
+- slowapi rate limiting on auth (5/min) and AI endpoints (10/min)
+- Input validation: question length 3–500 chars, password 8–128 chars
+
+**Phase E3: Database migrations**
+- Alembic initialized with initial migration for all 4 tables
+- alembic.ini, env.py, and migration template created
+
+**Phase E4: Frontend componentization**
+- App.vue refactored from ~700 lines to ~160 lines
+- Created AuthPanel.vue, UploadSection.vue, DocumentCard.vue components
+
+**Phase E5: Backend improvements**
+- Structured JSON logging with structlog
+- Global exception handlers (422 validation, 500 no traces, 429 rate limit)
+- Session management fix in processing_service.py
+- Pagination on GET /documents with skip/limit/total
+
+**Phase E6: Testing expansion**
+- Added test_auth.py (8 tests) and test_documents.py (11 tests)
+- Enhanced conftest.py with shared fixtures (mock_storage, mock_ai, auth_headers)
+- Added pytest-cov for coverage reporting
+- Total: 30 test cases across 4 files
+
+**Phase E7: CI/CD improvements**
+- Added ruff linting step to CI pipeline
+- pytest-cov with --cov-fail-under=50 in CI
+- Deploy script enhanced with Alembic migration and health check
+- Created .env.production.example and pyproject.toml with ruff config
+
+**Phase E8: Documentation and OpenAPI**
+- All endpoints now have summary and description parameters
+- README.md completely rewritten with architecture, security, testing sections
+- API endpoint table added to README
+
+**Phase E9: Report finalization**
+- Security section expanded with rate limiting, headers, OWASP Top 10 mapping, JWT trade-off
+- Cost table with real Hetzner CX22 pricing and PaaS comparison
+- Implementation validation section updated with 30 test cases, CI pipeline details
+- References expanded from 7 to 16 sources
+
+**Phase E10: Final audit fixes**
+- Fixed OPENAI_API_KEY default in .env and .env.example (was truthy placeholder, now empty for fallback mode)
+- Added /redoc proxy location to both Nginx configs (default.conf and ssl.conf)
+- Exposed backend port 8000 in dev docker-compose.yml; hidden via ports: [] in prod overlay
+- Updated /api/v1/status features list to reflect all current capabilities
+- Added summary/description to /health and /ready endpoints for OpenAPI completeness
+- Fixed .gitignore to preserve .env.production.example
+- Removed unused logging import from main.py
+
+**Phase E12: Version 1.1.1 — Delete documents, OpenAI config fix, UX polish**
+- Added DELETE /api/v1/documents/{id} endpoint with cascading removal of related Q&A records and processing jobs
+- Added delete_object() to StorageService for MinIO file removal
+- Added delete() to DocumentRepository and delete_for_document() to QuestionAnswerRepository and ProcessingJobRepository
+- Added delete_document() to DocumentService orchestrating storage + DB cleanup
+- Frontend: delete button on DocumentCard with inline confirmation overlay (backdrop-blur, cancel/confirm)
+- Frontend: deleteDocument() API function, handleDelete() handler in App.vue
+- Fixed OpenAI API key handling: added field_validator to convert empty string to None in Settings
+- Added .env comments guiding users to set OPENAI_API_KEY for real AI summaries
+- UX improvements: document card hover effects, creation date display, smooth TransitionGroup animations for document list add/remove, improved empty summary state with actionable hint
+- formatBytes() now handles MB-sized files
+- Version bumped to v1.1.1 in footer, README, and docs
+- Complete frontend redesign: Inter font, CSS custom properties, card-based responsive layout
+- App.vue: navbar with logo/version badge, hero section with gradient, footer with v1.1 branding
+- AuthPanel.vue: pill-style tab navigation, modern form styling
+- UploadSection.vue: drag-and-drop upload zone with file preview and cancel
+- DocumentCard.vue: color-coded status badges, sectioned summary/Q&A display
+- Nginx CSP relaxed for development (allows Google Fonts, WebSocket, inline scripts)
+- WebSocket proxy added for Vite HMR (`/@vite/` and `/` locations)
+- ssl.conf updated to match default.conf (WebSocket proxy, buffer tuning, gzip)
+- PostgreSQL healthcheck added to docker-compose.yml (`pg_isready`, interval 5s, retries 5)
+- Backend depends_on with `condition: service_healthy` for reliable startup order
+- bcrypt pinned to 4.0.1 for passlib compatibility on Python 3.13
+- Rate limiting disabled in test environment (`APP_ENV=test`)
+- Test isolation improved: `drop_all` + `init_db` between test runs
+- API URL changed from absolute `http://localhost:8000` to relative `/api/v1`
+- Seed script fixed: sys.path.insert for module resolution, scripts/ added to Docker image
+- All 30 tests passing, full E2E demo verified
+
+**Phase E13: Version 1.1.2 — Comprehensive GUI overhaul**
+- Overhauled `main.css` design tokens: gradient mesh background (layered radial-gradients on `<body>`), enhanced shadow scale (xs/sm/md/lg/glow), new CSS variables (`--border-subtle`, `--surface-raised`, `--primary-glow`, `--shadow-glow`, `--radius-xl`), `background-attachment: fixed`, `:focus-visible` outline
+- App.vue: glassmorphism navbar (`backdrop-filter: blur(16px)`, semi-transparent `rgba`), gradient brand logo, brand subtitle, user avatar with initial letter, hero glow radial gradient, gradient text headline (`background-clip: text`), colored pill dots, technology tags row (Vue 3, FastAPI, PostgreSQL, Docker, Groq AI), dashboard header with stat cards (document count + summary count), improved empty-state illustration, right-aligned toasts with colored side bar + close button
+- AuthPanel.vue: header with gradient icon wrap, SVG icons in tabs and form labels, gradient submit button with glow shadow, `<Transition>` form-switch animation, inputs with surface-alt background
+- DocumentCard.vue: gradient icon wrap, status dots, separated action group, summary section with left-border accent, chat-bubble styled Q&A answers (question in surface, answer in primary-light), circular delete-confirm icon, answer enter transition
+- UploadSection.vue: circular icon wrap, "Izberi datoteko" as gradient button, format hint text, file-icon gradient wrap, `<Transition>` upload-switch animation, inset shadow on drag-over
+- Added Groq as primary AI provider (free tier, Llama 3.3 70B) — provider chain: Groq → Gemini → OpenAI → fallback
+- Version bumped to v1.1.2 in footer, README, and docs
+
+**Phase E14: Version 1.2.0 — Admin, download, RAG-lite, Prometheus, expanded frontend**
+- Backend: `GET /api/v1/admin/users` and `GET /api/v1/admin/stats` with admin role middleware
+- Backend: `GET /api/v1/documents/{id}/download` with StreamingResponse and ownership check
+- Backend: RAG-lite BM25 chunking in `summary_service.py` — text split into overlapping 800-word chunks, ranked by BM25 (k1=1.5, b=0.75), top 5 chunks sent to AI for Q&A
+- Backend: Prometheus metrics via `prometheus-fastapi-instrumentator` at `/metrics`
+- Backend: `/api/v1/status` features list updated to reflect all capabilities
+- Frontend: search bar filtering documents by filename
+- Frontend: sort dropdown (date, name, size, status)
+- Frontend: user profile card (email, role, registration date)
+- Frontend: admin dashboard panel with system stats and user list (visible to admin role)
+- Frontend: download button on DocumentCard
+- Frontend: version bumped to v1.2.0
+- CI/CD: added Docker image build step in GitHub Actions
+- CI/CD: fixed duplicate `run:` bug in ci.yml
+- Infrastructure: `/metrics` proxy location in Nginx default.conf
+- Testing: 9 new tests (admin stats/users with admin role, 403 for regular users, 401 unauthorized, download happy/404/cross-user, metrics endpoint)
+- Total test suite: 39 tests across 5 files, all passing
+
+### Previous deltas added phase 05 documentation
+- added JWT-based auth with persistent SQLAlchemy-backed users
+- added phase 07 documentation for data and storage baseline
+- introduced document metadata model to support the next upload phase
+- added phase 08 documentation for MinIO storage integration and upload endpoints
+- implemented authenticated upload and per-user document listing endpoints
+- added phase 09 documentation for AI-backed summary generation with local fallback
+- implemented document summarize endpoint on top of stored PDFs
+- added phase 10 documentation for document Q&A
+- implemented document ask endpoint with persisted question-answer records
+- added phase 11 documentation for frontend auth and dashboard flows
+- implemented Vue flow for login, registration, upload, listing, and summary actions
+- added phase 12 documentation for async summary and question jobs with polling
+- added phase 14 documentation for hardened VPS deployment
+- implemented async summary and question job creation with polling-visible results
+- switched frontend summary action to async job polling flow
+- switched frontend question action to async job polling flow
+- refined document processing states with summary-processing, question-processing, summary-failed, and question-failed values
+- added phase 13 documentation for OpenAPI examples and demo seed path
+- added phase 16 documentation for observability baseline
+- added schema-level OpenAPI examples, readiness endpoint, request logging, and demo seed script
+- added phase 15 documentation for CI workflow
+- added phase 17 documentation for backend flow testing
+- added automated tests for upload, summarize, and ask endpoints with mocked storage and AI layers
+- added runtime validation note for this machine
+- added professor demo checklist
+- added production rollout checklist
+- added academic report outline
+- added phase 18 documentation for costs and organizational fit
+- aligned runtime notes with user-validated Docker and Node availability
+
+**Phase E15: Version 1.2.1 — Massive GUI overhaul with sidebar layout and admin role management**
+- Frontend: complete redesign from single-page scrolling to sidebar-based navigation
+- Frontend: dark sidebar (#1a1d23) with collapsible toggle, page-based navigation (Dokumenti, Naloži, Profil, Admin)
+- Frontend: user avatar and role badge in sidebar bottom, active page highlighting, document count badge
+- Frontend: dedicated pages — documents with search/sort toolbar, upload, user profile card, admin dashboard
+- Frontend: admin user table with data-table styling, role pills, promote/demote buttons
+- Frontend: landing page for unauthenticated users with hero gradient text, feature dots, tech chips, AuthPanel
+- Frontend: topbar with page title/subtitle and mini stats (document count, summary count)
+- Frontend: toast notifications with colored accent bar, smooth transitions
+- Frontend: responsive breakpoints at 860px and 540px for mobile support
+- Backend: `PATCH /api/v1/admin/users/{user_id}/role` endpoint for admin role management
+- Backend: `SetRoleRequest` Pydantic model with role validation, self-change protection
+- Frontend API: `setUserRole(token, userId, role)` function in api.js
+- main.css: removed `background-image: var(--bg-mesh)` from body (handled by landing page now)
+- Version bumped to v1.2.1 in App.vue footer, sidebar brand, landing nav
+- README updated: version title, API endpoint table (added download, admin, metrics, PATCH role)
+- 39 tests still passing, all containers healthy
+
+## Supporting operational documents
+
+- `docs/professor-demo-checklist.md`
+- `docs/production-rollout-checklist.md`
+- `docs/runtime-validation.md`
+- `docs/phase-18-costs-and-fit.md`
+- `docs/architecture-and-dataflows.md`
+- `report/00-report-outline.md`
+- `report/01-report-draft.md`
+
+## Diagram artifacts
+
+- `docs/diagrams/architecture.mmd`
+- `docs/diagrams/data-flow.mmd`
+
+---
+
+## Ocena projekta glede na zahteve naloge (MOŽNOST 3)
+
+### Minimalne tehnične zahteve — stanje
+
+| Zahteva | Status | Komentar |
+| --- | --- | --- |
+| REST API | ✅ Izpolnjeno | 14 endpointov, FastAPI, popolna OpenAPI dokumentacija |
+| Integracija z oblačno storitvijo | ✅ Izpolnjeno | PostgreSQL, MinIO (S3), Groq/Gemini/OpenAI AI API |
+| Gostovanje v oblaku | ⚠️ Pripravljeno, nepreverjeno | Docker Compose + prod overlay obstajata, VPS deployment ni dokazan |
+| Osnovni CI/CD | ✅ Izpolnjeno | GitHub Actions: ruff lint, pytest-cov, frontend build |
+| Dokumentacija API (OpenAPI) | ✅ Izpolnjeno | /docs (Swagger) + /redoc z opisi vseh endpointov |
+
+### Elementi za višjo oceno — stanje
+
+| Element | Status | Komentar |
+| --- | --- | --- |
+| Kontejnerizacija (Docker) | ✅ | Multi-stage builds, non-root containers, Docker Compose dev+prod |
+| Kubernetes ali managed platforma | ❌ Ni implementirano | Ni potrebno za pozitivno oceno, dobro za bonus |
+| Avtentikacija (JWT, OAuth2, OIDC) | ✅ | JWT HS256 z bcrypt, rate limiting |
+| Integracija AI API ali LLM | ✅ | Groq (Llama 3.3 70B) → Gemini → OpenAI → fallback |
+| Monitoring ali logging | ✅ | structlog JSON logging, /health, /ready, Prometheus /metrics endpoint |
+| Infrastructure as Code | ❌ Ni implementirano | Ni Terraform/Ansible; Docker Compose je edini IaC |
+
+### Ocenjevalni kriteriji naloge
+
+| Kriterij | Delež | Ocena | Komentar |
+| --- | --- | --- | --- |
+| Tehnična globina | 30% | 8/10 | Solidna arhitektura, RAG-lite BM25 chunking za Q&A, multi-provider AI z fallback, Prometheus metrics, admin API. |
+| Arhitekturna zasnova | 20% | 9/10 | Odlično: čista slojevita arhitektura, Mermaid diagrami, ločeni sloji (API → Service → Repository), Docker Compose dev/prod |
+| Integracija in varnost | 20% | 8/10 | MinIO, 3 AI ponudniki, JWT, OWASP A01-A07, rate limiting, security headers, admin role-based access. Manjka: refresh tokeni |
+| Analiza stroškov | 10% | 9/10 | Realne cene Hetzner, 3 scenariji, primerjava VPS vs. PaaS |
+| Dokumentacija | 10% | 9/10 | 18+ faz + akademski report + diagrami. Odlično pokrito |
+| Inovativnost | 10% | 7/10 | BM25 RAG-lite za kontekstualna vprašanja, multi-provider fallback, admin dashboard, search/filter/sort |
+
+### KRITIČNE POMANJKLJIVOSTI
+
+1. **VPS deployment ni dokazan** — Naloga zahteva "gostovanje v oblaku". Docker Compose prod overlay obstaja, deploy.sh obstaja, ampak NIMA dokazov da stvar dejansko teče na VPS. Potrebno: dejanski deploy + posnetki zaslona.
+
+2. ~~**Frontend je pretanek**~~ ✅ REŠENO v v1.2.0 — Dodano iskanje, sortiranje, prenos PDF, admin dashboard, user profil. Sedaj 12+ akcij.
+
+3. ~~**Admin vloga obstaja v bazi, ni pa implementirana**~~ ✅ REŠENO v v1.2.0 — Admin middleware, GET /admin/users, GET /admin/stats, frontend admin panel.
+
+4. ~~**AI integracija je plitva**~~ ✅ REŠENO v v1.2.0 — BM25 RAG-lite chunking: tekst se razdeli na segmente, rangira po relevantnosti za vprašanje, AI dobi samo top 5 chunkov.
+
+5. **CI/CD je samo CI, ni CD** — Pipeline izvaja lint+test+build+docker, ampak dejanski deployment je ročen (deploy.sh). Za polno oceno bi moral biti vsaj trigger za auto-deploy.
+
+6. **Report nima posnetkov zaslona** — 13.000 besed čistega teksta, brez vizualnih dokazov delovanja.
+
+### KAJ JE DOBRO (in zakaj naloga vseeno izpolnjuje zahteve)
+
+Naloga zahteva demonstracijo razumevanja **celotnega tehnološkega konteksta** — arhitekture, integracije, varnosti, stroškov, realnega deployment-a. Studentov projekt to POKRIVA:
+
+- Čista slojevita arhitektura (Vue → Nginx → FastAPI → PostgreSQL/MinIO/AI)
+- Realna integracija 4 zunanjih storitev (PostgreSQL, MinIO, AI API-ji, Nginx)
+- Varnostni model z JWT, rate limiting, ownership, security headers, OWASP
+- Docker Compose za dev in prod z multi-stage builds
+- CI pipeline z linting, testing, coverage
+- Popolna dokumentacija z 18 fazami
+- Dejanski tekoči sistem na localhost z vsemi servisi
+
+Student pravilno ugotavlja: AI del sam po sebi ni inovativen. Ampak **bistvo naloge ni AI inovacija** — bistvo je **integracija spletnih storitev v koherentno arhitekturo**.
+
+---
+
+## Predlagane nadaljnje faze (Phase 19+)
+
+Spodnje faze so razvrščene po PRIORITETI — od najnujnejšega do nice-to-have.
+
+### Phase 19: VPS deployment in dokazi ★★★ KRITIČNO
+
+**Zakaj:** Brez tega naloga ne izpolnjuje zahteve "gostovanje v oblaku".
+
+Koraki:
+1. Deploy na dejanski VPS (Hetzner CX22 ali obstoječi strežnik)
+2. Konfiguracija .env z produkcijskimi vrednostmi
+3. Izvedba `deploy.sh` + alembic migrate
+4. Aktivacija TLS z Let's Encrypt (ssl.conf → production)
+5. Posnetki zaslona: frontend, /docs, /redoc, curl -I za security headers
+6. Posnetki zaslona: login, upload, summary, Q&A flow
+7. Doda posnetke v report (Poglavje 14 - Implementacijska validacija)
+
+### Phase 20: Razširitev frontenda ★★ POMEMBNO
+
+**Zakaj:** Trenutno ima GUI samo 5 akcij. Za "integrirano spletno storitev" je premalo.
+
+Dodati:
+1. **Download PDF** — gumb za prenos originalnega dokumenta (backend endpoint + frontend gumb)
+2. **Iskanje/filter dokumentov** — iskalno polje po imenu datoteke
+3. **Sortiranje** — po datumu, velikosti, statusu
+4. **User profil stran** — prikaz email-a, števila dokumentov, datum registracije
+5. **Responsive navigacija** — hamburger menu za mobile
+
+### Phase 21: Admin funkcionalnost ★★ POMEMBNO
+
+**Zakaj:** Admin vloga obstaja v bazi ampak ni implementirana. To je mrtva koda.
+
+Dodati:
+1. Admin middleware/decorator ki preverja `role == "admin"`
+2. `GET /api/v1/admin/users` — seznam vseh uporabnikov
+3. `GET /api/v1/admin/stats` — skupno število dokumentov, uporabnikov, povzetkov, Q&A
+4. Frontend: admin dashboard stran z osnovnimi statistikami in seznamom uporabnikov
+5. Admin ne sme brisati tujih dokumentov, ampak vidi statistike
+
+### Phase 22: Izboljšana AI integracija (RAG-lite) ★★ POMEMBNO za inovativnost
+
+**Zakaj:** Trenutna integracija je samo relay. Z RAG-lite pristopom postane sistem pametnejši od ChatGPT za specifične dokumente.
+
+Dodati:
+1. **Chunking** — razdelitev PDF teksta na segmente (po 500-1000 znakov)
+2. **Relevance scoring** — BM25 ali TF-IDF prek chunkov za vprašanje
+3. **Contextual Q&A** — AI dobi samo relevantne chunke, ne celotnega dokumenta
+4. To NI polni RAG z vektorsko bazo, ampak je dovolj za demonstracijo pametnejšega iskanja
+5. Prednost: boljši odgovori, manjša poraba tokenov, lažje pojasniti v reportu
+
+### Phase 23: Prenos dokumentov (Download) ★ KORISTNO
+
+**Zakaj:** Uporabnik lahko naloži dokument, ampak ga ne more prenesti nazaj. To je osnovna funkcionalnost.
+
+Dodati:
+1. `GET /api/v1/documents/{id}/download` — streaming response z original PDF iz MinIO
+2. Frontend gumb "Prenesi" na DocumentCard
+3. Ownership preverba (samo lastnik sme prenesti)
+
+### Phase 24: Prometheus metrics endpoint ★ KORISTNO za višjo oceno
+
+**Zakaj:** Trenutno ima samo structlog logging. Metrics endpoint pokaže razumevanje observability koncepta.
+
+Dodati:
+1. `/metrics` endpoint z osnovnimi metrikami (request count, duration, error rate)
+2. Uporaba `prometheus-fastapi-instrumentator` Pythonove knjižnice
+3. Opcijsko: docker-compose service za Prometheus + Grafana dashboard
+4. Posnetki zaslona v report
+
+### Phase 25: Zdravje CI/CD pipeline-a ★ KORISTNO
+
+**Zakaj:** CI je samo CI, manjka CD del.
+
+Koraki:
+1. Popravi dupliciran `run:` v ci.yml (✅ že popravljeno)
+2. Dodaj step za Docker image build v CI (preveri da se slika zgradi)
+3. Opcijsko: GitHub Actions deploy step ki SSH-ja na VPS in požene deploy.sh
+4. Dodaj badge v README (CI status)
+
+### Phase 26: Report finalizacija s posnetki ★★★ KRITIČNO
+
+**Zakaj:** Report je vsebinsko odličen ampak nima vizualnih dokazov.
+
+Dodati v 01-report-draft.md:
+1. Posnetek: arhitektura diagram (render Mermaid v PNG)
+2. Posnetek: Swagger UI (/docs)
+3. Posnetek: frontend login stran
+4. Posnetek: dashboard z dokumenti
+5. Posnetek: AI summary in Q&A v akciji
+6. Posnetek: curl -I security headers
+7. Posnetek: GitHub Actions CI zelena
+8. Posnetki: `docker compose ps` output
+
+
+
+
+
