@@ -24,7 +24,7 @@ The system is built as a modular monolith with external integrations:
 
 ## Deployment summary
 
-The production target is a single VPS with Docker Compose. Public traffic enters through Nginx, while backend, database, and object storage remain on the internal Docker network.
+The production deployment runs on a Hetzner CX22 VPS (2 vCPU, 4 GB RAM, Ubuntu 24.04) at **https://doc-ai-assist.com** (IP: 178.104.25.28). TLS is provided by Let's Encrypt with automatic renewal. Public traffic enters through Nginx, while backend, database, and object storage remain on the internal Docker network.
 
 ### Container details
 

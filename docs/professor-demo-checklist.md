@@ -4,7 +4,39 @@
 
 This document is a short, evaluator-friendly checklist for verifying the semester project with minimal setup effort.
 
-## Fast verification path
+## Live production URL
+
+The application is deployed and running at **https://doc-ai-assist.com**.
+
+No local setup is required for evaluation. All flows can be tested directly in the browser.
+
+## Fast verification path (production)
+
+1. Open **https://doc-ai-assist.com** in any browser.
+
+2. Verify the landing page loads with hero text and feature overview.
+
+3. Click **Registracija** and create a new account (or use the demo account below).
+
+4. Open API docs at:
+   - **https://doc-ai-assist.com/docs** (Swagger UI)
+   - **https://doc-ai-assist.com/redoc** (ReDoc)
+
+5. Verify health endpoint:
+   ```bash
+   curl https://doc-ai-assist.com/health
+   ```
+   Expected: `{"status":"ok","environment":"production"}`
+
+6. Verify security headers:
+   ```bash
+   curl -I https://doc-ai-assist.com
+   ```
+   Expected: TLS, X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, HSTS headers.
+
+## Local verification path (alternative)
+
+If the evaluator prefers to run locally:
 
 1. Open a terminal in the project root (`Projektna naloga/`).
 
@@ -80,19 +112,23 @@ docker compose down
 
 ## Expected evidence during demo
 
-- OpenAPI documentation shows auth, documents, jobs, and health endpoints with descriptions
+- **Production URL**: https://doc-ai-assist.com is live with TLS
+- OpenAPI documentation shows auth, documents, jobs, admin, and health endpoints with descriptions
 - Both `/docs` (Swagger UI) and `/redoc` (ReDoc) render full API documentation
 - document list is user-scoped and paginated
 - summary flow changes processing status
 - question-answer flow returns a persisted answer
 - rate limiting returns 429 on excessive requests
-- security headers visible in HTTP responses (`curl -I http://localhost`)
+- security headers visible in HTTP responses (`curl -I https://doc-ai-assist.com`)
+- HSTS header present (TLS deployment)
 - deployment scripts and backup script are present in `infrastructure/scripts`
-- 30 automated backend tests pass:
+- 39 automated backend tests pass:
   ```bash
   docker compose exec backend python -m pytest tests/ -v
   ```
-- CI pipeline runs lint, test, and build steps
+- CI pipeline runs lint, test, build, and Docker image build steps
+- Admin panel visible for admin users (user management, stats)
+- Download PDF button works for uploaded documents
 
 ## Quick curl test commands
 

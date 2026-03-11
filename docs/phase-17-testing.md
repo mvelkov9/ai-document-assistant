@@ -20,7 +20,8 @@ Strengthen the project with repeatable automated checks for backend user flows, 
 | `test_document_flow.py` | 6 | Upload, summarize, Q&A, async jobs, job status |
 | `test_auth.py` | 8 | Short password, invalid email, missing fields, wrong password, nonexistent user, no token, invalid token, duplicate email |
 | `test_documents.py` | 11 | Non-PDF upload, no auth upload, 404 document, cross-user access, pagination, empty list, limit cap, 404 summarize, short question, long question, 404 job |
-| **Total** | **30** | |
+| `test_admin_and_download.py` | 9 | Admin stats, admin users, 403 regular user, 401 unauthorized, document download (happy/404/cross-user), Prometheus metrics |
+| **Total** | **39** | |
 
 ## Shared fixtures (conftest.py)
 

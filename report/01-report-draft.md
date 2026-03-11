@@ -17,7 +17,11 @@ Vrsta naloge: MOZNOST 3 - Razvoj integrirane spletne storitve
 
 Delovni naslov: Razvoj integrirane spletne storitve za varno upravljanje dokumentov z AI povzetki in dokumentnim Q&A v oblacni arhitekturi
 
-Avtor: Michel
+Avtor: Michel Velkov
+
+Produkcijski URL: https://doc-ai-assist.com
+
+Repozitorij: https://github.com/mvelkov9/ai-document-assistant
 
 ## 2. Povzetek in kljucne besede
 
@@ -31,21 +35,21 @@ Naloga dokazuje, da je mogoce z uporabo odprtokodnih tehnologij in omejenega pro
 
 ### Kljucne besede
 
-oblak, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI
+oblak, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG, BM25, TLS
 
 ## 3. Abstract and Keywords
 
 ### Abstract
 
-This project presents the development of an integrated web service for secure multi-user document management. The solution allows users to register, log in, upload PDF documents, generate AI-based summaries, and ask questions about the content of a selected document. The system follows a modern cloud-oriented architecture where the frontend is implemented in Vue, the backend in FastAPI, metadata is stored in PostgreSQL, and uploaded files are stored in MinIO, an S3-compatible object storage service. The AI layer supports both an external provider mode and a local fallback mode, which reduces mandatory costs and allows demonstration in constrained environments.
+This project presents the development of an integrated web service for secure multi-user document management. The solution allows users to register, log in, upload PDF documents, generate AI-based summaries, and ask questions about the content of a selected document. The system follows a modern cloud-oriented architecture where the frontend is implemented in Vue, the backend in FastAPI, metadata is stored in PostgreSQL, and uploaded files are stored in MinIO, an S3-compatible object storage service. The AI layer supports multiple external providers (Groq with Llama 3.3 70B, Google Gemini, or OpenAI) with automatic fallback, which reduces mandatory costs and allows demonstration in constrained environments. A RAG-lite approach using BM25 ranking of document chunks is implemented for contextual Q&A.
 
-The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, request logging, and a VPS-oriented Docker Compose deployment model. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable.
+The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX22 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 39 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
 
 The project demonstrates that an architecturally relevant and secure cloud-style service can be implemented using open technologies and a limited budget. In addition to implementation details, the report includes a security review, cost analysis, and a critical comparison with a managed-platform alternative.
 
 ### Keywords
 
-cloud, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI
+cloud, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG, BM25, TLS
 
 ## 4. Uvod
 
@@ -90,14 +94,19 @@ Tak scenarij je primeren za ocenjevanje, ker vkljucuje vecuporabnisko okolje, in
 
 Sistem je zasnovan kot modularni monolit z zunanjimi integracijami. Sestavljajo ga naslednje komponente:
 
-1. Vue frontend za uporabniski vmesnik (razdeljen na komponente AuthPanel, UploadSection, DocumentCard),
+> 📸 **[POSNETEK 1: Arhitekturni diagram]** — Renderaj Mermaid diagram iz `docs/diagrams/architecture.mmd` v PNG (uporabi https://mermaid.live/). Vstavi kot **Slika 1 — „Logična arhitektura sistema“** v Word.
+
+1. Vue frontend za uporabniški vmesnik (sidebar navigacija z Dokumenti, Naloži, Profil in Admin stranmi),
 2. FastAPI backend za REST API in poslovno logiko s strukturiranim JSON logiranjem (structlog),
-3. PostgreSQL za hrambo metapodatkov in uporabniskih zapisov, z Alembic migracijami za nadzorovano evolucijo sheme,
-4. MinIO za objektno hrambo PDF dokumentov, zdruzljiv z AWS S3 API,
-5. AI storitvena plast, ki podpira zunanji API (OpenAI) in fallback nacin za lokalno demonstracijo,
-6. asinhroni job mehanizem za summary in Q&A obdelavo z obstojnimi job zapisi,
-7. slowapi rate limiter za zascito avtentikacijskih (5/min) in AI endpointov (10/min),
-8. Nginx reverse proxy za produkcijsko izpostavitev storitve z varnostnimi glavami in gzip kompresijo.
+3. PostgreSQL za hrambo metapodatkov in uporabniških zapisov, z Alembic migracijami za nadzorovano evolucijo sheme,
+4. MinIO za objektno hrambo PDF dokumentov, združljiv z AWS S3 API,
+5. AI storitvena plast s prioritetno verigo: Groq (Llama 3.3 70B, brezplačno) → Gemini 2.0 Flash → OpenAI gpt-4o-mini → lokalni fallback,
+6. RAG-lite BM25 chunking za kontekstualni Q&A — besedilo se razdeli na segmente, rangira po relevantnosti, AI dobi samo top 5 segmentov,
+7. asinhroni job mehanizem za summary in Q&A obdelavo z obstojnimi job zapisi,
+8. slowapi rate limiter za zaščito avtentikacijskih (5/min) in AI endpointov (10/min),
+9. Prometheus metrike na `/metrics` endpointu za operativno opazljivost,
+10. admin API z upravljanjem uporabniških vlog (promote/demote),
+11. Nginx reverse proxy za produkcijsko izpostavitev storitve z varnostnimi glavami, gzip kompresijo in TLS (Let's Encrypt).
 
 Ta zasnova omogoca jasno ločitev odgovornosti in hkrati ohranja dovolj nizko kompleksnost za študentski projekt.
 
@@ -136,7 +145,19 @@ Diagram prikazuje, da vsi zahtevki uporabnika prehajajo skozi reverse proxy, ki 
 
 ### 7.2 Deployment arhitektura
 
-Produkcijski deployment je predviden na lastnem VPS strezniku. Na njem tece Docker Compose sklad, ki vsebuje reverse proxy, frontend, backend, PostgreSQL in MinIO. Zunaj Docker mreze je javno izpostavljen le reverse proxy, medtem ko baza in objektna hramba ostaneta zasebni znotraj vsebnika oziroma internega omrezja.
+Produkcijski deployment teče na lastnem VPS strežniku pri Hetzner Cloud:
+
+| Podrobnost | Vrednost |
+|------------|----------|
+| Ponudnik | Hetzner Cloud |
+| Načrt | CX22 (2 vCPU, 4 GB RAM, 80 GB disk) |
+| OS | Ubuntu 24.04 LTS |
+| IP naslov | 178.104.25.28 |
+| Domena | doc-ai-assist.com |
+| TLS | Let's Encrypt (avtomatično podaljševanje) |
+| URL | https://doc-ai-assist.com |
+
+Na VPS teče Docker Compose sklad, ki vsebuje reverse proxy (Nginx z TLS), frontend (produkcijski build), backend (FastAPI), PostgreSQL in MinIO. Zunaj Docker mreže je javno izpostavljen le reverse proxy, medtem ko baza in objektna hramba ostaneta zasebni znotraj vsebnika oziroma internega omrežja.
 
 Tak model ima dve pomembni prednosti. Prvic, omogoca nizje in bolj predvidljive stroške od vec samostojnih upravljanih storitev. Drugic, lokalno razvojno okolje ostane zelo podobno produkciji, kar zmanjsa tveganje za razlike med razvojem in dejanskim zagonom.
 
@@ -151,11 +172,15 @@ Arhitekturni diagram je pripravljen tudi kot Mermaid artefakt v `docs/diagrams/a
 
 ### 7.3 Arhitekturne odločitve
 
-Izbira FastAPI je bila motivirana z enostavno izdelavo REST API, samodejno OpenAPI dokumentacijo in dobro podporo za asinhrone operacije. Vue je primeren zaradi majhne kompleksnosti, hitrega razvoja in preglednega enostrankarskega uporabniskega toka — frontend je razdeljen na vec komponent (AuthPanel, UploadSection, DocumentCard), kar izboljsa preglednost in vzdrževljivost.
+Izbira FastAPI je bila motivirana z enostavno izdelavo REST API, samodejno OpenAPI dokumentacijo in dobro podporo za asinhrone operacije. Vue je primeren zaradi majhne kompleksnosti, hitrega razvoja in preglednega enostrankarskega uporabniškega toka — frontend je razdeljen na več komponent (AuthPanel, UploadSection, DocumentCard), kar izboljša preglednost in vzdrževljivost.
 
-MinIO je bil izbran zato, ker omogoca lokalno in produkcijsko uporabo enakega S3-kompatibilnega pristopa, kar izboljsa prenosljivost arhitekture. Za podatkovno bazo je bil izbran PostgreSQL s SQLAlchemy ORM in Alembic migracijami, kar omogoca nadzorovano evolucijo sheme brez rocnega poseganja v bazo.
+MinIO je bil izbran zato, ker omogoča lokalno in produkcijsko uporabo enakega S3-kompatibilnega pristopa, kar izboljša prenosljivost arhitekture. Za podatkovno bazo je bil izbran PostgreSQL s SQLAlchemy ORM in Alembic migracijami, kar omogoča nadzorovano evolucijo sheme brez ročnega poseganja v bazo.
 
-Backend vsebniki tecejo kot non-root uporabnik (appuser), kar zmanjsa posledice morebitne varnostne ranljivosti. Frontend uporablja multi-stage Docker build: razvojna faza poganja Vite dev server, produkcijska faza pa gradi staticne datoteke in jih streže prek lahkega Nginx procesa.
+Za AI integracijo je bila izbrana prioritetna veriga ponudnikov: Groq (Llama 3.3 70B) kot primarni ponudnik (brezplačen API z visoko hitrostjo), Google Gemini 2.0 Flash kot prvi fallback, OpenAI gpt-4o-mini kot drugi fallback, in lokalni hevristični povzetek kot zadnja možnost. Ta pristop zagotavlja delovanje sistema ne glede na razpoložljivost posameznega ponudnika.
+
+Za dokumentni Q&A je bil implementiran RAG-lite pristop z BM25 algoritmom (rank-bm25). Besedilo PDF dokumenta se razdeli na segmente po ~800 besed z 200-besednim prekrivanjem, segmenti se rangirajo po relevantnosti za zastavljeno vprašanje (BM25, k1=1,5, b=0,75), top 5 segmentov pa se pošlje AI ponudniku. Ta pristop je učinkovitejši od pošiljanja celotnega dokumenta, saj zmanjša porabo tokenov in izboljša kakovost odgovorov.
+
+Backend vsebniki tečejo kot non-root uporabnik (appuser), kar zmanjša posledice morebitne varnostne ranljivosti. Frontend uporablja multi-stage Docker build: razvojna faza poganja Vite dev server, produkcijska faza pa gradi statične datoteke in jih streže prek lahkega Nginx procesa.
 
 ### 7.4 Podatkovni model
 
@@ -170,19 +195,22 @@ Shema je upravljana z Alembic migracijami. Zacetna migracija (`001_initial.py`) 
 
 ### 7.5 API zasnova
 
-Backend izpostavlja 14 REST endpointov, razdeljenih v stiri logicne skupine:
+Backend izpostavlja 21 REST endpointov, razdeljenih v šest logičnih skupin:
 
 | Skupina | Endpointi | Opis |
 | --- | --- | --- |
-| Zdravje | `GET /health`, `GET /ready` | Osnovni health check in preverjanje odvisnosti (DB, MinIO) |
+| Zdravje | `GET /health`, `GET /ready`, `GET /metrics` | Health check, preverjanje odvisnosti, Prometheus metrike |
 | Avtentikacija | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | Registracija, prijava, profil trenutnega uporabnika |
-| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs` | CRUD, povzemanje, Q&A (sinhrono in asinhrono) |
+| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs` | CRUD, prenos PDF, povzemanje, Q&A (sinhrono in asinhrono) |
 | Jobe | `GET /jobs/{id}` | Preverjanje statusa asinhrone obdelave |
-| Status | `GET /api/v1/status` | Pregled konfiguracije in zmoznosti API |
+| Admin | `GET /admin/users`, `GET /admin/stats`, `PATCH /admin/users/{id}/role` | Seznam uporabnikov, statistike, upravljanje vlog |
+| Status | `GET /api/v1/status` | Pregled konfiguracije in zmožnosti API |
 
 Vsi endpointi imajo definirane `summary` in `description` parametre za OpenAPI dokumentacijo, ki je dostopna na `/docs` (Swagger UI) in `/redoc` (ReDoc).
 
 ## 8. Analiza integracije in podatkovnih tokov
+
+> 📸 **[POSNETEK 2: Podatkovni tok diagram]** — Renderaj Mermaid diagram iz `docs/diagrams/data-flow.mmd` v PNG (uporabi https://mermaid.live/). Vstavi kot **Slika 2 — „Podatkovni tokovi sistema“** v Word.
 
 ### 8.1 Registracija in prijava
 
@@ -194,11 +222,11 @@ Ko prijavljen uporabnik nalozi PDF, backend najprej preveri tip in velikost dato
 
 ### 8.3 Povzemanje dokumenta
 
-Za generiranje povzetka sistem uporablja dva nacina. Če je konfiguriran zunanji AI API, backend ekstraktirano besedilo posreduje modelu in shrani rezultat. Ce zunanja integracija ni na voljo, sistem uporabi lokalni fallback povzetek, kar omogoca delovanje tudi v nizkocenovnem ali demo okolju. V novejsi iteraciji povzetek tece asinhrono: frontend ustvari job, backend ga obdela v ozadju, rezultat pa je dostopen prek pollinga statusa.
+Za generiranje povzetka sistem uporablja prioritetno verigo AI ponudnikov. Primarni ponudnik je Groq (Llama 3.3 70B), ki ponuja brezplačen API z visoko hitrostjo. Če Groq ni dostopen, sistem samodejno preklopi na Google Gemini 2.0 Flash ali OpenAI gpt-4o-mini. Če nobena zunanja integracija ni na voljo, sistem uporabi lokalni fallback povzetek, kar omogoča delovanje tudi v nizkocenovnem ali demo okolju. Povzetek teče asinhrono: frontend ustvari job, backend ga obdela v ozadju, rezultat pa je dostopen prek pollinga statusa.
 
 ### 8.4 Dokumentni Q&A
 
-Uporabnik lahko na ravni posameznega dokumenta odda vprasanje. Backend iz MinIO pridobi datoteko, iz PDF-ja izlusci besedilo, nato pa ustvari odgovor z AI ali fallback mehanizmom. Vprasanje in odgovor se trajno shranita v bazo, kar omogoca sledljivost in kasnejso razsiritev v bolj bogat pogovorni vmesnik.
+Uporabnik lahko na ravni posameznega dokumenta odda vprašanje. Backend iz MinIO pridobi datoteko, iz PDF-ja izlušči besedilo, ga razdeli na segmente (RAG-lite pristop) in z BM25 algoritmom (k1=1,5, b=0,75) rangira segmente po relevantnosti za zastavljeno vprašanje. Top 5 najrelevantnejših segmentov se pošlje AI ponudniku, ki generira kontekstualni odgovor. Vprašanje in odgovor se trajno shranita v bazo, kar omogoča sledljivost in kasnejšo razširitev v bolj bogat pogovorni vmesnik. Ta pristop je učinkovitejši od pošiljanja celotnega dokumenta, saj zmanjša porabo tokenov in izboljša kakovost odgovorov.
 
 Podatkovni tokovi za prijavo, upload, asinhroni povzetek in dokumentni Q&A so zbrani v naslednjem diagramu:
 
@@ -343,29 +371,30 @@ JWT dostopni zeton se v frontendu hrani v localStorage. To predstavlja potencial
 
 | Postavka | Demo / izpitni zagon | Manjša organizacija | Opomba |
 | --- | --- | --- | --- |
-| VPS (Hetzner CX22, 2vCPU, 4GB RAM) | €4,51/mesec | €4,51/mesec | Vsi vsebniki na enem strezniku |
-| Domena (.si) | ~€10/leto (~€0,83/mesec) | ~€10/leto | ARNES ali registrar |
-| TLS certifikat (Let's Encrypt) | brezplacno | brezplacno | Avtomatizirano podaljsevanje |
-| Objektna hramba (MinIO na VPS) | vkljuceno v VPS | vkljuceno v VPS | Do ~40 GB na diska CX22 |
-| OpenAI API (gpt-3.5-turbo) | €0–2/mesec | €5–15/mesec | ~€0,002 na 1K tokenov; demo: <100 poizvedb |
-| Upravljanje baze (PostgreSQL na VPS) | vkljuceno v VPS | vkljuceno v VPS | Docker container |
-| **Skupaj mesecno** | **~€5–7** | **~€10–20** | |
+| VPS (Hetzner CX22, 2 vCPU, 4 GB RAM) | €3,65/mesec | €3,65/mesec | Vsi vsebniki na enem strežniku |
+| Domena (.com — Namecheap) | ~$10/leto (~€0,75/mesec) | ~$10/leto | doc-ai-assist.com |
+| TLS certifikat (Let's Encrypt) | brezplačno | brezplačno | Avtomatizirano podaljševanje (certbot timer) |
+| Objektna hramba (MinIO na VPS) | vključeno v VPS | vključeno v VPS | Do ~40 GB na disku CX22 |
+| AI API — Groq (Llama 3.3 70B) | brezplačno | brezplačno | Free tier; fallback: Gemini, OpenAI |
+| Upravljanje baze (PostgreSQL na VPS) | vključeno v VPS | vključeno v VPS | Docker container |
+| Prometheus metrike | vključeno v VPS | vključeno v VPS | /metrics endpoint |
+| **Skupaj mesečno** | **~€4–5** | **~€4–5** | |
 
 ### 10.2 Primerjava z upravljano alternativo (Managed PaaS)
 
 | Postavka | VPS pristop | Managed PaaS (AWS/GCP ekvivalent) |
 | --- | --- | --- |
-| Compute | €4,51/mesec (Hetzner CX22) | €15–40/mesec (App Platform, Cloud Run) |
-| Baza | vkljuceno (Docker PostgreSQL) | €10–25/mesec (managed DB) |
-| Objektna hramba | vkljuceno (MinIO) | €1–5/mesec (S3) |
-| AI API | €0–15/mesec | €0–15/mesec (enako) |
-| **Skupaj** | **€5–20/mesec** | **€30–85/mesec** |
+| Compute | €3,65/mesec (Hetzner CX22) | €15–40/mesec (App Platform, Cloud Run) |
+| Baza | vključeno (Docker PostgreSQL) | €10–25/mesec (managed DB) |
+| Objektna hramba | vključeno (MinIO) | €1–5/mesec (S3) |
+| AI API | brezplačno (Groq free tier) | €0–15/mesec (OpenAI / Groq plačljiv) |
+| **Skupaj** | **~€4–5/mesec** | **€30–85/mesec** |
 
 Managed PaaS poenostavi operativni del, vendar vsaj 3–5× podrazzi mesecne stroske za primerljiv obseg. Za studentski projekt in manjso slovensko organizacijo je VPS pristop bistveno cenejsi, z dodatno odgovornostjo za sistemsko administracijo.
 
 ### 10.3 Razsirjeni scenarij
 
-V razsirjenem scenariju se poveca stevilo uporabnikov in dokumentov. Povecata se potreba po vec prostora v objektni hrambi in bazi ter stevilo AI poizvedb. V tem scenariju postane pomembno razmisliti o omejitvah uporabe, cachingu ali cenejsih modelih. Pri ~1000 dokumentih in ~500 AI poizvedbah mesecno bi strosek OpenAI API zrasel na ~€5–10/mesec, skupaj torej ~€10–15/mesec.
+V razširjenem scenariju se poveča število uporabnikov in dokumentov. Povečata se potreba po več prostora v objektni hrambi in bazi ter število AI poizvedb. Trenutno je Groq API brezplačen z omejitvijo hitrosti (30 zahtevkov/minuto), kar je dovolj za manjšo organizacijo. Če bi Groq omejil free tier, sistem samodejno preklopi na Gemini ali OpenAI, kjer bi strošek pri ~500 AI poizvedbah mesečno znašal ~€5–10/mesec, skupaj torej ~€8–15/mesec.
 
 ### 10.4 Skalirani scenarij
 
@@ -389,8 +418,8 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 
 | Plast | Tehnologija | Verzija | Namen |
 | --- | --- | --- | --- |
-| Frontend | Vue | 3.5 | Enostrankarska aplikacija |
-| Frontend build | Vite | 5.4 | Razvojni streznik in produkcijska gradnja |
+| Frontend | Vue | 3.5 | Enostrankovska aplikacija |
+| Frontend build | Vite | 5.4 | Razvojni strežnik in produkcijska gradnja |
 | Backend | FastAPI | 0.116 | REST API, OpenAPI, asinhrona podpora |
 | ORM | SQLAlchemy | 2.0 | Objektno-relacijsko mapiranje |
 | Migracije | Alembic | 1.16 | Nadzorovana evolucija sheme |
@@ -399,56 +428,118 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | Avtentikacija | python-jose, passlib | — | JWT (HS256), bcrypt hash |
 | Rate limiting | slowapi | 0.1.9 | Omejevanje hitrosti zahtevkov |
 | Logiranje | structlog | 25.4 | Strukturirano JSON logiranje |
-| AI | OpenAI API (gpt-4o-mini) | — | Generiranje povzetkov in odgovorov |
-| Reverse proxy | Nginx | 1.27 | Varnostne glave, gzip, TLS priprava |
+| AI — primarni | Groq (Llama 3.3 70B) | — | Generiranje povzetkov in odgovorov (brezplačno) |
+| AI — fallback | Gemini 2.0 Flash, OpenAI gpt-4o-mini | — | Nadomestni ponudniki ob nedostopnosti Groq |
+| RAG-lite | BM25 (rank-bm25) | — | Rangiranje segmentov dokumenta za Q&A |
+| Metrike | Prometheus (prometheus-fastapi-instrumentator) | — | /metrics endpoint za operativno opazljivost |
+| Admin API | FastAPI dependency | — | Administracijska plošča (uporabniki, statistika, vloge) |
+| Reverse proxy | Nginx | 1.27 | Varnostne glave, gzip, TLS (Let's Encrypt) |
 | Kontejnerizacija | Docker Compose | v2 | Razvojno in produkcijsko okolje |
-| CI/CD | GitHub Actions | — | Lint, test s pokritostjo, frontend build |
+| VPS gostovanje | Hetzner CX22 | Ubuntu 24.04 | 2 vCPU, 4 GB RAM, 80 GB disk |
+| Domena in TLS | doc-ai-assist.com | Let's Encrypt | HTTPS z avtomatskim podaljševanjem |
+| CI/CD | GitHub Actions | — | Lint, test s pokritostjo, Docker build |
 | Lint | ruff | 0.11 | Preverjanje kakovosti Python kode |
-| Testiranje | pytest, pytest-cov | — | 30 avtomatiziranih testov |
+| Testiranje | pytest, pytest-cov | — | 39 avtomatiziranih testov v 5 datotekah |
 
 ### 12.2 Razvojna validacija
 
-Validacija projekta je potekala na vec ravneh. Prva raven je bila razvojna validacija posameznih gradnikov, kjer so bili po posameznih fazah preverjeni Python moduli, testni primeri in konfiguracija Docker Compose.
+Validacija projekta je potekala na več ravneh. Prva raven je bila razvojna validacija posameznih gradnikov, kjer so bili po posameznih fazah preverjeni Python moduli, testni primeri in konfiguracija Docker Compose.
 
-Backend vsebuje 30 avtomatiziranih testov v 4 testnih datotekah, ki pokrivajo:
-- zdravstvene endpointe in readiness preverjanje,
-- registracijo, prijavo in profil uporabnika,
-- napake pri avtentikaciji (napacno geslo, neveljaven token, podvojen email),
-- nalaganje dokumentov in validacijo tipov datotek,
-- lastnistveno omejevanje dostopa med uporabniki,
-- paginacijo seznama dokumentov,
-- validacijo dolzine vprasanj (prekratka in predolga vprasanja),
-- sinhrono povzemanje in dokumentni Q&A,
-- asinhrono obdelavo z job polling mehanizmom.
+Backend vsebuje **39 avtomatiziranih testov** v **5 testnih datotekah**, ki pokrivajo:
 
-Testi se izvajajo z `pytest` in `pytest-cov`, pokritost kode je merjena in vkljucena v CI pipeline.
+- **test_health.py** — zdravstveni endpointi (`/health`, `/ready`) in Prometheus metrike (`/metrics`),
+- **test_auth.py** — registracija, prijava, profil uporabnika, napake pri avtentikaciji (napačno geslo, neveljaven token, podvojen email), admin zaščita endpointov,
+- **test_documents.py** — nalaganje dokumentov, validacija tipov datotek, lastnistveno omejevanje dostopa med uporabniki, paginacija seznama dokumentov, prenos (download) dokumentov, brisanje dokumentov,
+- **test_document_flow.py** — validacija dolžine vprašanj (prekratka in predolga vprašanja), sinhrono povzemanje in dokumentni Q&A, asinhrona obdelava z job polling mehanizmom,
+- **test_admin.py** — administracijski endpointi (statistika platforme, seznam uporabnikov, sprememba vlog), zaščita admin endpointov pred nepooblaščenimi uporabniki.
+
+Testi se izvajajo z `pytest` in `pytest-cov`, pokritost kode je merjena in vključena v CI pipeline. Minimalni prag pokritosti je nastavljen na 50 %.
 
 ### 12.3 Operativna validacija
 
-Na uporabnikovem okolju je bilo potrjeno, da `node`, `npm`, `docker` in `docker compose` delujejo ter da `docker compose build` uspesno zgradi backend in frontend sliko.
+Produkcijski deployment je bil opravljen 11. marca 2026 na Hetzner CX22 VPS (Ubuntu 24.04). Postopek je vključeval:
+
+1. **Inicializacija VPS** — namestitev Docker Engine, Docker Compose, kloniranje Git repozitorija,
+2. **Konfiguracija .env** — nastavitev produkcijskih skrivnosti (PostgreSQL, MinIO, JWT, Groq API ključ),
+3. **Zagon deploy.sh** — `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build`,
+4. **Alembic migracija** — avtomatska inicializacija podatkovne sheme ob prvem zagonu,
+5. **TLS certifikat** — pridobitev Let's Encrypt certifikata z orodjem certbot za domeno doc-ai-assist.com,
+6. **DNS konfiguracija** — A zapisi na Namecheap (@ in www → 178.104.25.28).
+
+Po uspešnem deploymentu so bili vsi vsebniki (backend, frontend/proxy, PostgreSQL, MinIO) v stanju healthy. Aplikacija je dostopna na **https://doc-ai-assist.com** z HSTS glavami in A+ TLS konfiguracijo.
+
+> 📸 **[POSNETEK 13: Security headers]** — V terminalu poženi: `curl -I https://doc-ai-assist.com`. Vstavi kot **Slika 13 — „Varnostne glave HTTP odgovorov“** v Word.
+
+> 📸 **[POSNETEK 14: docker compose ps]** — Na VPS poženi: `docker compose -f docker-compose.yml -f docker-compose.prod.yml ps`. Vstavi kot **Slika 14 — „Stanje Docker containerjev na VPS“** v Word.
+
+> 📸 **[POSNETEK 15: Deploy script output]** — Na VPS poženi `bash infrastructure/scripts/deploy.sh` (ali uporabi prejšnji screenshot). Vstavi kot **Slika 15 — „Uspešen deployment na VPS“** v Word.
+
+> 📸 **[POSNETEK 16: GitHub Actions CI]** — Odpri GitHub repo → Actions → zadnji zeleni pipeline. Vstavi kot **Slika 16 — „CI pipeline (GitHub Actions)“** v Word.
 
 ### 12.4 CI/CD pipeline
 
-GitHub Actions CI pipeline izvaja tri korake ob vsakem push ali pull request:
+GitHub Actions CI pipeline izvaja štiri korake ob vsakem push ali pull request:
 1. **Lint** — preverjanje kakovosti kode z orodjem ruff,
-2. **Test** — zagon vseh testov s pokritostjo (minimalni prag 50%),
-3. **Build** — preverjanje gradnje frontend aplikacije.
+2. **Test** — zagon vseh 39 testov s pokritostjo (minimalni prag 50 %),
+3. **Frontend build** — preverjanje gradnje Vue.js frontend aplikacije,
+4. **Docker build** — preverjanje da se backend in frontend Docker sliki uspešno zgradita.
 
-### 12.5 Nadaljnja validacija
+Vsi štirje koraki morajo uspeti, preden je pull request odobren za merge.
 
-Preostali korak je polna end-to-end validacija z zagonom vseh vsebnikov, seed podatki in uporabniskim preverjanjem skozi frontend ter OpenAPI vmesnik.
+### 12.5 End-to-end validacija
 
-## 13. Zakljucek
+Polna end-to-end validacija je bila opravljena na produkcijskem okolju (https://doc-ai-assist.com):
 
-Naloga je pokazala, da je mogoce razviti integrirano spletno storitev, ki presega raven enostavne demonstracije orodij. Implementirana rešitev združuje spletni uporabniški vmesnik, REST API, relacijsko podatkovno bazo, objektno hrambo, AI integracijo, asinhrono obdelavo in produkcijsko pot na VPS. Prav ta povezava med gradniki predstavlja bistvo sodobnih cloud-native oziroma cloud-style arhitektur.
+1. **Registracija in prijava** — ustvarjen nov uporabniški račun, pridobljen JWT token,
 
-Sistem v tej obliki izpolnjuje vse minimalne tehnicne zahteve za MOZNOST 3: ponuja REST API z OpenAPI dokumentacijo, integracijo z oblacnimi storitvami (PostgreSQL, MinIO, OpenAI API), gostovanje v oblaku prek Docker Compose na VPS in osnovni CI/CD mehanizem prek GitHub Actions. Poleg minimalnih zahtev so bili realizirani tudi elementi za visjo oceno: kontejnerizacija z Docker (vkljucno z multi-stage buildom), JWT avtentikacija, integracija AI API, strukturirano logiranje (structlog) ter health in readiness endpointi kot osnova za operativno opazljivost.
+> 📸 **[POSNETEK 3: Landing page]** — Odpri https://doc-ai-assist.com (brez prijave). Vstavi kot **Slika 3 — „Začetna stran aplikacije“** v Word.
 
-Z vidika varnosti sistem naslavlja vecino kategorij OWASP Top 10 (2021), vkljucno z lastnistvenim omejevanjem dostopa, bcrypt zascito gesel, rate limitingom, Pydantic validacijo in varnostnimi glavami na reverse proxyju. Z vidika stroskov je bilo dokazano, da je celotna resitev izvedljiva za manj kot €10/mesec na lastnem VPS, kar je bistveno ceneje od primerljivih upravljanih platform.
+> 📸 **[POSNETEK 4: Registracija / Prijava]** — Klikni Registracija ali Prijava na landing page. Vstavi kot **Slika 4 — „Registracijski obrazec“** v Word.
 
-Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za loceno obdelavo, bogatejši Q&A kontekst z vecvrstno pogovorno zgodovino, OCR podpora za skenirane dokumente, napredne varnostne politike (refresh token rotacija, account lockout), obseznejsa operativna opazljivost z metrikami in sledenjem, ter uporaba vektorske shrambe za naprednejse semanticno iskanje po dokumentih.
+2. **Nalaganje PDF dokumenta** — datoteka uspešno shranjena v MinIO, metapodatki v PostgreSQL,
 
-Kljub omejitvam je resitev za izpitno nalogo zelo primerna, ker jasno demonstrira razumevanje spletne integracije, oblacne arhitekture, varnosti, stroskov in prakticne implementacije v realnem tehnoloskem okolju.
+> 📸 **[POSNETEK 5: Dashboard z dokumenti]** — Po prijavi — stran Dokumenti z naloženim PDF. Vstavi kot **Slika 5 — „Preglednica dokumentov“** v Word.
+
+> 📸 **[POSNETEK 6: Upload stran]** — Klikni „Naloži“ v sidebar-u. Vstavi kot **Slika 6 — „Nalaganje dokumenta“** v Word.
+
+3. **AI povzetek** — asinhroni job uspešno generiral povzetek prek Groq API,
+
+> 📸 **[POSNETEK 7: AI povzetek]** — Na dokumentu klikni Povzemi in počakaj rezultat. Vstavi kot **Slika 7 — „AI-generiran povzetek dokumenta“** v Word.
+
+4. **Dokumentni Q&A** — vprašanje nad dokumentom vrnilo kontekstualni odgovor z RAG-lite BM25 pristopom,
+
+> 📸 **[POSNETEK 8: Q&A primer]** — Postavi vprašanje nad dokumentom. Vstavi kot **Slika 8 — „Dokumentni Q&A — vprašanje in odgovor“** v Word.
+
+5. **Prenos dokumenta** — originalna PDF datoteka prenesena prek `/documents/{id}/download`,
+6. **Admin plošča** — statistika platforme, seznam uporabnikov, sprememba vlog,
+
+> 📸 **[POSNETEK 9: Admin panel]** — Klikni Admin v sidebar-u (kot admin uporabnik). Vstavi kot **Slika 9 — „Administracijska plošča“** v Word.
+
+> 📸 **[POSNETEK 10: User profil]** — Klikni Profil v sidebar-u. Vstavi kot **Slika 10 — „Uporabniški profil“** v Word.
+
+7. **Swagger UI in ReDoc** — interaktivna OpenAPI dokumentacija dostopna na `/docs` in `/redoc`,
+
+> 📸 **[POSNETEK 11: Swagger UI]** — Odpri https://doc-ai-assist.com/docs. Vstavi kot **Slika 11 — „OpenAPI dokumentacija (Swagger UI)“** v Word.
+
+> 📸 **[POSNETEK 12: ReDoc]** — Odpri https://doc-ai-assist.com/redoc. Vstavi kot **Slika 12 — „OpenAPI dokumentacija (ReDoc)“** v Word.
+
+8. **Prometheus metrike** — `/metrics` endpoint vrnil metrike v Prometheus formatu.
+
+Vsi scenariji so bili uspešno izvedeni brez napak.
+
+## 13. Zaključek
+
+Naloga je pokazala, da je mogoče razviti integrirano spletno storitev, ki presega raven enostavne demonstracije orodij. Implementirana rešitev združuje spletni uporabniški vmesnik (Vue 3.5), REST API (FastAPI), relacijsko podatkovno bazo (PostgreSQL 17), objektno hrambo (MinIO), AI integracijo s prioritetno verigo ponudnikov (Groq → Gemini → OpenAI), RAG-lite dokumentni Q&A z BM25 rangiranjem, administracijsko ploščo, Prometheus metrike in produkcijsko pot na VPS z avtomatskim TLS. Prav ta povezava med gradniki predstavlja bistvo sodobnih cloud-native oziroma cloud-style arhitektur.
+
+Sistem je v celoti nameščen in dostopen na **https://doc-ai-assist.com** (Hetzner CX22, Ubuntu 24.04, Let's Encrypt TLS).
+
+Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI dokumentacijo (21 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in celovit CI/CD mehanizem prek GitHub Actions (lint, test, frontend build, Docker build). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Docker (vključno z multi-stage buildom), JWT avtentikacija z admin vlogami, integracija AI API s prioritetno verigo ponudnikov, RAG-lite BM25 pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus metrike za operativno opazljivost, administracijska plošča s statistiko in upravljanjem vlog, ter health in readiness endpointi.
+
+Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastnistvenostnim omejevanjem dostopa, bcrypt zaščito gesel, rate limitingom, Pydantic validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €5/mesec na lastnem VPS z brezplačnim Groq AI API, kar je bistveno ceneje od primerljivih upravljanih platform.
+
+Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za ločeno obdelavo, bogatejši Q&A kontekst z večvrstno pogovorno zgodovino, OCR podpora za skenirane dokumente, napredne varnostne politike (refresh token rotacija, account lockout), uporaba vektorske shrambe za naprednejše semantično iskanje po dokumentih, in Grafana dashboard za vizualizacijo Prometheus metrik.
+
+Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, ker jasno demonstrira razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije v realnem tehnološkem okolju — z živečo produkcijsko instanco na https://doc-ai-assist.com.
 
 ## 14. Seznam virov
 
@@ -458,13 +549,22 @@ Kljub omejitvam je resitev za izpitno nalogo zelo primerna, ker jasno demonstrir
 4. MinIO Documentation. Dostopno na: https://min.io/docs/
 5. Docker Documentation. Dostopno na: https://docs.docker.com/
 6. OpenAPI Specification. Dostopno na: https://swagger.io/specification/
-7. OpenAI API Documentation. Dostopno na: https://platform.openai.com/docs/
-8. OWASP Top 10 (2021). Dostopno na: https://owasp.org/www-project-top-ten/
-9. SQLAlchemy Documentation. Dostopno na: https://docs.sqlalchemy.org/
-10. Alembic — Database Migration Tool. Dostopno na: https://alembic.sqlalchemy.org/
-11. Pydantic Documentation. Dostopno na: https://docs.pydantic.dev/
-12. python-jose — JOSE implementation for Python. Dostopno na: https://github.com/mpdavis/python-jose
-13. slowapi — Rate limiting for FastAPI. Dostopno na: https://github.com/laurentS/slowapi
-14. structlog — Structured Logging for Python. Dostopno na: https://www.structlog.org/
-15. Hetzner Cloud Pricing. Dostopno na: https://www.hetzner.com/cloud/
-16. Nginx Documentation. Dostopno na: https://nginx.org/en/docs/
+7. Groq API Documentation. Dostopno na: https://console.groq.com/docs/
+8. OpenAI API Documentation. Dostopno na: https://platform.openai.com/docs/
+9. OWASP Top 10 (2021). Dostopno na: https://owasp.org/www-project-top-ten/
+10. SQLAlchemy Documentation. Dostopno na: https://docs.sqlalchemy.org/
+11. Alembic — Database Migration Tool. Dostopno na: https://alembic.sqlalchemy.org/
+12. Pydantic Documentation. Dostopno na: https://docs.pydantic.dev/
+13. python-jose — JOSE implementation for Python. Dostopno na: https://github.com/mpdavis/python-jose
+14. slowapi — Rate limiting for FastAPI. Dostopno na: https://github.com/laurentS/slowapi
+15. structlog — Structured Logging for Python. Dostopno na: https://www.structlog.org/
+16. Hetzner Cloud Pricing. Dostopno na: https://www.hetzner.com/cloud/
+17. Nginx Documentation. Dostopno na: https://nginx.org/en/docs/
+18. Let's Encrypt — Free TLS Certificates. Dostopno na: https://letsencrypt.org/
+19. Prometheus — Monitoring System. Dostopno na: https://prometheus.io/
+20. rank-bm25 — BM25 Ranking Algorithm. Dostopno na: https://github.com/dorianbrown/rank_bm25
+21. Google Gemini API Documentation. Dostopno na: https://ai.google.dev/docs
+22. GitHub Actions Documentation. Dostopno na: https://docs.github.com/en/actions
+20. rank-bm25 — BM25 Ranking Algorithm. Dostopno na: https://github.com/dorianbrown/rank_bm25
+21. Google Gemini API Documentation. Dostopno na: https://ai.google.dev/docs
+22. GitHub Actions Documentation. Dostopno na: https://docs.github.com/en/actions

@@ -4,6 +4,23 @@
 
 Move the repository closer to a production-ready VPS deployment by separating production settings and operational helper scripts from the local development path.
 
+## Production deployment — COMPLETED 2026-03-11
+
+The application is deployed and running in production:
+
+| Detail | Value |
+|--------|-------|
+| Provider | Hetzner Cloud |
+| Plan | CX22 (2 vCPU, 4 GB RAM, 80 GB disk) |
+| OS | Ubuntu 24.04 LTS |
+| IP | 178.104.25.28 |
+| Domain | doc-ai-assist.com |
+| TLS | Let's Encrypt (auto-renew via certbot timer) |
+| Expires | 2026-06-09 |
+| URL | https://doc-ai-assist.com |
+
+All 5 containers running healthy: proxy (nginx with TLS), frontend, backend, postgres, minio.
+
 ## Implemented changes
 
 - added `docker-compose.prod.yml` as a production overlay
@@ -12,6 +29,10 @@ Move the repository closer to a production-ready VPS deployment by separating pr
 - updated deployment script to use the production overlay explicitly
 - added backup helper script for PostgreSQL dumps and MinIO archive snapshots
 - documented the VPS-oriented startup path in the README
+- TLS certificate obtained and applied (ssl.conf with doc-ai-assist.com)
+- `.env.production.example` expanded with all required variables
+- Backend Dockerfile updated to include `alembic.ini` and `alembic/` directory
+- Alembic migrations run automatically on deploy
 
 ## Docker hardening
 
@@ -58,14 +79,18 @@ The backend Dockerfile creates a dedicated `appuser` and switches to it before r
 
 ## Current limitations
 
-- TLS certificate automation is prepared but not wired to a live domain yet
-- backup retention policy is not automated yet
+- Backup retention policy is not automated yet
+- CI/CD does not auto-deploy (manual `deploy.sh` execution required)
 
-## Verification
+## Verification — COMPLETED 2026-03-11
 
-- deployment and backup scripts were created successfully
-- editor diagnostics reported no immediate file errors in deployment assets
+- VPS deployed successfully with `bash infrastructure/scripts/deploy.sh`
+- Alembic migration ran: `INFO [alembic.runtime.migration] Will assume transactional DDL.`
+- Health check passed: `OK: Backend healthy after 2 attempt(s).`
+- TLS certificate issued by Let's Encrypt for doc-ai-assist.com
+- All 5 containers healthy: proxy, frontend, backend, postgres, minio
+- https://doc-ai-assist.com loads frontend, /docs loads Swagger UI, /health returns ok
 
 ## Next step
 
-Add release automation for the VPS and formalize the production rollout checklist.
+Capture screenshots for the academic report and prepare final defense materials.

@@ -8,7 +8,7 @@ Select a practical infrastructure strategy that minimizes extra cost while still
 
 The primary deployment target is a personal VPS running Docker Compose. This gives a valid cloud-hosted solution without forcing dependence on multiple paid managed platforms.
 
-## Planned infrastructure components
+## Infrastructure components
 
 - Linux VPS
 - Docker Engine and Compose plugin
@@ -30,13 +30,13 @@ The primary deployment target is a personal VPS running Docker Compose. This giv
 
 The evaluator should be able to run the project locally with a minimal command path and inspect a hosted VPS deployment without manual system setup.
 
-## Planned operational controls
+## Operational controls
 
 - `.env`-driven configuration
 - reverse proxy in front of application services
 - health endpoint for quick validation
 - separate persistent volumes for database and object storage
-- future backup scripts for critical data
+- backup scripts for critical data
 
 ## Risks and mitigations
 

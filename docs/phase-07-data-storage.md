@@ -43,7 +43,7 @@ The previous backend iteration proved the auth API contract. This phase turns th
 ## Storage strategy
 
 - metadata remains in the relational database
-- actual PDF files will be stored in MinIO in the next phase
+- actual PDF files are stored in MinIO (implemented in Phase 08)
 - `storage_key` already exists in the document model so upload implementation can plug into it directly
 
 ## Local and production compatibility

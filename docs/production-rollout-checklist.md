@@ -4,6 +4,22 @@
 
 This checklist defines the minimal production rollout path for deploying the application to the personal VPS and validating that the deployment is stable enough for demonstration and grading.
 
+## Deployment status: ✅ COMPLETED — 2026-03-11
+
+| Item | Status |
+|------|--------|
+| VPS provisioned (Hetzner CX22, Ubuntu 24.04) | ✅ |
+| Docker & Docker Compose installed | ✅ |
+| Git repo cloned on VPS | ✅ |
+| `.env` filled with production secrets | ✅ |
+| Domain (doc-ai-assist.com) → A record → 178.104.25.28 | ✅ |
+| TLS certificate (Let's Encrypt) | ✅ Expires 2026-06-09 |
+| `deploy.sh` executed | ✅ |
+| Alembic migration ran | ✅ |
+| Health check passed | ✅ After 2 attempts |
+| All 5 containers healthy | ✅ |
+| https://doc-ai-assist.com accessible | ✅ |
+
 ## Before deployment
 
 1. Verify that Docker and Docker Compose work for the active VPS user.
