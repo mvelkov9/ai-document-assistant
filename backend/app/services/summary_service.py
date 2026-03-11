@@ -147,15 +147,13 @@ class SummaryService:
                     continue
                 if response.status_code in (401, 403):
                     raise RuntimeError(
-                        "Gemini API key is invalid or lacks permissions. "
-                        "Check GEMINI_API_KEY in your .env file."
+                        "Gemini API key is invalid or lacks permissions. Check GEMINI_API_KEY in your .env file."
                     )
                 response.raise_for_status()
                 data = response.json()
                 return data["candidates"][0]["content"]["parts"][0]["text"].strip()
         raise RuntimeError(
-            "Gemini API rate limit (429) after retries. "
-            "Check https://aistudio.google.com/usage"
+            "Gemini API rate limit (429) after retries. Check https://aistudio.google.com/usage"
         ) from last_exc
 
     # ── OpenAI REST API (optional fallback) ─────────────────────────
@@ -188,16 +186,12 @@ class SummaryService:
                     await asyncio.sleep(wait)
                     continue
                 if response.status_code in (401, 403):
-                    raise RuntimeError(
-                        "OpenAI API key is invalid or expired. "
-                        "Check OPENAI_API_KEY in your .env file."
-                    )
+                    raise RuntimeError("OpenAI API key is invalid or expired. Check OPENAI_API_KEY in your .env file.")
                 response.raise_for_status()
                 data = response.json()
                 return data["choices"][0]["message"]["content"].strip()
         raise RuntimeError(
-            "OpenAI API rate limit (429) after retries. "
-            "Check https://platform.openai.com/usage"
+            "OpenAI API rate limit (429) after retries. Check https://platform.openai.com/usage"
         ) from last_exc
 
     # ── Groq REST API (free, OpenAI-compatible) ─────────────────────
@@ -231,15 +225,13 @@ class SummaryService:
                     continue
                 if response.status_code in (401, 403):
                     raise RuntimeError(
-                        "Groq API key is invalid or lacks permissions. "
-                        "Check GROQ_API_KEY in your .env file."
+                        "Groq API key is invalid or lacks permissions. Check GROQ_API_KEY in your .env file."
                     )
                 response.raise_for_status()
                 data = response.json()
                 return data["choices"][0]["message"]["content"].strip()
         raise RuntimeError(
-            "Groq API rate limit (429) after retries. "
-            "Check https://console.groq.com/settings/limits"
+            "Groq API rate limit (429) after retries. Check https://console.groq.com/settings/limits"
         ) from last_exc
 
     # ── Unified dispatch ─────────────────────────────────────────────

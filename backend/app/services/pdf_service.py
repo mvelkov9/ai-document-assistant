@@ -28,4 +28,3 @@ class PdfService:
                 result = layout_result
 
         return result
-

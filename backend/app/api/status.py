@@ -3,8 +3,6 @@ from fastapi import APIRouter
 from app.core.config import get_settings
 from app.schemas.status import StatusResponse
 
-
-
 router = APIRouter()
 
 
@@ -35,4 +33,3 @@ def get_status() -> StatusResponse:
             "OpenAPI docs with endpoint descriptions",
         ],
     )
-

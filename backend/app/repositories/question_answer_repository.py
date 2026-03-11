@@ -1,8 +1,8 @@
-from sqlalchemy import delete as sa_delete, select
+from sqlalchemy import delete as sa_delete
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.question_answer import QuestionAnswer
-
 
 
 class QuestionAnswerRepository:
@@ -36,9 +36,7 @@ class QuestionAnswerRepository:
         return list(self.db.scalars(statement).all())
 
     def delete_for_document(self, document_id: str, *, auto_commit: bool = True) -> None:
-        statement = sa_delete(QuestionAnswer).where(
-            QuestionAnswer.document_id == document_id
-        )
+        statement = sa_delete(QuestionAnswer).where(QuestionAnswer.document_id == document_id)
         self.db.execute(statement)
         if auto_commit:
             self.db.commit()

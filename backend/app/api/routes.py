@@ -6,8 +6,6 @@ from app.api.documents import router as documents_router
 from app.api.jobs import router as jobs_router
 from app.api.status import router as status_router
 
-
-
 api_router = APIRouter()
 api_router.include_router(auth_router, tags=["auth"])
 api_router.include_router(documents_router, tags=["documents"])

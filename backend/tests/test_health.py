@@ -16,12 +16,12 @@ def test_api_status(client) -> None:
 
 
 def test_readiness(client, monkeypatch) -> None:
-    monkeypatch.setattr(StorageService, 'check_connection', lambda self: True)
+    monkeypatch.setattr(StorageService, "check_connection", lambda self: True)
 
-    response = client.get('/ready')
+    response = client.get("/ready")
 
     assert response.status_code == 200
-    assert response.json()['status'] == 'ready'
+    assert response.json()["status"] == "ready"
 
 
 def test_register_login_and_me_flow(client) -> None:
@@ -69,4 +69,3 @@ def test_duplicate_registration_is_rejected(client) -> None:
 
     assert first_response.status_code == 201
     assert second_response.status_code == 409
-

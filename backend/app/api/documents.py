@@ -174,6 +174,7 @@ def download_document(
     service = DocumentService(db)
     content, filename, content_type = service.download_document(current_user, document_id)
     from io import BytesIO
+
     return StreamingResponse(
         BytesIO(content),
         media_type=content_type,

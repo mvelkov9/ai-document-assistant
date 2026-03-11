@@ -1,10 +1,10 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import delete as sa_delete, select
+from sqlalchemy import delete as sa_delete
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.processing_job import ProcessingJob
-
 
 
 class ProcessingJobRepository:
@@ -69,9 +69,7 @@ class ProcessingJobRepository:
         return job
 
     def delete_for_document(self, document_id: str, *, auto_commit: bool = True) -> None:
-        statement = sa_delete(ProcessingJob).where(
-            ProcessingJob.document_id == document_id
-        )
+        statement = sa_delete(ProcessingJob).where(ProcessingJob.document_id == document_id)
         self.db.execute(statement)
         if auto_commit:
             self.db.commit()

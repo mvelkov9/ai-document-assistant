@@ -7,9 +7,7 @@ async function parseResponse(response) {
     : await response.text()
 
   if (!response.ok) {
-    const message = typeof payload === 'string'
-      ? payload
-      : payload?.detail || 'Request failed.'
+    const message = typeof payload === 'string' ? payload : payload?.detail || 'Request failed.'
     throw new Error(message)
   }
 

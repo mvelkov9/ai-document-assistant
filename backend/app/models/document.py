@@ -18,8 +18,6 @@ class Document(Base):
     size_bytes: Mapped[int] = mapped_column(Integer)
     processing_status: Mapped[str] = mapped_column(String(32), default="uploaded")
     summary_text: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     owner = relationship("User", back_populates="documents")

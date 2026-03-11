@@ -14,7 +14,7 @@
 | REST API | Completed | FastAPI with 18+ endpoints, OpenAPI documentation |
 | Cloud integration | Completed | MinIO object storage, Groq / Gemini / OpenAI API, PostgreSQL |
 | Cloud hosting | Completed | Docker Compose with production overlay for VPS |
-| Basic CI/CD | Completed | GitHub Actions: lint (ruff), test (pytest-cov), build |
+| Basic CI/CD | Completed | GitHub Actions: lint + format (ruff), test (pytest-cov), prettier, build, Docker |
 | OpenAPI / Swagger | Completed | Endpoint descriptions, schema examples, /docs + /redoc |
 | Authentication | Completed | JWT (HS256), bcrypt passwords, rate-limited auth |
 | Multi-user support | Completed | Ownership-based access control on all resources |
@@ -51,6 +51,8 @@
 | 25 | CI/CD health | Completed | Docker build step in CI, badge prep |
 | 26 | Report finalization | Completed | Report updated, 16 screenshot placeholders inserted, Word outline ready |
 | 27 | GUI overhaul v1.2.1 | Completed | Sidebar layout, admin role management |
+| 28 | Hardening v1.2.2 | Completed | PDF extraction fallback, VPS specs CX33, lint fixes |
+| 29 | Formatters v1.2.3 | Completed | Ruff format + prettier auto-formatting, CI format checks |
 
 ## Current implementation state
 
@@ -82,10 +84,9 @@
 
 ### Immediate next steps
 
-1. Deploy to actual VPS (Phase 19) — this is the last critical requirement
-2. Capture screenshots of running system for report (Phase 26)
-3. Add auto-deploy step in CI/CD if time allows (Phase 25 extension)
-4. Freeze final report text with screenshots
+1. Capture screenshots of running system for report (Phase 26)
+2. Finalize Word document with screenshots and submit
+3. Prepare for defense demo using https://doc-ai-assist.com
 
 ## Verification log
 
@@ -286,6 +287,17 @@ After every completed implementation phase:
 - Updated VPS specs from CX22 to CX33 (4 vCPU, 8 GB RAM, €5.49/month) across all docs
 - Updated domain cost to €7.99/year (Namecheap) across all docs
 - Version bumped to v1.2.2 in backend (FastAPI), frontend (package.json, App.vue), README
+
+**Phase E17: Version 1.2.3 — Auto-formatters, CI format checks**
+- Fixed persistent CI I001 errors by adding `[tool.ruff.lint.isort]` with `known-first-party = ["app"]` to pyproject.toml
+- Added `[tool.ruff.format]` section (double quotes, space indent) and ran `ruff format` on all 36 Python files
+- Added prettier (v3.5) as frontend devDependency with `.prettierrc` config (single quotes, no semicolons, trailing commas)
+- Ran prettier on all Vue/JS/CSS frontend files
+- CI backend-lint job now runs `ruff format --check` after `ruff check`
+- CI frontend job now runs `prettier --check` before `npm run build`
+- Deduplicated `ruff==0.11.13` line in requirements.txt
+- Updated all stale docs: phase-15 (4 jobs, format checks), runtime-validation (39 tests, 4 jobs, formatters), architecture-and-dataflows (CI line), README (CI section, test count)
+- Version bumped to v1.2.3 in backend (FastAPI), frontend (package.json, App.vue), README
 
 ## Supporting operational documents
 

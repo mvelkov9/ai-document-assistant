@@ -28,9 +28,7 @@ class DocumentRepository:
         self.db.refresh(document)
         return document
 
-    def list_for_owner(
-        self, owner_id: str, *, skip: int = 0, limit: int = 20
-    ) -> list[Document]:
+    def list_for_owner(self, owner_id: str, *, skip: int = 0, limit: int = 20) -> list[Document]:
         statement = (
             select(Document)
             .where(Document.owner_id == owner_id)
@@ -43,9 +41,7 @@ class DocumentRepository:
     def count_for_owner(self, owner_id: str) -> int:
         from sqlalchemy import func
 
-        statement = select(func.count()).select_from(Document).where(
-            Document.owner_id == owner_id
-        )
+        statement = select(func.count()).select_from(Document).where(Document.owner_id == owner_id)
         return self.db.scalar(statement) or 0
 
     def get_for_owner(self, document_id: str, owner_id: str) -> Document | None:

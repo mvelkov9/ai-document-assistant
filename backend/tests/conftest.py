@@ -7,9 +7,7 @@ os.environ["APP_ENV"] = "test"
 # app module is imported.  app.db.session creates a module-level engine on first
 # import; without this early override it would bind to the production DB and
 # drop_all would wipe real data.
-os.environ["DATABASE_URL"] = (
-    "postgresql+psycopg://docassist:docassist@postgres:5432/docassist_test"
-)
+os.environ["DATABASE_URL"] = "postgresql+psycopg://docassist:docassist@postgres:5432/docassist_test"
 
 from io import BytesIO
 
@@ -27,9 +25,7 @@ from app.services import summary_service as summary_service_module
 _admin_url = "postgresql+psycopg://docassist:docassist@postgres:5432/docassist"
 _admin_engine = create_engine(_admin_url, isolation_level="AUTOCOMMIT", future=True)
 with _admin_engine.connect() as _conn:
-    exists = _conn.execute(
-        text("SELECT 1 FROM pg_database WHERE datname = 'docassist_test'")
-    ).scalar()
+    exists = _conn.execute(text("SELECT 1 FROM pg_database WHERE datname = 'docassist_test'")).scalar()
     if not exists:
         _conn.execute(text("CREATE DATABASE docassist_test"))
 _admin_engine.dispose()
@@ -40,15 +36,15 @@ _TEST_DB_URL = "postgresql+psycopg://docassist:docassist@postgres:5432/docassist
 
 @pytest.fixture(autouse=True)
 def test_environment(monkeypatch):
-    monkeypatch.setenv('DATABASE_URL', _TEST_DB_URL)
-    monkeypatch.setenv('SECRET_KEY', 'test-secret-key')
-    monkeypatch.setenv('MINIO_ENDPOINT', 'localhost:9000')
-    monkeypatch.setenv('MINIO_ACCESS_KEY', 'minioadmin')
-    monkeypatch.setenv('MINIO_SECRET_KEY', 'minioadmin')
-    monkeypatch.setenv('MINIO_BUCKET', 'documents')
-    monkeypatch.setenv('MINIO_SECURE', 'false')
-    monkeypatch.setenv('SUMMARY_MAX_CHARS', '6000')
-    monkeypatch.setenv('APP_ENV', 'test')
+    monkeypatch.setenv("DATABASE_URL", _TEST_DB_URL)
+    monkeypatch.setenv("SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("MINIO_ENDPOINT", "localhost:9000")
+    monkeypatch.setenv("MINIO_ACCESS_KEY", "minioadmin")
+    monkeypatch.setenv("MINIO_SECRET_KEY", "minioadmin")
+    monkeypatch.setenv("MINIO_BUCKET", "documents")
+    monkeypatch.setenv("MINIO_SECURE", "false")
+    monkeypatch.setenv("SUMMARY_MAX_CHARS", "6000")
+    monkeypatch.setenv("APP_ENV", "test")
 
 
 @pytest.fixture
@@ -63,7 +59,10 @@ def client(test_environment):
     # Build a fresh engine targeting the dedicated test database
     test_engine = create_engine(_TEST_DB_URL, future=True)
     test_session_local = sessionmaker(
-        bind=test_engine, autoflush=False, autocommit=False, future=True,
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+        future=True,
     )
 
     # Swap into the session module so the app uses the test DB
@@ -89,13 +88,13 @@ def mock_storage(monkeypatch):
     """Mock MinIO storage upload/download so tests don't need a live bucket."""
     monkeypatch.setattr(
         document_service_module.StorageService,
-        'upload_bytes',
+        "upload_bytes",
         lambda self, key, content, ct: None,
     )
     monkeypatch.setattr(
         document_service_module.StorageService,
-        'download_bytes',
-        lambda self, key: b'%PDF-1.4 test-content',
+        "download_bytes",
+        lambda self, key: b"%PDF-1.4 test-content",
     )
 
 
@@ -104,42 +103,43 @@ def mock_ai(monkeypatch):
     """Mock PDF extraction and AI summary/Q&A services."""
     monkeypatch.setattr(
         pdf_service_module.PdfService,
-        'extract_text',
-        lambda self, content: 'Extracted document text for testing purposes.',
+        "extract_text",
+        lambda self, content: "Extracted document text for testing purposes.",
     )
 
     async def _fake_summarize(self, text):
-        return 'Test summary of the document.'
+        return "Test summary of the document."
 
     async def _fake_answer(self, text, question):
-        return ('Test answer to the question.', 'fallback')
+        return ("Test answer to the question.", "fallback")
 
-    monkeypatch.setattr(summary_service_module.SummaryService, 'summarize', _fake_summarize)
-    monkeypatch.setattr(summary_service_module.SummaryService, 'answer_question', _fake_answer)
+    monkeypatch.setattr(summary_service_module.SummaryService, "summarize", _fake_summarize)
+    monkeypatch.setattr(summary_service_module.SummaryService, "answer_question", _fake_answer)
 
 
 @pytest.fixture
 def mock_background_jobs(monkeypatch):
     """Mock background job runners so they don't actually execute."""
+
     async def _noop(self, job_id):
         return None
 
-    monkeypatch.setattr(processing_service_module.ProcessingService, 'run_summary_job', _noop)
-    monkeypatch.setattr(processing_service_module.ProcessingService, 'run_question_job', _noop)
+    monkeypatch.setattr(processing_service_module.ProcessingService, "run_summary_job", _noop)
+    monkeypatch.setattr(processing_service_module.ProcessingService, "run_question_job", _noop)
 
 
-def _register_and_login(client, email='test@example.com', password='VerySecure123'):
+def _register_and_login(client, email="test@example.com", password="VerySecure123"):
     """Helper: register a user and return auth headers."""
     client.post(
-        '/api/v1/auth/register',
-        json={'email': email, 'password': password, 'full_name': 'Test User'},
+        "/api/v1/auth/register",
+        json={"email": email, "password": password, "full_name": "Test User"},
     )
     resp = client.post(
-        '/api/v1/auth/login',
-        json={'email': email, 'password': password},
+        "/api/v1/auth/login",
+        json={"email": email, "password": password},
     )
-    token = resp.json()['access_token']
-    return {'Authorization': f'Bearer {token}'}
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
@@ -151,7 +151,7 @@ def auth_headers(client):
 @pytest.fixture
 def upload_document(client, auth_headers, mock_storage):
     """Upload a sample PDF and return the document JSON."""
-    files = {'file': ('test.pdf', BytesIO(b'%PDF-1.4 sample'), 'application/pdf')}
-    resp = client.post('/api/v1/documents/upload', headers=auth_headers, files=files)
+    files = {"file": ("test.pdf", BytesIO(b"%PDF-1.4 sample"), "application/pdf")}
+    resp = client.post("/api/v1/documents/upload", headers=auth_headers, files=files)
     assert resp.status_code == 201
     return resp.json()

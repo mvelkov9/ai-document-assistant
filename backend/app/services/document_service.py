@@ -202,9 +202,7 @@ class DocumentService:
     def delete_document(self, current_user: UserPublic, document_id: str) -> None:
         document = self.repository.get_for_owner(document_id, current_user.id)
         if not document:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Document not found."
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
 
         # Single transaction to avoid deadlocks
         self.qa_repository.delete_for_document(document.id, auto_commit=False)

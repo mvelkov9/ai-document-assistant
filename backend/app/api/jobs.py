@@ -7,8 +7,6 @@ from app.schemas.auth import UserPublic
 from app.schemas.job import ProcessingJobPublic
 from app.services.processing_service import ProcessingService
 
-
-
 router = APIRouter(prefix="/jobs")
 
 

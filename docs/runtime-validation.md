@@ -31,19 +31,21 @@
 
 ## Automated test suite
 
-- 30 test cases across 4 test files
-- Covers: auth validation, document operations, pagination, access control, error handling, async jobs
+- 39 test cases across 5 test files
+- Covers: auth validation, document operations, pagination, access control, error handling, async jobs, admin endpoints, document download, Prometheus metrics
 - Uses mocked storage and AI layers for deterministic execution
 - Coverage threshold enforced in CI (≥50%)
 
 ## CI pipeline validation
 
-- GitHub Actions workflow runs three jobs: ruff lint, pytest with coverage, frontend build
+- GitHub Actions workflow runs four jobs: ruff lint + format check, pytest with coverage, prettier check + frontend build, Docker image build
 - Pipeline triggers on push to main/master and on pull requests
 
 ## Code quality
 
-- `ruff` linter configured via `pyproject.toml` (rules: E, F, I, W; line length 120)
+- `ruff` linter configured via `pyproject.toml` (rules: E, F, I, W; line length 120; known-first-party: app)
+- `ruff format` enforces consistent Python code style (double quotes, space indent)
+- `prettier` enforces consistent frontend code style (single quotes, no semicolons, trailing commas)
 - Structured JSON logging via structlog
 - Global exception handlers prevent stack trace leakage
 

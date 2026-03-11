@@ -15,8 +15,6 @@ from app.core.config import get_settings
 from app.db.session import SessionLocal, init_db
 from app.services.storage_service import StorageService
 
-
-
 settings = get_settings()
 
 # ── Structured logging ──
@@ -39,7 +37,7 @@ limiter = Limiter(
 
 app = FastAPI(
     title=settings.project_name,
-    version="1.2.2",
+    version="1.2.3",
     description=(
         "REST API for the AI Document Assistant semester project. "
         "This initial iteration provides health and status endpoints, "
@@ -88,6 +86,7 @@ app.include_router(api_router, prefix=settings.api_prefix)
 # ── Prometheus metrics ──
 try:
     from prometheus_fastapi_instrumentator import Instrumentator
+
     Instrumentator().instrument(app).expose(app, endpoint="/metrics", tags=["monitoring"])
 except ImportError:
     pass  # Optional dependency

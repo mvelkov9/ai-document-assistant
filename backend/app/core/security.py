@@ -6,8 +6,6 @@ from passlib.context import CryptContext
 
 from app.core.config import get_settings
 
-
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -21,8 +19,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(subject: str, expires_minutes: int | None = None) -> str:
     settings = get_settings()
-    expire_at = datetime.now(UTC) + timedelta(
-        minutes=expires_minutes or settings.access_token_expire_minutes
-    )
+    expire_at = datetime.now(UTC) + timedelta(minutes=expires_minutes or settings.access_token_expire_minutes)
     payload: dict[str, Any] = {"sub": subject, "exp": expire_at}
     return jwt.encode(payload, settings.secret_key, algorithm="HS256")

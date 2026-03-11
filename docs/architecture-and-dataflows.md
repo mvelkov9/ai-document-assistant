@@ -36,7 +36,7 @@ The production deployment runs on a Hetzner CX33 VPS (4 vCPU, 8 GB RAM, Ubuntu 2
 
 ### CI/CD
 
-GitHub Actions pipeline: ruff lint → pytest with coverage (min 50%) → frontend build. Deploy script runs Alembic migration and health check polling.
+GitHub Actions pipeline: ruff lint + format check → pytest with coverage (min 50%) → prettier check + frontend build → Docker image build. Deploy script runs Alembic migration and health check polling.
 
 ## Main flows
 

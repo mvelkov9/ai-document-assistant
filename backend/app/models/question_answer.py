@@ -15,8 +15,6 @@ class QuestionAnswer(Base):
     question_text: Mapped[str] = mapped_column(Text)
     answer_text: Mapped[str] = mapped_column(Text)
     source_mode: Mapped[str] = mapped_column(String(32), default="fallback")
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     document = relationship("Document")
