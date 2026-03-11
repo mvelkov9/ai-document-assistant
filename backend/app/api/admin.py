@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
@@ -9,7 +10,6 @@ from app.models.processing_job import ProcessingJob
 from app.models.question_answer import QuestionAnswer
 from app.models.user import User
 from app.schemas.auth import UserPublic
-from sqlalchemy import func
 
 router = APIRouter(prefix="/admin")
 

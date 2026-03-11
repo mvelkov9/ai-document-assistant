@@ -5,6 +5,7 @@ from io import BytesIO
 from tests.conftest import _register_and_login
 
 
+
 # ── Upload validation ──
 
 def test_upload_non_pdf_rejected(client, auth_headers, mock_storage) -> None:

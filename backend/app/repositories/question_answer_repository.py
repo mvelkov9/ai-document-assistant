@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.question_answer import QuestionAnswer
 
 
+
 class QuestionAnswerRepository:
     def __init__(self, db: Session) -> None:
         self.db = db

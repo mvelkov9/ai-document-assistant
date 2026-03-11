@@ -6,13 +6,13 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.repositories.document_repository import DocumentRepository
-from app.repositories.question_answer_repository import QuestionAnswerRepository
 from app.repositories.processing_job_repository import ProcessingJobRepository
-from app.schemas.document import DocumentPublic, QuestionAnswerPublic
+from app.repositories.question_answer_repository import QuestionAnswerRepository
 from app.schemas.auth import UserPublic
+from app.schemas.document import DocumentPublic, QuestionAnswerPublic
 from app.services.pdf_service import PdfService
-from app.services.summary_service import SummaryService
 from app.services.storage_service import StorageService
+from app.services.summary_service import SummaryService
 
 
 class DocumentService:
@@ -104,6 +104,15 @@ class DocumentService:
         try:
             content = self.storage.download_bytes(document.storage_key)
             extracted_text = self.pdf_service.extract_text(content)
+
+            if not extracted_text.strip():
+                self.repository.update_processing(document, "summary-failed")
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Document does not contain enough machine-readable text for summarization. "
+                    "The PDF may be scanned or image-based. OCR is not yet supported.",
+                )
+
             summary_text = await self.summary_service.summarize(extracted_text)
             updated = self.repository.update_summary(document, summary_text, "ready")
         except RuntimeError as exc:
@@ -155,6 +164,15 @@ class DocumentService:
         try:
             content = self.storage.download_bytes(document.storage_key)
             extracted_text = self.pdf_service.extract_text(content)
+
+            if not extracted_text.strip():
+                self.repository.update_processing(document, idle_status)
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Document does not contain enough machine-readable text to answer questions. "
+                    "The PDF may be scanned or image-based. OCR is not yet supported.",
+                )
+
             answer_text, source_mode = await self.summary_service.answer_question(
                 extracted_text,
                 cleaned_question,

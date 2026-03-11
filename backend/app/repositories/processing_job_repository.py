@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.processing_job import ProcessingJob
 
 
+
 class ProcessingJobRepository:
     def __init__(self, db: Session) -> None:
         self.db = db

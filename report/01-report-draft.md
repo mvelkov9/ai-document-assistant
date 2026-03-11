@@ -43,7 +43,7 @@ oblak, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG
 
 This project presents the development of an integrated web service for secure multi-user document management. The solution allows users to register, log in, upload PDF documents, generate AI-based summaries, and ask questions about the content of a selected document. The system follows a modern cloud-oriented architecture where the frontend is implemented in Vue, the backend in FastAPI, metadata is stored in PostgreSQL, and uploaded files are stored in MinIO, an S3-compatible object storage service. The AI layer supports multiple external providers (Groq with Llama 3.3 70B, Google Gemini, or OpenAI) with automatic fallback, which reduces mandatory costs and allows demonstration in constrained environments. A RAG-lite approach using BM25 ranking of document chunks is implemented for contextual Q&A.
 
-The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX22 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 39 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
+The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX33 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 39 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
 
 The project demonstrates that an architecturally relevant and secure cloud-style service can be implemented using open technologies and a limited budget. In addition to implementation details, the report includes a security review, cost analysis, and a critical comparison with a managed-platform alternative.
 
@@ -150,7 +150,7 @@ Produkcijski deployment teče na lastnem VPS strežniku pri Hetzner Cloud:
 | Podrobnost | Vrednost |
 |------------|----------|
 | Ponudnik | Hetzner Cloud |
-| Načrt | CX22 (2 vCPU, 4 GB RAM, 80 GB disk) |
+| Načrt | CX33 (4 vCPU, 8 GB RAM, 80 GB disk) |
 | OS | Ubuntu 24.04 LTS |
 | IP naslov | 178.104.25.28 |
 | Domena | doc-ai-assist.com |
@@ -371,24 +371,24 @@ JWT dostopni zeton se v frontendu hrani v localStorage. To predstavlja potencial
 
 | Postavka | Demo / izpitni zagon | Manjša organizacija | Opomba |
 | --- | --- | --- | --- |
-| VPS (Hetzner CX22, 2 vCPU, 4 GB RAM) | €3,65/mesec | €3,65/mesec | Vsi vsebniki na enem strežniku |
-| Domena (.com — Namecheap) | ~$10/leto (~€0,75/mesec) | ~$10/leto | doc-ai-assist.com |
+| VPS (Hetzner CX33, 4 vCPU, 8 GB RAM) | €5,49/mesec | €5,49/mesec | Vsi vsebniki na enem strežniku |
+| Domena (.com — Namecheap) | €7,99/leto (~€0,67/mesec) | €7,99/leto | doc-ai-assist.com |
 | TLS certifikat (Let's Encrypt) | brezplačno | brezplačno | Avtomatizirano podaljševanje (certbot timer) |
-| Objektna hramba (MinIO na VPS) | vključeno v VPS | vključeno v VPS | Do ~40 GB na disku CX22 |
+| Objektna hramba (MinIO na VPS) | vključeno v VPS | vključeno v VPS | Do ~40 GB na disku CX33 |
 | AI API — Groq (Llama 3.3 70B) | brezplačno | brezplačno | Free tier; fallback: Gemini, OpenAI |
 | Upravljanje baze (PostgreSQL na VPS) | vključeno v VPS | vključeno v VPS | Docker container |
 | Prometheus metrike | vključeno v VPS | vključeno v VPS | /metrics endpoint |
-| **Skupaj mesečno** | **~€4–5** | **~€4–5** | |
+| **Skupaj mesečno** | **~€6–7** | **~€6–7** | |
 
 ### 10.2 Primerjava z upravljano alternativo (Managed PaaS)
 
 | Postavka | VPS pristop | Managed PaaS (AWS/GCP ekvivalent) |
 | --- | --- | --- |
-| Compute | €3,65/mesec (Hetzner CX22) | €15–40/mesec (App Platform, Cloud Run) |
+| Compute | €5,49/mesec (Hetzner CX33) | €15–40/mesec (App Platform, Cloud Run) |
 | Baza | vključeno (Docker PostgreSQL) | €10–25/mesec (managed DB) |
 | Objektna hramba | vključeno (MinIO) | €1–5/mesec (S3) |
 | AI API | brezplačno (Groq free tier) | €0–15/mesec (OpenAI / Groq plačljiv) |
-| **Skupaj** | **~€4–5/mesec** | **€30–85/mesec** |
+| **Skupaj** | **~€6–7/mesec** | **€30–85/mesec** |
 
 Managed PaaS poenostavi operativni del, vendar vsaj 3–5× podrazzi mesecne stroske za primerljiv obseg. Za studentski projekt in manjso slovensko organizacijo je VPS pristop bistveno cenejsi, z dodatno odgovornostjo za sistemsko administracijo.
 
@@ -435,7 +435,7 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | Admin API | FastAPI dependency | — | Administracijska plošča (uporabniki, statistika, vloge) |
 | Reverse proxy | Nginx | 1.27 | Varnostne glave, gzip, TLS (Let's Encrypt) |
 | Kontejnerizacija | Docker Compose | v2 | Razvojno in produkcijsko okolje |
-| VPS gostovanje | Hetzner CX22 | Ubuntu 24.04 | 2 vCPU, 4 GB RAM, 80 GB disk |
+| VPS gostovanje | Hetzner CX33 | Ubuntu 24.04 | 4 vCPU, 8 GB RAM, 80 GB disk |
 | Domena in TLS | doc-ai-assist.com | Let's Encrypt | HTTPS z avtomatskim podaljševanjem |
 | CI/CD | GitHub Actions | — | Lint, test s pokritostjo, Docker build |
 | Lint | ruff | 0.11 | Preverjanje kakovosti Python kode |
@@ -457,7 +457,7 @@ Testi se izvajajo z `pytest` in `pytest-cov`, pokritost kode je merjena in vklju
 
 ### 12.3 Operativna validacija
 
-Produkcijski deployment je bil opravljen 11. marca 2026 na Hetzner CX22 VPS (Ubuntu 24.04). Postopek je vključeval:
+Produkcijski deployment je bil opravljen 11. marca 2026 na Hetzner CX33 VPS (Ubuntu 24.04). Postopek je vključeval:
 
 1. **Inicializacija VPS** — namestitev Docker Engine, Docker Compose, kloniranje Git repozitorija,
 2. **Konfiguracija .env** — nastavitev produkcijskih skrivnosti (PostgreSQL, MinIO, JWT, Groq API ključ),
@@ -531,11 +531,11 @@ Vsi scenariji so bili uspešno izvedeni brez napak.
 
 Naloga je pokazala, da je mogoče razviti integrirano spletno storitev, ki presega raven enostavne demonstracije orodij. Implementirana rešitev združuje spletni uporabniški vmesnik (Vue 3.5), REST API (FastAPI), relacijsko podatkovno bazo (PostgreSQL 17), objektno hrambo (MinIO), AI integracijo s prioritetno verigo ponudnikov (Groq → Gemini → OpenAI), RAG-lite dokumentni Q&A z BM25 rangiranjem, administracijsko ploščo, Prometheus metrike in produkcijsko pot na VPS z avtomatskim TLS. Prav ta povezava med gradniki predstavlja bistvo sodobnih cloud-native oziroma cloud-style arhitektur.
 
-Sistem je v celoti nameščen in dostopen na **https://doc-ai-assist.com** (Hetzner CX22, Ubuntu 24.04, Let's Encrypt TLS).
+Sistem je v celoti nameščen in dostopen na **https://doc-ai-assist.com** (Hetzner CX33, Ubuntu 24.04, Let's Encrypt TLS).
 
 Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI dokumentacijo (21 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in celovit CI/CD mehanizem prek GitHub Actions (lint, test, frontend build, Docker build). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Docker (vključno z multi-stage buildom), JWT avtentikacija z admin vlogami, integracija AI API s prioritetno verigo ponudnikov, RAG-lite BM25 pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus metrike za operativno opazljivost, administracijska plošča s statistiko in upravljanjem vlog, ter health in readiness endpointi.
 
-Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastnistvenostnim omejevanjem dostopa, bcrypt zaščito gesel, rate limitingom, Pydantic validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €5/mesec na lastnem VPS z brezplačnim Groq AI API, kar je bistveno ceneje od primerljivih upravljanih platform.
+Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastnistvenostnim omejevanjem dostopa, bcrypt zaščito gesel, rate limitingom, Pydantic validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €7/mesec na lastnem VPS z brezplačnim Groq AI API, kar je bistveno ceneje od primerljivih upravljanih platform.
 
 Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za ločeno obdelavo, bogatejši Q&A kontekst z večvrstno pogovorno zgodovino, OCR podpora za skenirane dokumente, napredne varnostne politike (refresh token rotacija, account lockout), uporaba vektorske shrambe za naprednejše semantično iskanje po dokumentih, in Grafana dashboard za vizualizacijo Prometheus metrik.
 

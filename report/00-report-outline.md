@@ -6,7 +6,7 @@ Razvoj integrirane spletne storitve za varno upravljanje dokumentov z AI povzetk
 
 ## Production URL
 
-**https://doc-ai-assist.com** — live deployment on Hetzner CX22 VPS with TLS
+**https://doc-ai-assist.com** — live deployment on Hetzner CX33 VPS with TLS
 
 ## Required document structure (chapters in Word)
 
@@ -76,7 +76,7 @@ Razvoj integrirane spletne storitve za varno upravljanje dokumentov z AI povzetk
 
 ### 7. Stroškovna analiza
 
-- strošek VPS (Hetzner CX22 — €3,65/mesec)
+- strošek VPS (Hetzner CX33 — €5,49/mesec)
 - strošek domene (doc-ai-assist.com)
 - strošek AI API klicev (Groq free tier)
 - primerjava z managed alternativo

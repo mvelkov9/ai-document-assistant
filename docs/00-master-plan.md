@@ -42,7 +42,7 @@
 | 16 | Observability | Completed | Structured JSON logging (structlog), readiness endpoint |
 | 17 | Testing | Completed | 30 test cases, auth/doc/pagination/error coverage |
 | 18 | Costs and fit | Completed | Cost tables with real pricing, PaaS comparison |
-| 19 | VPS deployment | Completed | Deployed on Hetzner CX22, TLS, doc-ai-assist.com |
+| 19 | VPS deployment | Completed | Deployed on Hetzner CX33, TLS, doc-ai-assist.com |
 | 20 | Frontend expansion | Completed | Search, filter, sort, user profile |
 | 21 | Admin functionality | Completed | Admin endpoints, admin dashboard, stats |
 | 22 | RAG-lite AI | Completed | BM25 chunking for contextual Q&A |
@@ -161,7 +161,7 @@ After every completed implementation phase:
 
 **Phase E9: Report finalization**
 - Security section expanded with rate limiting, headers, OWASP Top 10 mapping, JWT trade-off
-- Cost table with real Hetzner CX22 pricing and PaaS comparison
+- Cost table with real Hetzner CX33 pricing and PaaS comparison
 - Implementation validation section updated with 30 test cases, CI pipeline details
 - References expanded from 7 to 16 sources
 
@@ -279,6 +279,14 @@ After every completed implementation phase:
 - README updated: version title, API endpoint table (added download, admin, metrics, PATCH role)
 - 39 tests still passing, all containers healthy
 
+**Phase E16: Version 1.2.2 — Lint fixes, PDF extraction hardening, specs update**
+- Fixed all 15 ruff lint errors (import sorting I001, missing newlines W292, unused import F401)
+- Improved PDF text extraction: layout mode fallback when standard extraction yields <50 chars
+- Proper HTTP 422 error for scanned/image-based PDFs instead of saving error message as summary
+- Updated VPS specs from CX22 to CX33 (4 vCPU, 8 GB RAM, €5.49/month) across all docs
+- Updated domain cost to €7.99/year (Namecheap) across all docs
+- Version bumped to v1.2.2 in backend (FastAPI), frontend (package.json, App.vue), README
+
 ## Supporting operational documents
 
 - `docs/professor-demo-checklist.md`
@@ -332,7 +340,7 @@ After every completed implementation phase:
 
 ### KRITIČNE POMANJKLJIVOSTI
 
-1. ~~**VPS deployment ni dokazan**~~ ✅ REŠENO 2026-03-11 — Aplikacija teče na Hetzner CX22 VPS, Ubuntu 24.04, https://doc-ai-assist.com, TLS Let's Encrypt, vseh 5 containerjev healthy.
+1. ~~**VPS deployment ni dokazan**~~ ✅ REŠENO 2026-03-11 — Aplikacija teče na Hetzner CX33 VPS, Ubuntu 24.04, https://doc-ai-assist.com, TLS Let's Encrypt, vseh 5 containerjev healthy.
 
 2. ~~**Frontend je pretanek**~~ ✅ REŠENO v v1.2.0 — Dodano iskanje, sortiranje, prenos PDF, admin dashboard, user profil. Sedaj 12+ akcij.
 
@@ -367,7 +375,7 @@ Spodnje faze so razvrščene po PRIORITETI — od najnujnejšega do nice-to-have
 ### Phase 19: VPS deployment in dokazi ★★★ ✅ ZAKLJUČENO 2026-03-11
 
 **Izvedeno:**
-1. Deploy na Hetzner CX22 VPS (Ubuntu 24.04, 2 vCPU, 4 GB RAM, 80 GB disk)
+1. Deploy na Hetzner CX33 VPS (Ubuntu 24.04, 4 vCPU, 8 GB RAM, 80 GB disk)
 2. Konfiguracija .env z produkcijskimi vrednostmi
 3. Izvedba `deploy.sh` + alembic migrate — uspeh po 2 poskusih
 4. Aktivacija TLS z Let's Encrypt za doc-ai-assist.com (velja do 2026-06-09)
@@ -439,7 +447,7 @@ Koraki:
 
 ### Phase 26: Report finalizacija s posnetki ✅ ZAKLJUČENO
 
-**Status:** Report in outline v celoti posodobljena. 16 screenshot placeholderjev vstavljen v report draft. Stroškovna analiza, tehnološka tabela, zaključek, reference — vse posodobljeno na dejansko stanje (Groq, BM25, 39 testov, VPS €3.65, doc-ai-assist.com). Student mora zajeti posnetke in jih vstaviti v Word dokument.
+**Status:** Report in outline v celoti posodobljena. 16 screenshot placeholderjev vstavljen v report draft. Stroškovna analiza, tehnološka tabela, zaključek, reference — vse posodobljeno na dejansko stanje (Groq, BM25, 39 testov, VPS €5.49, doc-ai-assist.com). Student mora zajeti posnetke in jih vstaviti v Word dokument.
 
 Posnetki za 01-report-draft.md in Word dokument:
 1. Posnetek 1: Arhitekturni diagram (Mermaid → PNG iz architecture.mmd)

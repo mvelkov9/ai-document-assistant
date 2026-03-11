@@ -8,7 +8,7 @@ This checklist defines the minimal production rollout path for deploying the app
 
 | Item | Status |
 |------|--------|
-| VPS provisioned (Hetzner CX22, Ubuntu 24.04) | ✅ |
+| VPS provisioned (Hetzner CX33, Ubuntu 24.04) | ✅ |
 | Docker & Docker Compose installed | ✅ |
 | Git repo cloned on VPS | ✅ |
 | `.env` filled with production secrets | ✅ |

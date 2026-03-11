@@ -11,7 +11,7 @@
 
 ## VPS production deployment — VALIDATED 2026-03-11
 
-- VPS: Hetzner CX22, Ubuntu 24.04, IP 178.104.25.28
+- VPS: Hetzner CX33, Ubuntu 24.04, IP 178.104.25.28
 - Domain: doc-ai-assist.com → A record pointing to VPS IP
 - TLS: Let's Encrypt certificate issued, expires 2026-06-09
 - Deploy: `bash infrastructure/scripts/deploy.sh` completed successfully

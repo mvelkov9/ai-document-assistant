@@ -12,7 +12,6 @@ os.environ["DATABASE_URL"] = (
 )
 
 from io import BytesIO
-from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -55,8 +54,8 @@ def test_environment(monkeypatch):
 @pytest.fixture
 def client(test_environment):
     from app.core.config import get_settings
-    from app.db.base import Base
     from app.db import session as session_module
+    from app.db.base import Base
     from app.main import app
 
     get_settings.cache_clear()

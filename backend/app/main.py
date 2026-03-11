@@ -16,6 +16,7 @@ from app.db.session import SessionLocal, init_db
 from app.services.storage_service import StorageService
 
 
+
 settings = get_settings()
 
 # ── Structured logging ──
@@ -38,7 +39,7 @@ limiter = Limiter(
 
 app = FastAPI(
     title=settings.project_name,
-    version="0.1.0",
+    version="1.2.2",
     description=(
         "REST API for the AI Document Assistant semester project. "
         "This initial iteration provides health and status endpoints, "

@@ -18,24 +18,24 @@ Document the financial, operational, and architectural consequences of the selec
 
 | Item | Demo / exam run | Small organization | Notes |
 | --- | --- | --- | --- |
-| VPS (Hetzner CX22, 2 vCPU, 4 GB RAM) | €3.65/month | €3.65/month | All containers on one server |
-| Domain (.com — Namecheap) | ~$10/year (~€0.75/month) | ~$10/year | doc-ai-assist.com |
+| VPS (Hetzner CX33, 4 vCPU, 8 GB RAM) | €5.49/month | €5.49/month | All containers on one server |
+| Domain (.com — Namecheap) | €7.99/year (~€0.67/month) | €7.99/year | doc-ai-assist.com |
 | TLS certificate (Let's Encrypt) | free | free | Automated renewal (certbot timer) |
-| Object storage (MinIO on VPS) | included in VPS | included in VPS | Up to ~40 GB on CX22 disk |
+| Object storage (MinIO on VPS) | included in VPS | included in VPS | Up to ~40 GB on CX33 disk |
 | AI API (Groq free tier; OpenAI/Gemini fallback) | €0/month | €0–15/month | Groq free; OpenAI ~€0.002/1K tokens if fallback used |
 | Database (PostgreSQL on VPS) | included in VPS | included in VPS | Docker container |
 | Prometheus metrics | included in VPS | included in VPS | /metrics endpoint |
-| **Monthly total** | **~€4–5** | **~€4–20** | |
+| **Monthly total** | **~€6–7** | **~€6–20** | |
 
 ### VPS vs. Managed PaaS comparison
 
 | Item | VPS approach | Managed PaaS (AWS/GCP equivalent) |
 | --- | --- | --- |
-| Compute | €3.65/month (Hetzner CX22) | €15–40/month (App Platform, Cloud Run) |
+| Compute | €5.49/month (Hetzner CX33) | €15–40/month (App Platform, Cloud Run) |
 | Database | included (Docker PostgreSQL) | €10–25/month (managed DB) |
 | Object storage | included (MinIO) | €1–5/month (S3) |
 | AI API | €0 (Groq free tier) | €0–15/month (OpenAI / Groq paid) |
-| **Total** | **~€4–5/month** | **€30–85/month** |
+| **Total** | **~€6–7/month** | **€30–85/month** |
 
 Managed PaaS simplifies operations but costs 3–5× more for comparable scope.
 

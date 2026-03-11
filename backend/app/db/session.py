@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.db.base import Base
 
 
+
 settings = get_settings()
 
 connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}

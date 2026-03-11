@@ -11,7 +11,7 @@ The application is deployed and running in production:
 | Detail | Value |
 |--------|-------|
 | Provider | Hetzner Cloud |
-| Plan | CX22 (2 vCPU, 4 GB RAM, 80 GB disk) |
+| Plan | CX33 (4 vCPU, 8 GB RAM, 80 GB disk) |
 | OS | Ubuntu 24.04 LTS |
 | IP | 178.104.25.28 |
 | Domain | doc-ai-assist.com |
