@@ -115,6 +115,8 @@ class DocumentService:
 
             summary_text = await self.summary_service.summarize(extracted_text)
             updated = self.repository.update_summary(document, summary_text, "ready")
+        except HTTPException:
+            raise
         except RuntimeError as exc:
             self.repository.update_processing(document, "summary-failed")
             raise HTTPException(
@@ -184,6 +186,8 @@ class DocumentService:
                 source_mode=source_mode,
             )
             self.repository.update_processing(document, idle_status)
+        except HTTPException:
+            raise
         except RuntimeError as exc:
             self.repository.update_processing(document, "question-failed")
             raise HTTPException(
