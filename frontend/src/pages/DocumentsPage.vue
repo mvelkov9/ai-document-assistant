@@ -43,8 +43,10 @@
       <div class="stat-card">
         <div class="stat-icon stat-icon-summaries">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" />
-            <line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" />
+            <line x1="17" y1="10" x2="3" y2="10" />
+            <line x1="21" y1="6" x2="3" y2="6" />
+            <line x1="21" y1="14" x2="3" y2="14" />
+            <line x1="17" y1="18" x2="3" y2="18" />
           </svg>
         </div>
         <div class="stat-body">
@@ -70,7 +72,9 @@
           </svg>
         </div>
         <div class="stat-body">
-          <span class="stat-num">{{ documents.length ? Math.round((summaryCount / documents.length) * 100) : 0 }}%</span>
+          <span class="stat-num"
+            >{{ documents.length ? Math.round((summaryCount / documents.length) * 100) : 0 }}%</span
+          >
           <span class="stat-label">Obdelanih</span>
         </div>
       </div>
@@ -179,7 +183,9 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
 
   .stat-card:hover {

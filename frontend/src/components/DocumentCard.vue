@@ -60,7 +60,10 @@
 </script>
 
 <template>
-  <article class="doc-card" :class="{ 'is-collapsed': isCollapsed, 'is-processing': summaryBusy || questionBusy }">
+  <article
+    class="doc-card"
+    :class="{ 'is-collapsed': isCollapsed, 'is-processing': summaryBusy || questionBusy }"
+  >
     <!-- ── Header ── -->
     <div class="doc-header" @click="isCollapsed = !isCollapsed" style="cursor: pointer">
       <div class="doc-icon-wrap">
@@ -253,11 +256,29 @@
           </div>
           <div v-else class="summary-content">
             <p class="summary-text">{{ document.summary_text }}</p>
-            <button class="btn-copy" @click="copyToClipboard(document.summary_text)" :title="copied ? 'Skopirano!' : 'Kopiraj povzetek'">
-              <svg v-if="copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="copy-icon">
+            <button
+              class="btn-copy"
+              @click="copyToClipboard(document.summary_text)"
+              :title="copied ? 'Skopirano!' : 'Kopiraj povzetek'"
+            >
+              <svg
+                v-if="copied"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="copy-icon"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="copy-icon">
+              <svg
+                v-else
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="copy-icon"
+              >
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
@@ -407,13 +428,22 @@
   }
 
   @keyframes pulse-border {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.1); }
-    50% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08); }
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
+    }
   }
 
   @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
 
   /* ── Collapse toggle ── */
