@@ -20,7 +20,7 @@
             </svg>
           </div>
           <span class="brand-name">AI Document Assistant</span>
-          <span class="brand-version">v1.3.0</span>
+          <span class="brand-version">v1.3.1</span>
         </div>
         <div class="landing-nav-links">
           <a href="/docs" class="nav-link-top">API Docs</a>
@@ -68,12 +68,8 @@
             <div class="feature-item">
               <span class="feature-dot dot-rose"></span>RAG-lite Q&amp;A
             </div>
-            <div class="feature-item">
-              <span class="feature-dot dot-sky"></span>Admin panel
-            </div>
-            <div class="feature-item">
-              <span class="feature-dot dot-violet"></span>Prometheus
-            </div>
+            <div class="feature-item"><span class="feature-dot dot-sky"></span>Admin panel</div>
+            <div class="feature-item"><span class="feature-dot dot-violet"></span>Prometheus</div>
           </div>
           <div class="tech-chips">
             <span class="tech-chip">Vue 3</span>
@@ -92,7 +88,7 @@
     </main>
 
     <footer class="landing-footer">
-      <span>AI Document Assistant v1.3.0</span>
+      <span>AI Document Assistant v1.3.1</span>
       <span class="footer-dot">&middot;</span>
       <span>ALMA MATER EUROPAEA 2025/26</span>
       <span class="footer-dot">&middot;</span>

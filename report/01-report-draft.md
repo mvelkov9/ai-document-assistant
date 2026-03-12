@@ -41,7 +41,7 @@ oblak, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG
 
 ### Abstract
 
-This project presents the development of an integrated web service for secure multi-user document management. The solution allows users to register, log in, upload PDF documents, generate AI-based summaries, and ask questions about the content of a selected document. The system follows a modern cloud-oriented architecture where the frontend is implemented in Vue, the backend in FastAPI, metadata is stored in PostgreSQL, and uploaded files are stored in MinIO, an S3-compatible object storage service. The AI layer supports multiple external providers (Groq with Llama 3.3 70B, Google Gemini, or OpenAI) with automatic fallback, which reduces mandatory costs and allows demonstration in constrained environments. A RAG-lite approach using BM25 ranking of document chunks is implemented for contextual Q&A.
+This project presents the development of an integrated web service for secure multi-user document management. The solution allows users to register, log in, upload PDF documents, generate AI-based summaries, and ask questions about the content of a selected document. The system follows a modern cloud-oriented architecture where the frontend is implemented in Vue, the backend in FastAPI, metadata is stored in PostgreSQL, and uploaded files are stored in MinIO, an S3-compatible object storage service. The AI layer supports multiple external providers (Groq with Llama 4 Scout, Google Gemini, or OpenAI) with automatic fallback, which reduces mandatory costs and allows demonstration in constrained environments. A RAG-lite approach using BM25 ranking of document chunks is implemented for contextual Q&A.
 
 The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX33 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 39 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
 
@@ -100,7 +100,7 @@ Sistem je zasnovan kot modularni monolit z zunanjimi integracijami. Sestavljajo 
 2. FastAPI backend za REST API in poslovno logiko s strukturiranim JSON logiranjem (structlog),
 3. PostgreSQL za hrambo metapodatkov in uporabniških zapisov, z Alembic migracijami za nadzorovano evolucijo sheme,
 4. MinIO za objektno hrambo PDF dokumentov, združljiv z AWS S3 API,
-5. AI storitvena plast s prioritetno verigo: Groq (Llama 3.3 70B, brezplačno) → Gemini 2.0 Flash → OpenAI gpt-4o-mini → lokalni fallback,
+5. AI storitvena plast s prioritetno verigo: Groq (Llama 4 Scout, brezplačno) → Gemini 2.0 Flash → OpenAI gpt-4o-mini → lokalni fallback,
 6. RAG-lite BM25 chunking za kontekstualni Q&A — besedilo se razdeli na segmente, rangira po relevantnosti, AI dobi samo top 5 segmentov,
 7. asinhroni job mehanizem za summary in Q&A obdelavo z obstojnimi job zapisi,
 8. slowapi rate limiter za zaščito avtentikacijskih (5/min) in AI endpointov (10/min),
@@ -176,7 +176,7 @@ Izbira FastAPI je bila motivirana z enostavno izdelavo REST API, samodejno OpenA
 
 MinIO je bil izbran zato, ker omogoča lokalno in produkcijsko uporabo enakega S3-kompatibilnega pristopa, kar izboljša prenosljivost arhitekture. Za podatkovno bazo je bil izbran PostgreSQL s SQLAlchemy ORM in Alembic migracijami, kar omogoča nadzorovano evolucijo sheme brez ročnega poseganja v bazo.
 
-Za AI integracijo je bila izbrana prioritetna veriga ponudnikov: Groq (Llama 3.3 70B) kot primarni ponudnik (brezplačen API z visoko hitrostjo), Google Gemini 2.0 Flash kot prvi fallback, OpenAI gpt-4o-mini kot drugi fallback, in lokalni hevristični povzetek kot zadnja možnost. Ta pristop zagotavlja delovanje sistema ne glede na razpoložljivost posameznega ponudnika.
+Za AI integracijo je bila izbrana prioritetna veriga ponudnikov: Groq (Llama 4 Scout 17B-16E) kot primarni ponudnik (brezplačen API z visoko hitrostjo, 750 tok/s), Google Gemini 2.0 Flash kot prvi fallback, OpenAI gpt-4o-mini kot drugi fallback, in lokalni hevristični povzetek kot zadnja možnost. Ta pristop zagotavlja delovanje sistema ne glede na razpoložljivost posameznega ponudnika.
 
 Za dokumentni Q&A je bil implementiran RAG-lite pristop z BM25 algoritmom (rank-bm25). Besedilo PDF dokumenta se razdeli na segmente po ~800 besed z 200-besednim prekrivanjem, segmenti se rangirajo po relevantnosti za zastavljeno vprašanje (BM25, k1=1,5, b=0,75), top 5 segmentov pa se pošlje AI ponudniku. Ta pristop je učinkovitejši od pošiljanja celotnega dokumenta, saj zmanjša porabo tokenov in izboljša kakovost odgovorov.
 
@@ -222,7 +222,7 @@ Ko prijavljen uporabnik nalozi PDF, backend najprej preveri tip in velikost dato
 
 ### 8.3 Povzemanje dokumenta
 
-Za generiranje povzetka sistem uporablja prioritetno verigo AI ponudnikov. Primarni ponudnik je Groq (Llama 3.3 70B), ki ponuja brezplačen API z visoko hitrostjo. Če Groq ni dostopen, sistem samodejno preklopi na Google Gemini 2.0 Flash ali OpenAI gpt-4o-mini. Če nobena zunanja integracija ni na voljo, sistem uporabi lokalni fallback povzetek, kar omogoča delovanje tudi v nizkocenovnem ali demo okolju. Povzetek teče asinhrono: frontend ustvari job, backend ga obdela v ozadju, rezultat pa je dostopen prek pollinga statusa.
+Za generiranje povzetka sistem uporablja prioritetno verigo AI ponudnikov. Primarni ponudnik je Groq (Llama 4 Scout 17B-16E), ki ponuja brezplačen API z visoko hitrostjo (~750 tok/s). Če Groq ni dostopen, sistem samodejno preklopi na Google Gemini 2.0 Flash ali OpenAI gpt-4o-mini. Če nobena zunanja integracija ni na voljo, sistem uporabi lokalni fallback povzetek, kar omogoča delovanje tudi v nizkocenovnem ali demo okolju. Povzetek teče asinhrono: frontend ustvari job, backend ga obdela v ozadju, rezultat pa je dostopen prek pollinga statusa.
 
 ### 8.4 Dokumentni Q&A
 
@@ -375,7 +375,7 @@ JWT dostopni zeton se v frontendu hrani v localStorage. To predstavlja potencial
 | Domena (.com — Namecheap) | €7,99/leto (~€0,67/mesec) | €7,99/leto | doc-ai-assist.com |
 | TLS certifikat (Let's Encrypt) | brezplačno | brezplačno | Avtomatizirano podaljševanje (certbot timer) |
 | Objektna hramba (MinIO na VPS) | vključeno v VPS | vključeno v VPS | Do ~40 GB na disku CX33 |
-| AI API — Groq (Llama 3.3 70B) | brezplačno | brezplačno | Free tier; fallback: Gemini, OpenAI |
+| AI API — Groq (Llama 4 Scout) | brezplačno | brezplačno | Free tier; fallback: Gemini, OpenAI |
 | Upravljanje baze (PostgreSQL na VPS) | vključeno v VPS | vključeno v VPS | Docker container |
 | Prometheus + Grafana | vključeno v VPS | vključeno v VPS | Metrike, dashboard |
 | **Skupaj mesečno** | **~€6–7** | **~€6–7** | |
@@ -456,7 +456,7 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | Avtentikacija | python-jose, passlib | — | JWT (HS256), bcrypt hash |
 | Rate limiting | slowapi | 0.1.9 | Omejevanje hitrosti zahtevkov |
 | Logiranje | structlog | 25.4 | Strukturirano JSON logiranje |
-| AI — primarni | Groq (Llama 3.3 70B) | — | Generiranje povzetkov in odgovorov (brezplačno) |
+| AI — primarni | Groq (Llama 4 Scout 17B-16E) | — | Generiranje povzetkov in odgovorov (brezplačno) |
 | AI — fallback | Gemini 2.0 Flash, OpenAI gpt-4o-mini | — | Nadomestni ponudniki ob nedostopnosti Groq |
 | RAG-lite | BM25 (rank-bm25) | — | Rangiranje segmentov dokumenta za Q&A |
 | Metrike | Prometheus (prometheus-fastapi-instrumentator) | v3.4 | /metrics endpoint za operativno opazljivost |

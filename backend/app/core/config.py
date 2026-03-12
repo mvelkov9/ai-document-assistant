@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = Field(default=None)
     gemini_model: str = Field(default="gemini-2.0-flash")
     groq_api_key: str | None = Field(default=None)
-    groq_model: str = Field(default="llama-3.3-70b-versatile")
+    groq_model: str = Field(default="meta-llama/llama-4-scout-17b-16e-instruct")
     summary_max_chars: int = Field(default=6000)
 
     @field_validator("openai_api_key", "gemini_api_key", "groq_api_key", mode="before")

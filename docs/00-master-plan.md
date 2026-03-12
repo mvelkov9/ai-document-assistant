@@ -217,7 +217,7 @@ After every completed implementation phase:
 - AuthPanel.vue: header with gradient icon wrap, SVG icons in tabs and form labels, gradient submit button with glow shadow, `<Transition>` form-switch animation, inputs with surface-alt background
 - DocumentCard.vue: gradient icon wrap, status dots, separated action group, summary section with left-border accent, chat-bubble styled Q&A answers (question in surface, answer in primary-light), circular delete-confirm icon, answer enter transition
 - UploadSection.vue: circular icon wrap, "Izberi datoteko" as gradient button, format hint text, file-icon gradient wrap, `<Transition>` upload-switch animation, inset shadow on drag-over
-- Added Groq as primary AI provider (free tier, Llama 3.3 70B) — provider chain: Groq → Gemini → OpenAI → fallback
+- Added Groq as primary AI provider (free tier, Llama 4 Scout) — provider chain: Groq → Gemini → OpenAI → fallback
 - Version bumped to v1.1.2 in footer, README, and docs
 
 **Phase E14: Version 1.2.0 — Admin, download, RAG-lite, Prometheus, expanded frontend**
@@ -338,6 +338,18 @@ Changes:
 - Production overlay updated with restart policies for monitoring services
 - Version bumped to v1.3.0 in backend (main.py), frontend (package.json, App.vue, LandingPage.vue), README
 
+**Phase E20: Version 1.3.1 — Llama 4 Scout, prod fixes, lint fixes**
+
+Changes:
+- Upgraded primary AI model from Llama 3.3 70B to Llama 4 Scout 17B-16E (MoE, 750 tok/s, multimodal)
+- Fixed Prettier lint failures in 3 Vue page components (AdminPage, DocumentsPage, LandingPage)
+- Fixed docker-compose.prod.yml: mounted ssl.conf for production nginx (was missing — port 443 had no HTTPS config)
+- Fixed docker-compose.prod.yml: removed duplicate port 80 mapping from prod overlay
+- Updated .env.production.example and .env.example with new Groq model and added missing GROQ/GEMINI env vars
+- Added .bak/.bak2 patterns to .gitignore
+- Updated all docs (master plan, report, README) to reference Llama 4 Scout instead of Llama 3.3 70B
+- Version bumped to v1.3.1 in backend (main.py), frontend (package.json, App.vue, LandingPage.vue), README
+
 ## Supporting operational documents
 
 - `docs/professor-demo-checklist.md`
@@ -374,7 +386,7 @@ Changes:
 | Kontejnerizacija (Docker) | ✅ | Multi-stage builds, non-root containers, Docker Compose dev+prod |
 | Kubernetes ali managed platforma | ❌ Ni implementirano | Ni potrebno za pozitivno oceno, dobro za bonus |
 | Avtentikacija (JWT, OAuth2, OIDC) | ✅ | JWT HS256 z bcrypt, rate limiting |
-| Integracija AI API ali LLM | ✅ | Groq (Llama 3.3 70B) → Gemini → OpenAI → fallback |
+| Integracija AI API ali LLM | ✅ | Groq (Llama 4 Scout) → Gemini → OpenAI → fallback |
 | Monitoring ali logging | ✅ | structlog JSON logging, /health, /ready, Prometheus /metrics, Grafana dashboard |
 | Infrastructure as Code | ❌ Ni implementirano | Ni Terraform/Ansible; Docker Compose je edini IaC |
 

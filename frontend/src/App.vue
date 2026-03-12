@@ -74,7 +74,7 @@
               </div>
               <div class="sb-text">
                 <span class="sb-name">DocAssist</span>
-                <span class="sb-ver">v1.3.0</span>
+                <span class="sb-ver">v1.3.1</span>
               </div>
             </div>
             <button
@@ -176,7 +176,7 @@
 
           <!-- Footer -->
           <footer class="main-footer">
-            <span>AI Document Assistant v1.3.0</span>
+            <span>AI Document Assistant v1.3.1</span>
             <span class="footer-dot">&middot;</span>
             <span>ALMA MATER EUROPAEA 2025/26</span>
             <span class="footer-dot">&middot;</span>

@@ -15,4 +15,7 @@ frontend/node_modules/
 frontend/dist/
 coverage/
 frontend/src/App.vue.bak
+frontend/src/App.vue.bak2
+*.bak
+*.bak2
 package-lock.json
