@@ -9,10 +9,11 @@
     questionBusy: { type: Boolean, default: false },
   })
 
-  const emit = defineEmits(['ask', 'delete-answer'])
+  const emit = defineEmits(['ask', 'delete-answer', 'clear-answers'])
 
   const questionDraft = ref('')
   const chatBody = ref(null)
+  const confirmClear = ref(false)
 
   /* Answers sorted chronologically (oldest first for chat flow) */
   const sortedAnswers = computed(() => {
@@ -62,6 +63,23 @@
 
 <template>
   <div class="chat-qa">
+    <!-- Chat header with clear button -->
+    <div v-if="sortedAnswers.length" class="chat-header">
+      <span class="chat-header-count">{{ sortedAnswers.length }} sporočil</span>
+      <button v-if="!confirmClear" class="chat-clear-btn" @click="confirmClear = true" title="Počisti pogovor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+        Počisti
+      </button>
+      <div v-else class="chat-clear-confirm">
+        <span class="chat-clear-q">Počistiti ves pogovor?</span>
+        <button class="chat-clear-yes" @click="emit('clear-answers'); confirmClear = false">Da</button>
+        <button class="chat-clear-no" @click="confirmClear = false">Ne</button>
+      </div>
+    </div>
+
     <!-- Chat body -->
     <div class="chat-body" ref="chatBody">
       <!-- Empty state -->
@@ -159,6 +177,66 @@
   background: var(--bg);
   max-height: 440px;
 }
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  min-height: 32px;
+}
+.chat-header-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+.chat-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+}
+.chat-clear-btn svg { width: 12px; height: 12px; }
+.chat-clear-btn:hover { background: rgba(239,68,68,0.08); color: #ef4444; }
+.chat-clear-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.chat-clear-q {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.chat-clear-yes, .chat-clear-no {
+  border: none;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chat-clear-yes {
+  background: #ef4444;
+  color: white;
+}
+.chat-clear-yes:hover { background: #dc2626; }
+.chat-clear-no {
+  background: var(--surface-alt);
+  color: var(--text);
+}
+.chat-clear-no:hover { background: var(--border); }
 
 .chat-body {
   flex: 1;

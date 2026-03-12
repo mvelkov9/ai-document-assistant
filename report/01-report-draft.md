@@ -43,9 +43,11 @@ oblak, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG
 
 This project presents the development of an integrated web service for secure multi-user document management. The solution allows users to register, log in, upload PDF documents, generate AI-based summaries, and ask questions about the content of a selected document. The system follows a modern cloud-oriented architecture where the frontend is implemented in Vue, the backend in FastAPI, metadata is stored in PostgreSQL, and uploaded files are stored in MinIO, an S3-compatible object storage service. The AI layer supports multiple external providers (Groq with Llama 4 Scout, Google Gemini, or OpenAI) with automatic fallback, which reduces mandatory costs and allows demonstration in constrained environments. A RAG-lite approach using BM25 ranking of document chunks is implemented for contextual Q&A.
 
-The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX33 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 39 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
+The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX33 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 107 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
 
 The project demonstrates that an architecturally relevant and secure cloud-style service can be implemented using open technologies and a limited budget. In addition to implementation details, the report includes a security review, cost analysis, and a critical comparison with a managed-platform alternative.
+
+The system includes 107 automated tests in 9 test files with approximately 90% code coverage.
 
 ### Keywords
 
@@ -195,13 +197,13 @@ Shema je upravljana z Alembic migracijami. Zacetna migracija (`001_initial.py`) 
 
 ### 7.5 API zasnova
 
-Backend izpostavlja 22 REST endpointov, razdeljenih v šest logičnih skupin:
+Backend izpostavlja 23 REST endpointov, razdeljenih v šest logičnih skupin:
 
 | Skupina | Endpointi | Opis |
 | --- | --- | --- |
 | Zdravje | `GET /health`, `GET /ready`, `GET /metrics` | Health check, preverjanje odvisnosti, Prometheus metrike |
 | Avtentikacija | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | Registracija, prijava, profil trenutnega uporabnika |
-| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs`, `GET /documents/{id}/answers` | CRUD, prenos PDF, povzemanje, Q&A (sinhrono in asinhrono), zgodovina odgovorov |
+| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs`, `GET /documents/{id}/answers`, `DELETE /documents/{id}/answers/{answerId}`, `DELETE /documents/{id}/answers` | CRUD, prenos PDF, povzemanje, Q&A (sinhrono in asinhrono), zgodovina odgovorov, brisanje posameznega ali vseh odgovorov |
 | Jobe | `GET /jobs/{id}` | Preverjanje statusa asinhrone obdelave |
 | Admin | `GET /admin/users`, `GET /admin/stats`, `PATCH /admin/users/{id}/role` | Seznam uporabnikov, statistike, upravljanje vlog |
 | Status | `GET /api/v1/status` | Pregled konfiguracije in zmožnosti API |
@@ -329,7 +331,7 @@ Backend uporablja knjiznico structlog za strukturirano JSON logiranje. Vsak HTTP
 
 ### 9.8 CORS in OWASP Top 10
 
-CORS politika je omejene: dovoljene so le metode GET, POST in OPTIONS, le glave Authorization in Content-Type. V kontekstu OWASP Top 10 (2021) sistem naslavlja:
+CORS politika je omejene: dovoljene so le metode GET, POST, PATCH, DELETE in OPTIONS, le glave Authorization in Content-Type. V kontekstu OWASP Top 10 (2021) sistem naslavlja:
 
 - **A01 Broken Access Control** — lastnistveno preverjanje za dokumente
 - **A02 Cryptographic Failures** — bcrypt hash za gesla, HS256 za JWT
@@ -439,6 +441,23 @@ V različici v1.4.1 je dodana podpora za skenirane in slikovne PDF dokumente:
 - **OCR za skenirane dokumente (Tesseract)**: vsaka stran PDF-ja se renderira v sliko pri 300 DPI z uporabo PyMuPDF-ja, nato pa Tesseract opravi optično prepoznavanje znakov. Podprta sta slovenščina (`slv`) in angleščina (`eng`),
 - **Robustna obravnava napak**: vsaka stopnja ekstrakcije samostojno obravnava napake (poškodovani PDF, prazen tok bajtov), kar zagotavlja, da sistem nikoli ne preneha delovati — najslabši rezultat je prazen niz, ne pa sesutje aplikacije.
 
+V različici v1.5.0 je bila izvedena obsežna nadgradnja uporabniškega vmesnika in funkcionalnosti:
+
+- **Vgrajeni PDF pregledovalnik**: uporabnik lahko odpre PDF dokument neposredno v aplikaciji brez prenosa datoteke. Pregledovalnik temelji na knjižnici pdfjs-dist (v5.5) in ponuja navigacijo po straneh, približevanje/oddaljevanje in tipkovnične bližnjice (puščice za strani, Escape za zapiranje). Renderiranje poteka v Canvas elementu znotraj modalnega okna,
+- **Pogovorno okno za dokumentni Q&A (ChatQA)**: namesto preprostega obrazca za vprašanja je zdaj implementiran pogovorni vmesnik v slogu sodobnih klepetov — uporabnikova vprašanja se prikazujejo na desni strani, AI odgovori z avatarjem na levi. Podprti so Markdown odgovori (parsiranje z knjižnico `marked`), izpis vira odgovora (source_mode), časovni žigi ter tipkalni indikator med obdelavo,
+- **Interaktivni grafični prikazi (chart.js)**: na strani Dokumenti sta dodana dva grafikona — krožni diagram za prikaz statusov dokumentov (pripravljeni, v obdelavi, čakajoči, neuspešni) in stolpični diagram s časovnico nalaganja dokumentov po mesecih. Za izris se uporabljata knjižnici chart.js in vue-chartjs,
+- **Odzivna zasnova za mobilne naprave**: celoten GUI je prilagojen za manjše zaslone. Hamburger gumb odpre stransko navigacijo kot overlay, statistične kartice se prerazporedijo v dve ali eno kolono, stolpci dokumentnih kartic pa se zmanjšajo. CSS media queries pokrivajo tri prelomne točke (860px, 640px, 540px),
+- **Statistične kartice na pregledu dokumentov**: nad seznamom dokumentov se prikazujejo 4 kartice z ključnimi metrikami: število dokumentov, generiranih povzetkov, zastavljenih vprašanj in odstotek obdelanih dokumentov.
+
+V različici v1.5.1 so implementirane naslednje izboljšave in popravki:
+
+- **Popravek PDF pregledovalnika**: spremenjena nastavitev delavca (worker) za pdfjs-dist v5 na Vite-kompatibilen `?url` import vzorec, kar odpravlja prazno modalno okno v produkciji,
+- **Točen čas prijave in registracije**: profilna stran in administracijska tabela zdaj prikazujeta popoln datum in uro v obliki »d. mmm yyyy ob HH:MM« namesto zgolj datuma,
+- **Čiščenje celotnega pogovora (clear chat)**: nov API endpoint `DELETE /documents/{id}/answers` omogoča brisanje vseh vprašanj in odgovorov za posamezen dokument naenkrat. V ChatQA komponenti je dodan gumb »Počisti« s potrditvenim dialogom,
+- **Posodobljena OpenAPI dokumentacija**: opis aplikacije v Swagger UI in ReDoc zdaj odraža polno funkcionalnost sistema (23 endpointov). Dodan je manjkajoči PATCH v CORS dovoljenih metodah,
+- **Obogatena administracijska plošča**: statistika sistema zdaj vključuje 7 kazalnikov (uporabniki, admini, dokumenti, povzetki, vprašanja, opravila, poraba prostora) ter tri grafikone — krožni diagram statusov dokumentov, stolpični diagram odgovorov po AI viru in krožni diagram opravil po statusu,
+- **Razširjen uporabniški profil**: profilna stran prikazuje 9 informacij vključno s skupno velikostjo naloženih datotek in odstotkom obdelanih dokumentov.
+
 ### 11.3 Razlikovanje od enostavne uporabe AI orodij
 
 Pomembno je poudariti, v čem se ta rešitev razlikuje od neposredne uporabe ChatGPT ali drugega AI orodja. Neposredna uporaba AI orodja omogoča posamezne poizvedbe brez konteksta, brez sledljivosti in brez integracije z obstoječo infrastrukturo. Implementirana rešitev pa ponuja:
@@ -483,6 +502,9 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | Frontend routing | Vue Router | 4 | Lazy-loaded strani, navigacijska zaščita |
 | Frontend teme | CSS Custom Properties | — | Svetli in temni način z localStorage persistenco |
 | Frontend build | Vite | 5.4 | Razvojni strežnik in produkcijska gradnja |
+| PDF pregledovalnik | pdfjs-dist | 5.5 | Vgrajeno branje PDF dokumentov v brskalniku |
+| Grafikoni | chart.js + vue-chartjs | 4.x / 5.x | Interaktivni krožni in stolpični diagrami |
+| Parsiranje Markdown | marked | 15.x | Izris AI odgovorov v Markdown obliki |
 | Backend | FastAPI | 0.116 | REST API, OpenAPI, asinhrona podpora |
 | ORM | SQLAlchemy | 2.0 | Objektno-relacijsko mapiranje |
 | Migracije | Alembic | 1.16 | Nadzorovana evolucija sheme |
@@ -607,7 +629,7 @@ Naloga je pokazala, da je mogoče razviti integrirano spletno storitev, ki prese
 
 Sistem je v celoti nameščen in dostopen na **https://doc-ai-assist.com** (Hetzner CX33, Ubuntu 24.04, Let's Encrypt TLS).
 
-Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI dokumentacijo (21 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in CI/CD mehanizem prek GitHub Actions (6 jobov: backend-lint, backend-test, frontend-lint, frontend-build, Docker build, deploy). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Docker (vključno z multi-stage buildom), JWT avtentikacija z admin vlogami, integracija AI API s prioritetno verigo ponudnikov, RAG-lite BM25 pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus metrike z Grafana dashboardom za operativno opazljivost, Vue Router 4 z lazy-loading stranmi, šifrirane varnostne kopije (GPG AES-256) z avtomatsko rotacijo, administracijska plošča s statistiko in upravljanjem vlog, ter health in readiness endpointi. Skupaj 107 avtomatiziranih testov v 9 datotekah pokriva ~90 % kode.
+Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI dokumentacijo (23 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in CI/CD mehanizem prek GitHub Actions (6 jobov: backend-lint, backend-test, frontend-lint, frontend-build, Docker build, deploy). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Docker (vključno z multi-stage buildom), JWT avtentikacija z admin vlogami, integracija AI API s prioritetno verigo ponudnikov, RAG-lite BM25 pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus metrike z Grafana dashboardom za operativno opazljivost, Vue Router 4 z lazy-loading stranmi, šifrirane varnostne kopije (GPG AES-256) z avtomatsko rotacijo, administracijska plošča s statistiko in upravljanjem vlog, ter health in readiness endpointi. Skupaj 107 avtomatiziranih testov v 9 datotekah pokriva ~90 % kode.
 
 Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastnistvenostnim omejevanjem dostopa, bcrypt zaščito gesel, rate limitingom, Pydantic validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €7/mesec na lastnem VPS z brezplačnim Groq AI API, kar je bistveno ceneje od primerljivih upravljanih platform.
 
@@ -642,4 +664,9 @@ Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, ker jasno demonstri
 23. passlib — Password Hashing Library for Python. Dostopno na: https://passlib.readthedocs.io/
 24. Vue Router Documentation. Dostopno na: https://router.vuejs.org/
 25. Grafana Documentation. Dostopno na: https://grafana.com/docs/
-24. Vite — Next Generation Frontend Tooling. Dostopno na: https://vitejs.dev/
+26. Vite — Next Generation Frontend Tooling. Dostopno na: https://vitejs.dev/
+27. pdfjs-dist — PDF rendering library for JavaScript. Dostopno na: https://github.com/nicolo-ribaudo/pdfjs-dist
+28. Chart.js — Simple yet flexible JavaScript charting. Dostopno na: https://www.chartjs.org/
+29. marked — A markdown parser and compiler. Dostopno na: https://marked.js.org/
+30. PyMuPDF Documentation. Dostopno na: https://pymupdf.readthedocs.io/
+31. Tesseract OCR Documentation. Dostopno na: https://github.com/tesseract-ocr/tesseract

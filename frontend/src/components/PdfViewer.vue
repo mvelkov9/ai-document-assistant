@@ -1,11 +1,9 @@
 <script setup>
   import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
   import * as pdfjsLib from 'pdfjs-dist'
+  import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.mjs',
-    import.meta.url,
-  ).toString()
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
 
   const props = defineProps({
     documentId: { type: String, required: true },
@@ -33,10 +31,12 @@
       })
       if (!response.ok) throw new Error('Failed to download PDF')
       const arrayBuffer = await response.arrayBuffer()
-      const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+      const data = new Uint8Array(arrayBuffer)
+      const doc = await pdfjsLib.getDocument({ data }).promise
       pdfDoc.value = doc
       totalPages.value = doc.numPages
       currentPage.value = 1
+      await nextTick()
       await renderPage(1)
     } catch (e) {
       error.value = e.message || 'Could not load PDF'

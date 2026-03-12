@@ -11,7 +11,7 @@
 
 | Requirement | Status | Notes |
 | --- | --- | --- |
-| REST API | Completed | FastAPI with 18+ endpoints, OpenAPI documentation |
+| REST API | Completed | FastAPI with 23 endpoints, OpenAPI documentation |
 | Cloud integration | Completed | MinIO object storage, Groq / Gemini / OpenAI API, PostgreSQL |
 | Cloud hosting | Completed | Docker Compose with production overlay for VPS |
 | Basic CI/CD | Completed | GitHub Actions: lint + format (ruff), test (pytest-cov), prettier, build, Docker |
@@ -69,6 +69,7 @@
 | 43 | Document Tags v1.5.0 | Proposed | Tag-based organization and filtering |
 | 44 | Markdown Summaries v1.5.0 | Proposed | Rendered markdown for AI summaries |
 | 45 | Onboarding Wizard v1.5.0 | Proposed | First-time user guide and enhanced empty states |
+| 46 | v1.5.1 Fixes & Enhancements | Completed | PDF viewer fix, timestamps, clear chat, enriched admin stats, OpenAPI update |
 
 ## Current implementation state
 
@@ -125,6 +126,19 @@
   - Responsive breakpoints added to all pages (860px, 640px, 540px)
   - New npm packages: pdfjs-dist, chart.js, vue-chartjs, marked
   - Version bumped to v1.5.0 everywhere (backend, frontend, README)
+- **v1.5.1 Fixes & Enhancements:**
+  - PdfViewer.vue: fixed pdfjs-dist v5 worker URL with Vite `?url` import pattern
+  - ProfilePage.vue: `formatDateTime` shows "d. mmm yyyy ob HH:MM" for registration and last login
+  - AdminPage.vue: dates updated to formatDateTime, enriched stats with 7 tiles + 3 charts (status doughnut, source bar, job doughnut)
+  - ChatQA.vue: "Počisti" (clear chat) button with confirmation dialog, removes all Q&A for document
+  - Backend: `DELETE /documents/{id}/answers` endpoint for bulk clearing Q&A history
+  - Backend: `DELETE /documents/{id}/answers/{answerId}` endpoint for single answer deletion
+  - Backend: admin/stats now returns storage_bytes, status_breakdown, source_breakdown, job_breakdown
+  - Backend: CORS updated to include PATCH method (was missing, needed for admin role endpoint)
+  - Backend: OpenAPI description updated to reflect full feature set (23 endpoints)
+  - Backend: version bumped to v1.5.1
+  - README updated to v1.5.1 with new endpoint table
+  - Report updated with v1.5.0 + v1.5.1 feature descriptions, corrected endpoint count, technology table expanded
 
 ### Immediate next steps
 

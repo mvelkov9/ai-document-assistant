@@ -1,7 +1,20 @@
 <script setup>
+  import { computed } from 'vue'
   import { useStore } from '../composables/useStore'
 
-  const { currentUser, documents, summaryCount, formatDate } = useStore()
+  const { currentUser, documents, summaryCount, questionsCount, formatDate, formatDateTime } = useStore()
+
+  const totalSize = computed(() => {
+    const bytes = documents.value.reduce((sum, d) => sum + (d.size_bytes || 0), 0)
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  })
+
+  const processedPercent = computed(() => {
+    if (!documents.value.length) return 0
+    return Math.round((summaryCount.value / documents.value.length) * 100)
+  })
 </script>
 
 <template>
@@ -33,12 +46,24 @@
         <span class="info-value">{{ summaryCount }}</span>
       </div>
       <div class="info-item">
+        <span class="info-label">Vprašanja</span>
+        <span class="info-value">{{ questionsCount }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Skupna velikost</span>
+        <span class="info-value">{{ totalSize }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Obdelanih</span>
+        <span class="info-value">{{ processedPercent }}%</span>
+      </div>
+      <div class="info-item">
         <span class="info-label">Registriran</span>
-        <span class="info-value">{{ formatDate(currentUser.created_at) || '—' }}</span>
+        <span class="info-value">{{ formatDateTime(currentUser.created_at) || '—' }}</span>
       </div>
       <div class="info-item">
         <span class="info-label">Zadnja prijava</span>
-        <span class="info-value">{{ formatDate(currentUser.last_login_at) || '—' }}</span>
+        <span class="info-value">{{ formatDateTime(currentUser.last_login_at) || '—' }}</span>
       </div>
     </div>
   </section>

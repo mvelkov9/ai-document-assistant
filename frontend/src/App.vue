@@ -85,7 +85,7 @@
               </div>
               <div class="sb-text">
                 <span class="sb-name">DocAssist</span>
-                <span class="sb-ver">v1.5.0</span>
+                <span class="sb-ver">v1.5.1</span>
               </div>
             </div>
             <button

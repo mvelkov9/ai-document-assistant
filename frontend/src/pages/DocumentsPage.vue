@@ -34,6 +34,7 @@
     handleAsk,
     handleDelete,
     handleDeleteAnswer,
+    handleClearAnswers,
     handleDownload,
   } = useStore()
 
@@ -256,6 +257,7 @@
           @ask="handleAsk"
           @delete="handleDelete"
           @delete-answer="handleDeleteAnswer"
+          @clear-answers="handleClearAnswers"
           @download="handleDownload"
         />
       </TransitionGroup>

@@ -1,7 +1,87 @@
 <script setup>
+  import { computed } from 'vue'
   import { useStore } from '../composables/useStore'
+  import { Doughnut, Bar } from 'vue-chartjs'
+  import {
+    Chart as ChartJS,
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend,
+  } from 'chart.js'
 
-  const { adminStats, adminUsers, currentUser, handleSetRole, formatDate } = useStore()
+  ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
+
+  const { adminStats, adminUsers, currentUser, handleSetRole, formatDate, formatDateTime } = useStore()
+
+  function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return '0 B'
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  }
+
+  const statusChartData = computed(() => {
+    if (!adminStats.value?.status_breakdown) return null
+    const b = adminStats.value.status_breakdown
+    const labels = Object.keys(b)
+    const data = Object.values(b)
+    const colors = {
+      ready: '#10b981', uploaded: '#6366f1', processing: '#f59e0b',
+      'summary-processing': '#f59e0b', 'question-processing': '#f59e0b',
+      'summary-failed': '#ef4444', failed: '#ef4444',
+    }
+    return {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: labels.map(l => colors[l] || '#94a3b8'),
+        borderWidth: 0,
+        hoverOffset: 6,
+      }],
+    }
+  })
+
+  const sourceChartData = computed(() => {
+    if (!adminStats.value?.source_breakdown) return null
+    const b = adminStats.value.source_breakdown
+    const labels = Object.keys(b)
+    const data = Object.values(b)
+    return {
+      labels,
+      datasets: [{
+        label: 'Odgovori po viru',
+        data,
+        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+        borderRadius: 6,
+        borderSkipped: false,
+      }],
+    }
+  })
+
+  const jobChartData = computed(() => {
+    if (!adminStats.value?.job_breakdown) return null
+    const b = adminStats.value.job_breakdown
+    const labels = Object.keys(b)
+    const data = Object.values(b)
+    const colors = {
+      completed: '#10b981', queued: '#6366f1', running: '#f59e0b', failed: '#ef4444',
+    }
+    return {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: labels.map(l => colors[l] || '#94a3b8'),
+        borderWidth: 0,
+        hoverOffset: 6,
+      }],
+    }
+  })
+
+  const chartOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } } }
+  const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
 </script>
 
 <template>
@@ -10,6 +90,10 @@
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.users }}</span
         ><span class="stat-lbl">Uporabnikov</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-num">{{ adminStats.admins }}</span
+        ><span class="stat-lbl">Adminov</span>
       </div>
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.documents }}</span
@@ -26,6 +110,26 @@
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.jobs }}</span
         ><span class="stat-lbl">Opravil</span>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-num">{{ formatBytes(adminStats.total_storage_bytes) }}</span
+        ><span class="stat-lbl">Poraba</span>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div v-if="adminStats" class="charts-row">
+      <div v-if="statusChartData" class="chart-card">
+        <h5 class="chart-title">Status dokumentov</h5>
+        <div class="chart-wrap"><Doughnut :data="statusChartData" :options="chartOpts" /></div>
+      </div>
+      <div v-if="sourceChartData" class="chart-card chart-card-wide">
+        <h5 class="chart-title">Odgovori po AI viru</h5>
+        <div class="chart-wrap"><Bar :data="sourceChartData" :options="barOpts" /></div>
+      </div>
+      <div v-if="jobChartData" class="chart-card">
+        <h5 class="chart-title">Opravila po statusu</h5>
+        <div class="chart-wrap"><Doughnut :data="jobChartData" :options="chartOpts" /></div>
       </div>
     </div>
 
@@ -67,8 +171,8 @@
               <td>
                 <span class="role-pill" :class="'rp-' + u.role">{{ u.role }}</span>
               </td>
-              <td class="td-date">{{ formatDate(u.created_at) }}</td>
-              <td class="td-date">{{ formatDate(u.last_login_at) || '—' }}</td>
+              <td class="td-date">{{ formatDateTime(u.created_at) }}</td>
+              <td class="td-date">{{ formatDateTime(u.last_login_at) || '—' }}</td>
               <td class="td-actions">
                 <template v-if="u.id !== currentUser.id">
                   <button
@@ -113,7 +217,7 @@
 
   .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 0.75rem;
     margin-bottom: 1.5rem;
   }
@@ -142,6 +246,30 @@
     letter-spacing: 0.04em;
     color: var(--text-light);
     margin-top: 0.2rem;
+  }
+
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+  .chart-card-wide { }
+  .chart-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .chart-wrap {
+    position: relative;
+    height: 160px;
   }
 
   .table-card {
@@ -299,6 +427,9 @@
     }
     .stats-row {
       grid-template-columns: repeat(2, 1fr);
+    }
+    .charts-row {
+      grid-template-columns: 1fr;
     }
   }
 

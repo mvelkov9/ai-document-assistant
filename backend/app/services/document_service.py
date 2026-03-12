@@ -153,6 +153,9 @@ class DocumentService:
             return False
         return self.qa_repository.delete_by_id(answer_id)
 
+    def clear_answers(self, document_id: str) -> None:
+        self.qa_repository.delete_for_document(document_id)
+
     async def ask_document_question_for_owner(
         self,
         owner_id: str,

@@ -12,7 +12,7 @@
     token: { type: String, default: '' },
   })
 
-  const emit = defineEmits(['summarize', 'ask', 'delete', 'delete-answer', 'download'])
+  const emit = defineEmits(['summarize', 'ask', 'delete', 'delete-answer', 'clear-answers', 'download'])
   const confirmingDelete = ref(false)
   const isCollapsed = ref(props.collapsed)
   const copied = ref(false)
@@ -307,6 +307,7 @@
             :question-busy="questionBusy"
             @ask="(q) => emit('ask', document.id, q)"
             @delete-answer="(answerId) => emit('delete-answer', document.id, answerId)"
+            @clear-answers="emit('clear-answers', document.id)"
           />
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { computed, reactive, ref } from 'vue'
 
 import {
+  clearDocumentAnswers,
   createQuestionJob,
   createSummaryJob,
   deleteDocument,
@@ -280,6 +281,16 @@ async function handleDeleteAnswer(documentId, answerId) {
   }
 }
 
+async function handleClearAnswers(documentId) {
+  try {
+    await clearDocumentAnswers(sessionToken.value, documentId)
+    documentAnswers[documentId] = []
+    setMessage('Pogovor je bil počiščen.')
+  } catch (e) {
+    setError(e.message)
+  }
+}
+
 async function handleDownload(documentId, filename) {
   try {
     await downloadDocument(sessionToken.value, documentId, filename)
@@ -305,6 +316,18 @@ function formatDate(iso) {
     month: 'short',
     year: 'numeric',
   })
+}
+
+function formatDateTime(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const date = d.toLocaleDateString('sl-SI', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  const time = d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })
+  return `${date} ob ${time}`
 }
 
 export function useStore() {
@@ -350,10 +373,12 @@ export function useStore() {
     logout,
     handleDelete,
     handleDeleteAnswer,
+    handleClearAnswers,
     handleDownload,
     handleSetRole,
     toggleDarkMode,
     formatDate,
+    formatDateTime,
     sessionReady,
   }
 }

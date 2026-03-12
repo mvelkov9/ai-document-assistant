@@ -37,11 +37,20 @@ limiter = Limiter(
 
 app = FastAPI(
     title=settings.project_name,
-    version="1.5.0",
+    version="1.5.1",
     description=(
-        "REST API for the AI Document Assistant semester project. "
-        "This initial iteration provides health and status endpoints, "
-        "with document and authentication flows planned next."
+        "REST API for the AI Document Assistant — a semester project at ALMA MATER EUROPAEA.\n\n"
+        "**Core features:**\n"
+        "- JWT authentication with role-based access control (user / admin)\n"
+        "- PDF document upload, storage (MinIO), download and in-app viewing\n"
+        "- AI-powered document summarization (Groq → Gemini → OpenAI → heuristic fallback)\n"
+        "- RAG-lite document Q&A with BM25 segment ranking\n"
+        "- Async background job processing with polling\n"
+        "- Tristage PDF text extraction: PyMuPDF → pypdf → Tesseract OCR\n"
+        "- Admin dashboard with system statistics and user management\n"
+        "- Prometheus metrics, structured logging, health & readiness checks\n"
+        "- Rate limiting on auth and AI endpoints\n\n"
+        "**Endpoints:** 23 REST endpoints organized in auth, documents, jobs, admin, health and monitoring groups."
     ),
 )
 
@@ -49,7 +58,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
