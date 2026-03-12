@@ -143,6 +143,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/doc-ai-assist
+            cd ~/ai-document-assistant
             git pull origin main
             bash infrastructure/scripts/deploy.sh
