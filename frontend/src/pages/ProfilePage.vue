@@ -2,7 +2,8 @@
   import { computed } from 'vue'
   import { useStore } from '../composables/useStore'
 
-  const { currentUser, documents, summaryCount, questionsCount, formatDate, formatDateTime } = useStore()
+  const { currentUser, documents, summaryCount, questionsCount, formatDate, formatDateTime } =
+    useStore()
 
   const totalSize = computed(() => {
     const bytes = documents.value.reduce((sum, d) => sum + (d.size_bytes || 0), 0)

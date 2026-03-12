@@ -16,6 +16,7 @@ import {
   loginUser,
   registerUser,
   setUserRole,
+  updateDocumentTags,
   uploadDocument,
 } from '../lib/api'
 
@@ -35,6 +36,7 @@ const activeQuestionId = ref('')
 const documentAnswers = reactive({})
 const searchQuery = ref('')
 const sortField = ref('date')
+const selectedTag = ref('')
 const adminStats = ref(null)
 const adminUsers = ref([])
 const sidebarCollapsed = ref(false)
@@ -66,6 +68,7 @@ const filteredDocuments = computed(() => {
   let docs = [...documents.value]
   const q = searchQuery.value.trim().toLowerCase()
   if (q) docs = docs.filter((d) => d.original_filename.toLowerCase().includes(q))
+  if (selectedTag.value) docs = docs.filter((d) => (d.tags || []).includes(selectedTag.value))
   if (sortField.value === 'name')
     docs.sort((a, b) => a.original_filename.localeCompare(b.original_filename))
   else if (sortField.value === 'size') docs.sort((a, b) => b.size_bytes - a.size_bytes)
@@ -73,6 +76,12 @@ const filteredDocuments = computed(() => {
     docs.sort((a, b) => a.processing_status.localeCompare(b.processing_status))
   else docs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   return docs
+})
+
+const allTags = computed(() => {
+  const tagSet = new Set()
+  documents.value.forEach((d) => (d.tags || []).forEach((t) => tagSet.add(t)))
+  return [...tagSet].sort()
 })
 
 const summaryCount = computed(() => documents.value.filter((d) => d.summary_text).length)
@@ -291,6 +300,16 @@ async function handleClearAnswers(documentId) {
   }
 }
 
+async function handleUpdateTags(documentId, tags) {
+  try {
+    const updated = await updateDocumentTags(sessionToken.value, documentId, tags)
+    const idx = documents.value.findIndex((d) => d.id === documentId)
+    if (idx !== -1) documents.value[idx] = updated
+  } catch (e) {
+    setError(e.message)
+  }
+}
+
 async function handleDownload(documentId, filename) {
   try {
     await downloadDocument(sessionToken.value, documentId, filename)
@@ -346,6 +365,7 @@ export function useStore() {
     documentAnswers,
     searchQuery,
     sortField,
+    selectedTag,
     adminStats,
     adminUsers,
     sidebarCollapsed,
@@ -357,6 +377,7 @@ export function useStore() {
     filteredDocuments,
     summaryCount,
     questionsCount,
+    allTags,
 
     /* actions */
     setMessage,
@@ -374,6 +395,7 @@ export function useStore() {
     handleDelete,
     handleDeleteAnswer,
     handleClearAnswers,
+    handleUpdateTags,
     handleDownload,
     handleSetRole,
     toggleDarkMode,

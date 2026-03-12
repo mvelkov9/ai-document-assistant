@@ -4,11 +4,16 @@
   import UploadSection from '../components/UploadSection.vue'
 
   const router = useRouter()
-  const { uploadBusy, handleUpload: storeUpload } = useStore()
+  const { uploadBusy, handleUpload: storeUpload, refreshDocuments, setMessage } = useStore()
 
-  async function onUpload(file) {
-    const ok = await storeUpload(file)
-    if (ok) router.push('/documents')
+  async function onUpload(file, done) {
+    try {
+      const ok = await storeUpload(file)
+      if (done) done(ok)
+      if (ok) await refreshDocuments()
+    } catch {
+      if (done) done(false)
+    }
   }
 </script>
 

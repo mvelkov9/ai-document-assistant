@@ -14,9 +14,14 @@ class DocumentPublic(BaseModel):
         default=None,
         examples=["This document defines the internal policy for secure document handling."],
     )
+    tags: list[str] = Field(default_factory=list, examples=[["fakulteta", "poročilo"]])
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class DocumentTagsRequest(BaseModel):
+    tags: list[str] = Field(max_length=20, examples=[["fakulteta", "poročilo"]])
 
 
 class DocumentListResponse(BaseModel):

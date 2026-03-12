@@ -1,4 +1,4 @@
-# AI Document Assistant — v1.5.1
+# AI Document Assistant — v1.5.2
 
 AI Document Assistant is a semester project for the course *Integracija spletnih strani in servisi* (2025/26, ALMA MATER EUROPAEA). The solution targets **MOŽNOST 3 — Razvoj integrirane spletne storitve** and implements a multi-user web service for secure PDF upload, AI summarization, and document question-answering.
 
@@ -20,7 +20,7 @@ AI Document Assistant is a semester project for the course *Integracija spletnih
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Vue 3.5 + Vite 5 + Vue Router 4, pdfjs-dist 5.5, chart.js, Inter font, sidebar layout with admin panel |
+| Frontend | Vue 3.5 + Vite 5 + Vue Router 4, pdfjs-dist 5.5, chart.js, marked.js, Inter font, sidebar layout with admin panel |
 | Backend | Python 3.13, FastAPI 0.116, SQLAlchemy 2.0, Alembic |
 | Database | PostgreSQL 17 |
 | Object storage | MinIO (S3-compatible) |
@@ -88,6 +88,7 @@ uvicorn app.main:app --reload
 | `DELETE` | `/api/v1/documents/{id}/answers/{aid}` | Delete single answer |
 | `DELETE` | `/api/v1/documents/{id}/answers` | Clear all answers |
 | `DELETE` | `/api/v1/documents/{id}` | Delete document |
+| `PATCH` | `/api/v1/documents/{id}/tags` | Update document tags |
 | `GET` | `/api/v1/jobs/{id}` | Job status |
 | `GET` | `/api/v1/admin/users` | List all users (admin) |
 | `GET` | `/api/v1/admin/stats` | System statistics (admin) |

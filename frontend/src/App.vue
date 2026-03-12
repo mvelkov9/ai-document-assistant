@@ -73,7 +73,10 @@
         </Transition>
 
         <!-- ── Sidebar ── -->
-        <aside class="sidebar" :class="{ collapsed: sidebarCollapsed, 'mobile-open': mobileMenuOpen }">
+        <aside
+          class="sidebar"
+          :class="{ collapsed: sidebarCollapsed, 'mobile-open': mobileMenuOpen }"
+        >
           <div class="sidebar-header">
             <div class="sidebar-brand" v-if="!sidebarCollapsed">
               <div class="sb-icon">
@@ -85,7 +88,7 @@
               </div>
               <div class="sb-text">
                 <span class="sb-name">DocAssist</span>
-                <span class="sb-ver">v1.5.1</span>
+                <span class="sb-ver">v1.5.2</span>
               </div>
             </div>
             <button
@@ -268,7 +271,7 @@
 
           <!-- Footer -->
           <footer class="main-footer">
-            <span>AI Document Assistant v1.5.0</span>
+            <span>AI Document Assistant v1.5.2</span>
             <span class="footer-dot">&middot;</span>
             <span>ALMA MATER EUROPAEA 2025/26</span>
             <span class="footer-dot">&middot;</span>
@@ -765,7 +768,10 @@
     cursor: pointer;
     flex-shrink: 0;
   }
-  .mobile-hamburger svg { width: 18px; height: 18px; }
+  .mobile-hamburger svg {
+    width: 18px;
+    height: 18px;
+  }
 
   .mobile-backdrop {
     display: none;
@@ -782,7 +788,7 @@
       position: fixed;
       inset: 0;
       z-index: 29;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(2px);
     }
 
@@ -832,6 +838,12 @@
     }
   }
 
-  .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-  .fade-enter-from, .fade-leave-to { opacity: 0; }
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
 </style>

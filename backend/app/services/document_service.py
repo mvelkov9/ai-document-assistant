@@ -156,6 +156,14 @@ class DocumentService:
     def clear_answers(self, document_id: str) -> None:
         self.qa_repository.delete_for_document(document_id)
 
+    def update_tags(self, current_user: UserPublic, document_id: str, tags: list[str]) -> DocumentPublic:
+        document = self.repository.get_for_owner(document_id, current_user.id)
+        if not document:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        cleaned = list(dict.fromkeys(t.strip() for t in tags if t.strip()))[:20]
+        updated = self.repository.update_tags(document, cleaned)
+        return DocumentPublic.model_validate(updated)
+
     async def ask_document_question_for_owner(
         self,
         owner_id: str,

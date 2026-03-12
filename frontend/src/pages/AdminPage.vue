@@ -14,7 +14,8 @@
 
   ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
-  const { adminStats, adminUsers, currentUser, handleSetRole, formatDate, formatDateTime } = useStore()
+  const { adminStats, adminUsers, currentUser, handleSetRole, formatDate, formatDateTime } =
+    useStore()
 
   function formatBytes(bytes) {
     if (!bytes || bytes === 0) return '0 B'
@@ -29,18 +30,24 @@
     const labels = Object.keys(b)
     const data = Object.values(b)
     const colors = {
-      ready: '#10b981', uploaded: '#6366f1', processing: '#f59e0b',
-      'summary-processing': '#f59e0b', 'question-processing': '#f59e0b',
-      'summary-failed': '#ef4444', failed: '#ef4444',
+      ready: '#10b981',
+      uploaded: '#6366f1',
+      processing: '#f59e0b',
+      'summary-processing': '#f59e0b',
+      'question-processing': '#f59e0b',
+      'summary-failed': '#ef4444',
+      failed: '#ef4444',
     }
     return {
       labels,
-      datasets: [{
-        data,
-        backgroundColor: labels.map(l => colors[l] || '#94a3b8'),
-        borderWidth: 0,
-        hoverOffset: 6,
-      }],
+      datasets: [
+        {
+          data,
+          backgroundColor: labels.map((l) => colors[l] || '#94a3b8'),
+          borderWidth: 0,
+          hoverOffset: 6,
+        },
+      ],
     }
   })
 
@@ -51,13 +58,15 @@
     const data = Object.values(b)
     return {
       labels,
-      datasets: [{
-        label: 'Odgovori po viru',
-        data,
-        backgroundColor: 'rgba(99, 102, 241, 0.7)',
-        borderRadius: 6,
-        borderSkipped: false,
-      }],
+      datasets: [
+        {
+          label: 'Odgovori po viru',
+          data,
+          backgroundColor: 'rgba(99, 102, 241, 0.7)',
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+      ],
     }
   })
 
@@ -67,21 +76,35 @@
     const labels = Object.keys(b)
     const data = Object.values(b)
     const colors = {
-      completed: '#10b981', queued: '#6366f1', running: '#f59e0b', failed: '#ef4444',
+      completed: '#10b981',
+      queued: '#6366f1',
+      running: '#f59e0b',
+      failed: '#ef4444',
     }
     return {
       labels,
-      datasets: [{
-        data,
-        backgroundColor: labels.map(l => colors[l] || '#94a3b8'),
-        borderWidth: 0,
-        hoverOffset: 6,
-      }],
+      datasets: [
+        {
+          data,
+          backgroundColor: labels.map((l) => colors[l] || '#94a3b8'),
+          borderWidth: 0,
+          hoverOffset: 6,
+        },
+      ],
     }
   })
 
-  const chartOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } } }
-  const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  const chartOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } },
+  }
+  const barOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } },
+    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+  }
 </script>
 
 <template>
@@ -260,7 +283,8 @@
     border-radius: var(--radius);
     padding: 1rem;
   }
-  .chart-card-wide { }
+  .chart-card-wide {
+  }
   .chart-title {
     margin: 0 0 0.5rem;
     font-size: 0.78rem;

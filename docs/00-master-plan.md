@@ -65,11 +65,12 @@
 | 39 | Chat Q&A v1.5.0 | Completed | ChatQA.vue with chat bubbles, typing indicator, marked markdown |
 | 40 | Dashboard Charts v1.5.0 | Completed | vue-chartjs doughnut (status) + bar (timeline) charts |
 | 41 | Mobile Responsive v1.5.0 | Completed | Hamburger drawer menu, responsive breakpoints at 860/640/540px |
-| 42 | Multi-File Upload v1.5.0 | Proposed | Batch upload with per-file progress bars |
-| 43 | Document Tags v1.5.0 | Proposed | Tag-based organization and filtering |
-| 44 | Markdown Summaries v1.5.0 | Proposed | Rendered markdown for AI summaries |
-| 45 | Onboarding Wizard v1.5.0 | Proposed | First-time user guide and enhanced empty states |
+| 42 | Multi-File Upload v1.5.2 | Completed | Batch upload with per-file progress bars, drag-and-drop multiple PDFs |
+| 43 | Document Tags v1.5.2 | Completed | JSON tags column, PATCH /documents/{id}/tags, tag chips, tag filter |
+| 44 | Markdown Summaries v1.5.2 | Completed | AI prompts request structured markdown, rendered with marked.js |
+| 45 | Onboarding Wizard v1.5.2 | Completed | 4-step wizard overlay, localStorage dismiss, enhanced empty states |
 | 46 | v1.5.1 Fixes & Enhancements | Completed | PDF viewer fix, timestamps, clear chat, enriched admin stats, OpenAPI update |
+| 47 | v1.5.2 Feature Bundle | Completed | Phases 42-45 implemented, CI lint fixes, version bump |
 
 ## Current implementation state
 
@@ -139,6 +140,17 @@
   - Backend: version bumped to v1.5.1
   - README updated to v1.5.1 with new endpoint table
   - Report updated with v1.5.0 + v1.5.1 feature descriptions, corrected endpoint count, technology table expanded
+- **v1.5.2 Feature Bundle:**
+  - Phase 42: UploadSection.vue rewritten for multi-file upload with per-file progress bars and batch upload
+  - Phase 43: Document tags — Alembic migration 003, JSON tags column, PATCH endpoint, tag chips in DocumentCard, tag filter in DocumentsPage
+  - Phase 44: AI summary prompts updated to request structured markdown, DocumentCard renders with marked.js + v-html
+  - Phase 45: OnboardingWizard.vue component with 4-step wizard, localStorage persistence, enhanced empty state with step hints
+  - ChatQA.vue: refactored inline multi-statement handler to method (prettier compatibility)
+  - CI fixes: removed unused `case` import from admin.py, formatted all files with prettier
+  - API endpoint count: 24 (added PATCH /documents/{id}/tags)
+  - Backend: version bumped to v1.5.2
+  - Frontend: version bumped to v1.5.2
+  - README and report updated
 
 ### Immediate next steps
 

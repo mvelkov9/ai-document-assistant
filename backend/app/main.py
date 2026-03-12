@@ -37,7 +37,7 @@ limiter = Limiter(
 
 app = FastAPI(
     title=settings.project_name,
-    version="1.5.1",
+    version="1.5.2",
     description=(
         "REST API for the AI Document Assistant — a semester project at ALMA MATER EUROPAEA.\n\n"
         "**Core features:**\n"
@@ -50,7 +50,7 @@ app = FastAPI(
         "- Admin dashboard with system statistics and user management\n"
         "- Prometheus metrics, structured logging, health & readiness checks\n"
         "- Rate limiting on auth and AI endpoints\n\n"
-        "**Endpoints:** 23 REST endpoints organized in auth, documents, jobs, admin, health and monitoring groups."
+        "**Endpoints:** 24 REST endpoints organized in auth, documents, jobs, admin, health and monitoring groups."
     ),
 )
 

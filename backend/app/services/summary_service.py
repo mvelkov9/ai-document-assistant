@@ -248,8 +248,10 @@ class SummaryService:
         return await self._call_ai(
             "Summarize the provided document text into a concise academic and business-oriented summary. "
             "IMPORTANT: Respond in the SAME language as the document text. "
-            "Do NOT use markdown formatting — no bold (**), no bullet points (*), no numbered lists (1.), no headings (#). "
-            "Write the summary as clean, flowing plain-text paragraphs.",
+            "Use structured markdown formatting: "
+            "start with a bold one-line overview, then use bullet points for key findings, "
+            "and optionally a short concluding paragraph. "
+            "You may use **bold**, *italic*, bullet lists (- item), and ### subheadings where appropriate.",
             text,
         )
 
@@ -258,7 +260,7 @@ class SummaryService:
             "Answer the user's question using only the provided document context. "
             "If the answer is not supported by the context, say so explicitly. "
             "IMPORTANT: Respond in the SAME language as the question. "
-            "Do NOT use markdown formatting — write clean plain-text only.",
+            "Use structured markdown: bullet points, bold key terms, and short paragraphs for clarity.",
             f"Document context: {text}\n\nQuestion: {question}",
         )
 

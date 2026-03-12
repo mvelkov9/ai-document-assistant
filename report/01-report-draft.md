@@ -197,13 +197,13 @@ Shema je upravljana z Alembic migracijami. Zacetna migracija (`001_initial.py`) 
 
 ### 7.5 API zasnova
 
-Backend izpostavlja 23 REST endpointov, razdeljenih v šest logičnih skupin:
+Backend izpostavlja 24 REST endpointov, razdeljenih v šest logičnih skupin:
 
 | Skupina | Endpointi | Opis |
 | --- | --- | --- |
 | Zdravje | `GET /health`, `GET /ready`, `GET /metrics` | Health check, preverjanje odvisnosti, Prometheus metrike |
 | Avtentikacija | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | Registracija, prijava, profil trenutnega uporabnika |
-| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs`, `GET /documents/{id}/answers`, `DELETE /documents/{id}/answers/{answerId}`, `DELETE /documents/{id}/answers` | CRUD, prenos PDF, povzemanje, Q&A (sinhrono in asinhrono), zgodovina odgovorov, brisanje posameznega ali vseh odgovorov |
+| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `PATCH /documents/{id}/tags`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs`, `GET /documents/{id}/answers`, `DELETE /documents/{id}/answers/{answerId}`, `DELETE /documents/{id}/answers` | CRUD, prenos PDF, oznake, povzemanje, Q&A (sinhrono in asinhrono), zgodovina odgovorov, brisanje posameznega ali vseh odgovorov |
 | Jobe | `GET /jobs/{id}` | Preverjanje statusa asinhrone obdelave |
 | Admin | `GET /admin/users`, `GET /admin/stats`, `PATCH /admin/users/{id}/role` | Seznam uporabnikov, statistike, upravljanje vlog |
 | Status | `GET /api/v1/status` | Pregled konfiguracije in zmožnosti API |
@@ -454,9 +454,17 @@ V različici v1.5.1 so implementirane naslednje izboljšave in popravki:
 - **Popravek PDF pregledovalnika**: spremenjena nastavitev delavca (worker) za pdfjs-dist v5 na Vite-kompatibilen `?url` import vzorec, kar odpravlja prazno modalno okno v produkciji,
 - **Točen čas prijave in registracije**: profilna stran in administracijska tabela zdaj prikazujeta popoln datum in uro v obliki »d. mmm yyyy ob HH:MM« namesto zgolj datuma,
 - **Čiščenje celotnega pogovora (clear chat)**: nov API endpoint `DELETE /documents/{id}/answers` omogoča brisanje vseh vprašanj in odgovorov za posamezen dokument naenkrat. V ChatQA komponenti je dodan gumb »Počisti« s potrditvenim dialogom,
-- **Posodobljena OpenAPI dokumentacija**: opis aplikacije v Swagger UI in ReDoc zdaj odraža polno funkcionalnost sistema (23 endpointov). Dodan je manjkajoči PATCH v CORS dovoljenih metodah,
+- **Posodobljena OpenAPI dokumentacija**: opis aplikacije v Swagger UI in ReDoc zdaj odraža polno funkcionalnost sistema (24 endpointov). Dodan je manjkajoči PATCH v CORS dovoljenih metodah,
 - **Obogatena administracijska plošča**: statistika sistema zdaj vključuje 7 kazalnikov (uporabniki, admini, dokumenti, povzetki, vprašanja, opravila, poraba prostora) ter tri grafikone — krožni diagram statusov dokumentov, stolpični diagram odgovorov po AI viru in krožni diagram opravil po statusu,
 - **Razširjen uporabniški profil**: profilna stran prikazuje 9 informacij vključno s skupno velikostjo naloženih datotek in odstotkom obdelanih dokumentov.
+
+V različici v1.5.2 je bila dodana nova funkcionalnost:
+
+- **Nalaganje več datotek hkrati (multi-file upload)**: uporabnik lahko izbere ali povleče več PDF datotek naenkrat. UploadSection.vue prikazuje čakalno vrsto z vsako datoteko, posameznim napredkom nalaganja in statusom (čaka/nalaga/uspešno/neuspešno),
+- **Označevanje dokumentov z oznakami (tags)**: dokumenti se lahko označijo s poljubnimi oznakami (do 20). Alembic migracija 003 doda JSON stolpec za oznake. Nov endpoint `PATCH /documents/{id}/tags` omogoča posodabljanje oznak. Dokumentna kartica prikazuje oznake kot čipe z možnostjo dodajanja in odstranjevanja. Na strani Dokumenti je dodan filter po oznakah,
+- **Prikaz povzetkov v strukturiranem Markdownu**: AI povzetek ni več navadno besedilo, temveč strukturiran Markdown z naslovi, seznami in poudarki. Prompt za AI ponudnika zahteva oblikovan izhod, ki se renderira v komponenti DocumentCard z uporabo knjižnice marked.js,
+- **Čarovnik za uvajanje novih uporabnikov (onboarding wizard)**: ob prvem obisku strani s praznim seznamom dokumentov se prikaže 4-koračni čarovnik, ki uporabnika vodi skozi korake: Dobrodošli → Naloži → Povzemi → Vprašaj. Čarovnik se ohrani v localStorage in se ne prikaže več po odprtju,
+- **Izboljšana prazna stanja**: ko uporabnik nima dokumentov, se prikaže bolj informativen prikaz z vizualnimi koraki (1-2-3), ki nakazujejo potek dela.
 
 ### 11.3 Razlikovanje od enostavne uporabe AI orodij
 

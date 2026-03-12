@@ -12,6 +12,7 @@ from app.schemas.document import (
     DocumentListResponse,
     DocumentPublic,
     DocumentQuestionRequest,
+    DocumentTagsRequest,
     QuestionAnswerPublic,
 )
 from app.services.document_service import DocumentService
@@ -217,6 +218,26 @@ def clear_answers(
     if not document:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
     service.clear_answers(document_id)
+
+
+@router.patch(
+    "/{document_id}/tags",
+    response_model=DocumentPublic,
+    summary="Update document tags",
+    description="Set or replace the tags for a specific document. Tags help organize and filter documents.",
+)
+def update_document_tags(
+    document_id: str,
+    payload: DocumentTagsRequest,
+    db: Session = Depends(get_db),
+    current_user: UserPublic = Depends(get_current_user),
+) -> DocumentPublic:
+    service = DocumentService(db)
+    document = service.get_document(current_user, document_id)
+    if not document:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+    updated = service.update_tags(current_user, document_id, payload.tags)
+    return updated
 
 
 @router.get(

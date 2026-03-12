@@ -242,3 +242,16 @@ export async function clearDocumentAnswers(token, documentId) {
     throw new Error(payload?.detail || 'Clear failed.')
   }
 }
+
+export async function updateDocumentTags(token, documentId, tags) {
+  const response = await fetch(`${API_BASE_URL}/documents/${documentId}/tags`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ tags }),
+  })
+
+  return parseResponse(response)
+}

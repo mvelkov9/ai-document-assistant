@@ -1,9 +1,10 @@
 <script setup>
-  import { computed } from 'vue'
+  import { computed, ref } from 'vue'
   import { useStore } from '../composables/useStore'
   import { useRouter } from 'vue-router'
   import DocumentCard from '../components/DocumentCard.vue'
   import UploadSection from '../components/UploadSection.vue'
+  import OnboardingWizard from '../components/OnboardingWizard.vue'
   import { Doughnut, Bar } from 'vue-chartjs'
   import {
     Chart as ChartJS,
@@ -23,9 +24,11 @@
     dashboardBusy,
     searchQuery,
     sortField,
+    selectedTag,
     filteredDocuments,
     summaryCount,
     questionsCount,
+    allTags,
     activeSummaryId,
     activeQuestionId,
     documentAnswers,
@@ -35,6 +38,7 @@
     handleDelete,
     handleDeleteAnswer,
     handleClearAnswers,
+    handleUpdateTags,
     handleDownload,
   } = useStore()
 
@@ -43,7 +47,10 @@
     const ready = documents.value.filter((d) => d.processing_status === 'ready').length
     const processing = documents.value.filter((d) => d.processing_status === 'processing').length
     const pending = documents.value.filter(
-      (d) => d.processing_status !== 'ready' && d.processing_status !== 'processing' && d.processing_status !== 'failed',
+      (d) =>
+        d.processing_status !== 'ready' &&
+        d.processing_status !== 'processing' &&
+        d.processing_status !== 'failed',
     ).length
     const failed = documents.value.filter((d) => d.processing_status === 'failed').length
     return {
@@ -100,6 +107,22 @@
   }
 
   const showCharts = computed(() => documents.value.length >= 2)
+
+  /* ── Onboarding wizard ── */
+  const wizardDismissed = ref(localStorage.getItem('onboarding_done') === '1')
+  const showWizard = computed(
+    () => !dashboardBusy.value && documents.value.length === 0 && !wizardDismissed.value,
+  )
+
+  function dismissWizard() {
+    wizardDismissed.value = true
+    localStorage.setItem('onboarding_done', '1')
+  }
+
+  function goUpload() {
+    dismissWizard()
+    router.push('/upload')
+  }
 </script>
 
 <template>
@@ -167,10 +190,18 @@
             <Doughnut :data="statusChartData" :options="chartOptions" />
           </div>
           <div class="chart-legend">
-            <span class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Pripravljeni</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>V obdelavi</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>Čakajo</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Neuspešni</span>
+            <span class="legend-item"
+              ><span class="legend-dot" style="background: #10b981"></span>Pripravljeni</span
+            >
+            <span class="legend-item"
+              ><span class="legend-dot" style="background: #f59e0b"></span>V obdelavi</span
+            >
+            <span class="legend-item"
+              ><span class="legend-dot" style="background: #6366f1"></span>Čakajo</span
+            >
+            <span class="legend-item"
+              ><span class="legend-dot" style="background: #ef4444"></span>Neuspešni</span
+            >
           </div>
         </div>
         <div class="chart-card chart-card-wide">
@@ -207,6 +238,10 @@
         <option value="size">Po velikosti</option>
         <option value="status">Po statusu</option>
       </select>
+      <select v-if="allTags.length" v-model="selectedTag" class="sort-select">
+        <option value="">Vse oznake</option>
+        <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
+      </select>
       <span class="result-count">{{ filteredDocuments.length }} rezultatov</span>
     </div>
 
@@ -231,7 +266,21 @@
         </svg>
       </div>
       <p class="empty-title">Ni dokumentov</p>
-      <p class="empty-sub">Naloži prvi PDF za začetek</p>
+      <p class="empty-sub">Naloži prvi PDF dokument in pusti AI, da ga analizira namesto tebe.</p>
+      <div class="empty-hints">
+        <div class="empty-hint">
+          <span class="hint-num">1</span>
+          <span>Naloži PDF</span>
+        </div>
+        <div class="empty-hint">
+          <span class="hint-num">2</span>
+          <span>Generiraj povzetek</span>
+        </div>
+        <div class="empty-hint">
+          <span class="hint-num">3</span>
+          <span>Zastavi vprašanje</span>
+        </div>
+      </div>
       <button class="btn-primary-sm" @click="router.push('/upload')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-ico">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -258,10 +307,16 @@
           @delete="handleDelete"
           @delete-answer="handleDeleteAnswer"
           @clear-answers="handleClearAnswers"
+          @update-tags="handleUpdateTags"
           @download="handleDownload"
         />
       </TransitionGroup>
     </div>
+
+    <!-- Onboarding Wizard -->
+    <Transition name="fade">
+      <OnboardingWizard v-if="showWizard" @dismiss="dismissWizard" @go-upload="goUpload" />
+    </Transition>
   </section>
 </template>
 
@@ -470,6 +525,34 @@
     margin: 0.15rem 0 1rem;
     font-size: 0.85rem;
     color: var(--text-light);
+    max-width: 340px;
+    line-height: 1.5;
+  }
+
+  .empty-hints {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .empty-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--text-light);
+  }
+  .hint-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   .btn-primary-sm {
@@ -553,7 +636,9 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
 
   .chart-card:hover {
@@ -573,8 +658,12 @@
   .chart-wrap {
     position: relative;
   }
-  .chart-wrap-doughnut { height: 150px; }
-  .chart-wrap-bar { height: 150px; }
+  .chart-wrap-doughnut {
+    height: 150px;
+  }
+  .chart-wrap-bar {
+    height: 150px;
+  }
 
   .chart-legend {
     display: flex;
@@ -599,8 +688,14 @@
     flex-shrink: 0;
   }
 
-  .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-  .fade-enter-from, .fade-leave-to { opacity: 0; }
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.3s ease;
+  }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
 
   @media (max-width: 860px) {
     .charts-row {

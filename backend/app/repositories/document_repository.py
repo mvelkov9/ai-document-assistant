@@ -66,6 +66,13 @@ class DocumentRepository:
         self.db.refresh(document)
         return document
 
+    def update_tags(self, document: Document, tags: list[str]) -> Document:
+        document.tags = tags
+        self.db.add(document)
+        self.db.commit()
+        self.db.refresh(document)
+        return document
+
     def delete(self, document: Document, *, auto_commit: bool = True) -> None:
         self.db.delete(document)
         if auto_commit:

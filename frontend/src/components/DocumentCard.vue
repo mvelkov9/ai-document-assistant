@@ -1,7 +1,10 @@
 <script setup>
   import { ref } from 'vue'
+  import { marked } from 'marked'
   import PdfViewer from './PdfViewer.vue'
   import ChatQA from './ChatQA.vue'
+
+  marked.setOptions({ breaks: true, gfm: true })
 
   const props = defineProps({
     document: { type: Object, required: true },
@@ -12,11 +15,38 @@
     token: { type: String, default: '' },
   })
 
-  const emit = defineEmits(['summarize', 'ask', 'delete', 'delete-answer', 'clear-answers', 'download'])
+  const emit = defineEmits([
+    'summarize',
+    'ask',
+    'delete',
+    'delete-answer',
+    'clear-answers',
+    'download',
+    'update-tags',
+  ])
   const confirmingDelete = ref(false)
   const isCollapsed = ref(props.collapsed)
   const copied = ref(false)
   const showPdfViewer = ref(false)
+  const tagInput = ref('')
+
+  function addTag() {
+    const tag = tagInput.value.trim().toLowerCase()
+    if (!tag || tag.length > 30) return
+    const current = props.document.tags || []
+    if (current.includes(tag)) return
+    emit('update-tags', props.document.id, [...current, tag])
+    tagInput.value = ''
+  }
+
+  function removeTag(tag) {
+    const current = props.document.tags || []
+    emit(
+      'update-tags',
+      props.document.id,
+      current.filter((t) => t !== tag),
+    )
+  }
 
   function handleDelete() {
     emit('delete', props.document.id)
@@ -82,6 +112,9 @@
           <span v-if="answers.length" class="meta-badge meta-qa-count">
             {{ answers.length }} V&amp;O
           </span>
+          <span v-for="tag in document.tags || []" :key="tag" class="meta-badge meta-tag">
+            {{ tag }}
+          </span>
         </div>
       </div>
       <div class="doc-actions" @click.stop>
@@ -101,11 +134,7 @@
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
-        <button
-          class="btn-action btn-view"
-          @click="showPdfViewer = true"
-          title="Preberi PDF"
-        >
+        <button class="btn-action btn-view" @click="showPdfViewer = true" title="Preberi PDF">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -227,6 +256,44 @@
           </div>
         </Transition>
 
+        <!-- ── Tags Section ── -->
+        <div class="section tags-section">
+          <div class="section-label">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="label-icon"
+            >
+              <path
+                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+              />
+              <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
+            Oznake
+          </div>
+          <div class="tags-wrap">
+            <span v-for="tag in document.tags || []" :key="tag" class="tag-chip">
+              {{ tag }}
+              <button class="tag-remove" @click="removeTag(tag)" title="Odstrani oznako">
+                &times;
+              </button>
+            </span>
+            <div class="tag-add">
+              <input
+                v-model="tagInput"
+                @keydown.enter.prevent="addTag"
+                type="text"
+                placeholder="Nova oznaka..."
+                maxlength="30"
+                class="tag-input"
+              />
+              <button class="tag-add-btn" @click="addTag" :disabled="!tagInput.trim()">+</button>
+            </div>
+          </div>
+        </div>
+
         <!-- ── Summary Section ── -->
         <div class="section summary-section">
           <div class="section-label">
@@ -256,7 +323,7 @@
             <span>Klikni <strong>Povzetek</strong> za generiranje AI povzetka</span>
           </div>
           <div v-else class="summary-content">
-            <p class="summary-text">{{ document.summary_text }}</p>
+            <div class="summary-md" v-html="marked.parse(document.summary_text || '')"></div>
             <button
               class="btn-copy"
               @click="copyToClipboard(document.summary_text)"
@@ -686,6 +753,38 @@
     color: var(--text);
   }
 
+  .summary-md {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .summary-md :deep(h1),
+  .summary-md :deep(h2),
+  .summary-md :deep(h3) {
+    margin: 0.6rem 0 0.3rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .summary-md :deep(p) {
+    margin: 0.3rem 0;
+  }
+  .summary-md :deep(ul),
+  .summary-md :deep(ol) {
+    margin: 0.3rem 0;
+    padding-left: 1.4rem;
+  }
+  .summary-md :deep(li) {
+    margin: 0.15rem 0;
+  }
+  .summary-md :deep(strong) {
+    font-weight: 700;
+    color: var(--text);
+  }
+  .summary-md :deep(em) {
+    font-style: italic;
+  }
+
   .empty-summary {
     display: flex;
     align-items: center;
@@ -849,5 +948,90 @@
       font-size: 0.75rem;
       padding: 0.4rem 0.6rem;
     }
+  }
+
+  /* ── Tags ── */
+  .tags-section {
+    padding: 0.75rem 1.25rem;
+  }
+  .tags-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-top: 0.4rem;
+  }
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.2rem 0.55rem;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .tag-remove {
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0.1rem;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+  .tag-remove:hover {
+    opacity: 1;
+  }
+  .tag-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  .tag-input {
+    width: 100px;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.72rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .tag-input:focus {
+    border-color: var(--primary);
+  }
+  .tag-add-btn {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .tag-add-btn:hover:not(:disabled) {
+    background: var(--primary-light);
+    border-color: var(--primary);
+  }
+  .tag-add-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .meta-tag {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
   }
 </style>
