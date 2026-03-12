@@ -301,4 +301,17 @@
       grid-template-columns: repeat(2, 1fr);
     }
   }
+
+  @media (max-width: 540px) {
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+    .users-table {
+      font-size: 0.78rem;
+    }
+    .users-table th,
+    .users-table td {
+      padding: 0.5rem 0.4rem;
+    }
+  }
 </style>

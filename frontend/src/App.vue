@@ -1,11 +1,13 @@
 <script setup>
-  import { onMounted, provide } from 'vue'
+  import { onMounted, provide, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { useStore } from './composables/useStore'
 
   const route = useRoute()
   const router = useRouter()
   const store = useStore()
+
+  const mobileMenuOpen = ref(false)
 
   const {
     isAuthenticated,
@@ -48,6 +50,11 @@
   onMounted(async () => {
     await bootstrapSession()
   })
+
+  /* Close mobile menu on navigation */
+  router.afterEach(() => {
+    mobileMenuOpen.value = false
+  })
 </script>
 
 <template>
@@ -60,8 +67,13 @@
     <!-- ════════════ AUTHENTICATED SHELL ════════════ -->
     <template v-else>
       <div class="shell">
+        <!-- Mobile overlay backdrop -->
+        <Transition name="fade">
+          <div v-if="mobileMenuOpen" class="mobile-backdrop" @click="mobileMenuOpen = false"></div>
+        </Transition>
+
         <!-- ── Sidebar ── -->
-        <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
+        <aside class="sidebar" :class="{ collapsed: sidebarCollapsed, 'mobile-open': mobileMenuOpen }">
           <div class="sidebar-header">
             <div class="sidebar-brand" v-if="!sidebarCollapsed">
               <div class="sb-icon">
@@ -73,7 +85,7 @@
               </div>
               <div class="sb-text">
                 <span class="sb-name">DocAssist</span>
-                <span class="sb-ver">v1.4.1</span>
+                <span class="sb-ver">v1.5.0</span>
               </div>
             </div>
             <button
@@ -225,6 +237,13 @@
           <!-- Top bar -->
           <header class="topbar">
             <div class="topbar-left">
+              <button class="mobile-hamburger" @click="mobileMenuOpen = !mobileMenuOpen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+              </button>
               <h1 class="page-title">
                 {{ pageMeta[route.name]?.title || '' }}
               </h1>
@@ -249,7 +268,7 @@
 
           <!-- Footer -->
           <footer class="main-footer">
-            <span>AI Document Assistant v1.4.1</span>
+            <span>AI Document Assistant v1.5.0</span>
             <span class="footer-dot">&middot;</span>
             <span>ALMA MATER EUROPAEA 2025/26</span>
             <span class="footer-dot">&middot;</span>
@@ -732,20 +751,68 @@
     animation: spin 1s linear infinite;
   }
 
+  /* ── Mobile hamburger (hidden on desktop) ── */
+  .mobile-hamburger {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .mobile-hamburger svg { width: 18px; height: 18px; }
+
+  .mobile-backdrop {
+    display: none;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 860px) {
+    .mobile-hamburger {
+      display: inline-flex;
+    }
+
+    .mobile-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 29;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+    }
+
     .sidebar {
       position: fixed;
       left: 0;
       top: 0;
       bottom: 0;
-      width: 256px;
+      width: 256px !important;
       transform: translateX(-100%);
-      transition: transform 0.25s ease;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 30;
     }
 
-    .sidebar:not(.collapsed) {
+    .sidebar.mobile-open {
       transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+      width: 256px !important;
+    }
+
+    /* Show all labels when sidebar is forced open on mobile */
+    .sidebar.mobile-open .nav-label,
+    .sidebar.mobile-open .sidebar-brand,
+    .sidebar.mobile-open .sidebar-user,
+    .sidebar.mobile-open .nav-badge,
+    .sidebar.mobile-open .nav-divider,
+    .sidebar.mobile-open .nav-section-label {
+      display: flex !important;
     }
 
     .topbar {
@@ -757,5 +824,14 @@
     .topbar-stats {
       display: none;
     }
+    .topbar {
+      padding: 0.75rem 1rem;
+    }
+    .page-title {
+      font-size: 1.1rem;
+    }
   }
+
+  .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+  .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

@@ -1,5 +1,7 @@
 <script setup>
   import { ref } from 'vue'
+  import PdfViewer from './PdfViewer.vue'
+  import ChatQA from './ChatQA.vue'
 
   const props = defineProps({
     document: { type: Object, required: true },
@@ -7,20 +9,14 @@
     questionBusy: { type: Boolean, default: false },
     answers: { type: Array, default: () => [] },
     collapsed: { type: Boolean, default: false },
+    token: { type: String, default: '' },
   })
 
   const emit = defineEmits(['summarize', 'ask', 'delete', 'delete-answer', 'download'])
-  const questionDraft = ref('')
   const confirmingDelete = ref(false)
   const isCollapsed = ref(props.collapsed)
   const copied = ref(false)
-
-  function handleAsk() {
-    const q = questionDraft.value.trim()
-    if (q.length < 3) return
-    emit('ask', props.document.id, q)
-    questionDraft.value = ''
-  }
+  const showPdfViewer = ref(false)
 
   function handleDelete() {
     emit('delete', props.document.id)
@@ -44,18 +40,6 @@
     if (!iso) return ''
     const d = new Date(iso)
     return d.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' })
-  }
-
-  function formatDateTime(iso) {
-    if (!iso) return ''
-    const d = new Date(iso)
-    return d.toLocaleDateString('sl-SI', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
   }
 </script>
 
@@ -116,6 +100,23 @@
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
+        </button>
+        <button
+          class="btn-action btn-view"
+          @click="showPdfViewer = true"
+          title="Preberi PDF"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="btn-icon"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          Preberi
         </button>
         <button
           class="btn-action btn-download"
@@ -287,7 +288,7 @@
           </div>
         </div>
 
-        <!-- ── Q&A Section ── -->
+        <!-- ── Q&A Section (Chat) ── -->
         <div class="section qa-section">
           <div class="section-label">
             <svg
@@ -299,95 +300,27 @@
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
-            Vprašanje
+            Vprašanja &amp; Odgovori
           </div>
-          <div class="qa-input-row">
-            <textarea
-              v-model="questionDraft"
-              rows="2"
-              maxlength="500"
-              placeholder="Npr.: Kateri je glavni namen dokumenta?"
-            />
-            <button
-              class="btn-send"
-              :disabled="questionBusy || questionDraft.trim().length < 3"
-              @click="handleAsk"
-            >
-              <svg
-                v-if="questionBusy"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="btn-icon spin"
-              >
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              <svg
-                v-else
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="btn-icon"
-              >
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-              Pošlji
-            </button>
-          </div>
-
-          <!-- ── Answers History ── -->
-          <TransitionGroup name="answer" tag="div" class="answers-list">
-            <div v-for="answer in answers" :key="answer.id || answer.created_at" class="answer-box">
-              <div class="answer-header">
-                <div class="answer-label">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    class="label-icon"
-                  >
-                    <path
-                      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                    />
-                  </svg>
-                  <span>Odgovor</span>
-                </div>
-                <div class="answer-meta">
-                  <span class="source-badge">{{ answer.source_mode }}</span>
-                  <span v-if="answer.created_at" class="answer-time">{{
-                    formatDateTime(answer.created_at)
-                  }}</span>
-                  <button
-                    class="btn-delete-answer"
-                    title="Izbriši odgovor"
-                    @click="emit('delete-answer', props.document.id, answer.id)"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path
-                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div class="answer-bubble answer-q">
-                <strong>V:</strong> {{ answer.question_text }}
-              </div>
-              <div class="answer-bubble answer-a"><strong>O:</strong> {{ answer.answer_text }}</div>
-            </div>
-          </TransitionGroup>
-
-          <div v-if="!answers.length" class="empty-qa">
-            <span>Še ni zastavljenih vprašanj za ta dokument.</span>
-          </div>
+          <ChatQA
+            :answers="answers"
+            :question-busy="questionBusy"
+            @ask="(q) => emit('ask', document.id, q)"
+            @delete-answer="(answerId) => emit('delete-answer', document.id, answerId)"
+          />
         </div>
       </div>
     </Transition>
+
+    <!-- PDF Viewer (teleported to body) -->
+    <Teleport to="body">
+      <PdfViewer
+        v-if="showPdfViewer"
+        :document-id="document.id"
+        :token="token"
+        @close="showPdfViewer = false"
+      />
+    </Teleport>
   </article>
 </template>
 
@@ -782,166 +715,16 @@
   }
 
   /* ── Q&A ── */
-  .qa-input-row {
-    display: flex;
-    gap: 0.5rem;
-    align-items: flex-end;
+  .qa-section {
+    padding-top: 0.75rem;
   }
 
-  .qa-input-row textarea {
-    flex: 1;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.65rem 0.85rem;
-    background: var(--surface-alt);
-    font-size: 0.88rem;
-    resize: vertical;
-    min-height: 2.5rem;
-    transition: all 0.2s ease;
+  .btn-view:hover {
+    background: rgba(139, 92, 246, 0.08);
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
   }
-
-  .qa-input-row textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: var(--surface);
-    box-shadow: var(--shadow-glow);
-  }
-
-  .qa-input-row textarea::placeholder {
-    color: var(--text-light);
-  }
-
-  .btn-send {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.55rem 0.9rem;
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--primary), #818cf8);
-    color: white;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
-  }
-
-  .btn-send:hover:not(:disabled) {
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
-  }
-
-  .btn-send:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .btn-send .btn-icon {
-    color: white;
-  }
-
-  /* ── Answers List ── */
-  .answers-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-    margin-top: 0.85rem;
-  }
-
-  .answer-box {
-    padding: 1rem;
-    background: var(--surface-alt);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-subtle);
-  }
-
-  .answer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.65rem;
-  }
-
-  .answer-label {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-light);
-  }
-
-  .answer-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .answer-time {
-    font-size: 0.68rem;
-    color: var(--text-light);
-  }
-
-  .btn-delete-answer {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--text-light);
-    cursor: pointer;
-    transition: all 0.15s;
-    padding: 0;
-  }
-  .btn-delete-answer svg {
-    width: 13px;
-    height: 13px;
-  }
-  .btn-delete-answer:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-  }
-
-  .source-badge {
-    padding: 0.15rem 0.5rem;
-    background: var(--primary-light);
-    color: var(--primary);
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 600;
-  }
-
-  .answer-bubble {
-    padding: 0.65rem 0.85rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.86rem;
-    line-height: 1.65;
-    margin-bottom: 0.5rem;
-  }
-
-  .answer-bubble:last-child {
-    margin-bottom: 0;
-  }
-
-  .answer-q {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-  }
-
-  .answer-a {
-    background: var(--primary-light);
-    border: 1px solid rgba(99, 102, 241, 0.12);
-    color: var(--text);
-  }
-
   .empty-qa {
     margin-top: 0.65rem;
     padding: 0.75rem 1rem;
@@ -1046,5 +829,24 @@
   .fade-enter-from,
   .fade-leave-to {
     opacity: 0;
+  }
+
+  @media (max-width: 640px) {
+    .doc-header {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .doc-actions {
+      width: 100%;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .doc-name {
+      font-size: 0.85rem;
+    }
+    .btn-action {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.6rem;
+    }
   }
 </style>

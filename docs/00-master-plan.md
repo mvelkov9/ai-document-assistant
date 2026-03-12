@@ -61,6 +61,14 @@
 | 35 | UX & persistence v1.3.2 | Completed | Favicon, last-login tracking, Q&A history persistence, collapsible cards, sidebar tool links |
 | 36 | Frontend UX v1.4.0 | Completed | Dark mode, stats dashboard, copy summary, AI loading animations |
 | 37 | OCR support v1.4.1 | Completed | PyMuPDF + Tesseract OCR for scanned/image-based PDFs, 3-tier extraction (PyMuPDF → pypdf → OCR), Slovenian language pack |
+| 38 | PDF Viewer v1.5.0 | Completed | PdfViewer.vue with pdfjs-dist, page nav, zoom, keyboard shortcuts |
+| 39 | Chat Q&A v1.5.0 | Completed | ChatQA.vue with chat bubbles, typing indicator, marked markdown |
+| 40 | Dashboard Charts v1.5.0 | Completed | vue-chartjs doughnut (status) + bar (timeline) charts |
+| 41 | Mobile Responsive v1.5.0 | Completed | Hamburger drawer menu, responsive breakpoints at 860/640/540px |
+| 42 | Multi-File Upload v1.5.0 | Proposed | Batch upload with per-file progress bars |
+| 43 | Document Tags v1.5.0 | Proposed | Tag-based organization and filtering |
+| 44 | Markdown Summaries v1.5.0 | Proposed | Rendered markdown for AI summaries |
+| 45 | Onboarding Wizard v1.5.0 | Proposed | First-time user guide and enhanced empty states |
 
 ## Current implementation state
 
@@ -108,13 +116,111 @@
 - 3-tier PDF extraction pipeline: PyMuPDF → pypdf → OCR
 - Graceful degradation for corrupted/empty PDFs (no crashes)
 - tesseract-ocr + tesseract-ocr-slv installed in Docker image and CI
+- **v1.5.0 GUI overhaul:**
+  - PdfViewer.vue: in-app PDF rendering with pdfjs-dist (page nav, zoom, Esc close, responsive)
+  - ChatQA.vue: chat-bubble Q&A interface (user right, AI left, typing dots, markdown via marked)
+  - DocumentCard.vue: integrated PdfViewer + ChatQA, "Preberi" button, removed flat Q&A
+  - DocumentsPage.vue: vue-chartjs analytics (status doughnut + upload timeline bar chart)
+  - App.vue: mobile hamburger menu with sidebar drawer and backdrop overlay
+  - Responsive breakpoints added to all pages (860px, 640px, 540px)
+  - New npm packages: pdfjs-dist, chart.js, vue-chartjs, marked
+  - Version bumped to v1.5.0 everywhere (backend, frontend, README)
 
 ### Immediate next steps
 
-1. Capture 16 screenshots of running system for report (see report/00-report-outline.md)
-2. Render Mermaid diagrams (architecture.mmd, data-flow.mmd) to PNG via mermaid.live
-3. Finalize Word document with screenshots, formatting, and table of contents
-4. Prepare for defense demo using https://doc-ai-assist.com
+1. ~~Implement Phase 38 (in-app PDF viewer with PDF.js)~~ ✅ DONE
+2. ~~Implement Phase 39 (chat-style Q&A interface)~~ ✅ DONE
+3. ~~Implement Phase 41 (responsive mobile layout)~~ ✅ DONE
+4. ~~Implement Phase 40 (dashboard charts with Chart.js)~~ ✅ DONE
+5. Capture 16+ screenshots of running system for report (see report/00-report-outline.md)
+6. Render Mermaid diagrams (architecture.mmd, data-flow.mmd) to PNG via mermaid.live
+7. Update report with v1.5.0 features, new screenshots, and additional section on frontend architecture
+8. Finalize Word document with screenshots, formatting, and table of contents
+9. Prepare for defense demo using https://doc-ai-assist.com
+
+## Proposed phases for v1.5.0 (GUI & Feature Overhaul)
+
+The following phases target a significant upgrade of the user interface and frontend functionality. These are prioritized by impact on the professor demo experience and report quality.
+
+### Phase 38 — In-App PDF Viewer (HIGH IMPACT) ✅ IMPLEMENTED
+**Goal**: Embed a PDF viewer so users can read documents without downloading.
+- Integrated `pdfjs-dist` (Mozilla PDF.js) as `PdfViewer.vue` component
+- Shows PDF in a modal overlay when user clicks "Preberi" button on document card
+- Supports page navigation, zoom in/out, keyboard shortcuts (Esc, arrows)
+- Full mobile responsive (fills screen on small devices)
+- **Status**: Completed in v1.5.0
+
+### Phase 39 — Chat-Style Q&A Interface (HIGH IMPACT) ✅ IMPLEMENTED
+**Goal**: Replace the flat Q&A cards with a modern chat-bubble interface per document.
+- Created `ChatQA.vue` component with chat-bubble conversation thread
+- User questions right-aligned (purple gradient), AI answers left-aligned with avatar
+- Auto-scroll to latest message
+- Typing indicator animation (bouncing dots) while AI processes
+- Markdown rendering of AI responses via `marked` library
+- Timestamps and source badges inline, delete button per answer
+- **Status**: Completed in v1.5.0
+
+### Phase 40 — Dashboard Analytics with Charts (MEDIUM IMPACT) ✅ IMPLEMENTED
+**Goal**: Add visual charts to the Documents page.
+- Integrated `chart.js` + `vue-chartjs` for doughnut and bar charts
+- Document status distribution doughnut chart (ready/processing/pending/failed)
+- Upload timeline bar chart (documents by month)
+- Charts appear when user has 2+ documents
+- Custom color scheme matching app theme
+- **Status**: Completed in v1.5.0
+
+### Phase 41 — Responsive Mobile Layout (MEDIUM IMPACT) ✅ IMPLEMENTED
+**Goal**: Make the entire app work well on mobile and tablet screens.
+- Hamburger menu button appears on mobile (< 860px)
+- Sidebar opens as drawer overlay with backdrop dimming
+- Stack stat cards and charts vertically on narrow screens
+- Document cards wrap action buttons on mobile
+- Landing page single-column on mobile, hidden nav links
+- Admin page responsive table
+- All breakpoints: 860px (tablet), 640px (mobile), 540px (small mobile)
+- **Status**: Completed in v1.5.0
+
+### Phase 42 — Multi-File Upload with Progress Bars (LOW-MEDIUM)
+**Goal**: Allow users to upload multiple PDFs at once with visual progress tracking.
+- Drag-and-drop multiple files
+- Per-file progress bars during upload
+- Queue visualization (uploading, waiting, done)
+- Batch summary generation after multi-upload
+- **Why**: Improves the practical usability of the upload feature.
+
+### Phase 43 — Document Tags & Folders (LOW-MEDIUM)
+**Goal**: Let users organize documents with tags and virtual folders.
+- Backend: `tags` field on Document model (JSON array or separate table)
+- Frontend: tag chips on document cards, filter by tag
+- Create/rename/delete tags
+- Optional: folder-like tree navigation in sidebar
+- **Why**: Demonstrates a more realistic document management use case and adds visual richness.
+
+### Phase 44 — Enhanced Summary Display with Markdown (LOW)
+**Goal**: Render AI summaries as formatted markdown instead of plain text.
+- Use `marked` or `markdown-it` to render summary_text
+- Support bullet points, headers, bold/italic from AI output
+- Prompt engineering: instruct AI to respond in structured markdown
+- **Why**: Makes AI output look professional and structured.
+
+### Phase 45 — Onboarding Wizard & Enhanced Empty States (LOW)
+**Goal**: Guide new users through the app with a first-time onboarding flow.
+- Step-by-step wizard: "Welcome → Upload your first document → Generate a summary → Ask a question"
+- Better empty states with illustrations on all pages
+- Tooltip hints on key elements
+- **Why**: Polish that makes the app feel complete and user-friendly.
+
+### Priority recommendation for v1.5.0
+
+All four high/medium priority phases have been implemented:
+1. ✅ **Phase 38 (PDF Viewer)** — PdfViewer.vue with pdfjs-dist
+2. ✅ **Phase 39 (Chat Q&A)** — ChatQA.vue with marked, chat bubbles
+3. ✅ **Phase 41 (Mobile layout)** — hamburger menu, responsive breakpoints
+4. ✅ **Phase 40 (Charts)** — vue-chartjs doughnut + bar charts
+
+New packages added: `pdfjs-dist`, `chart.js`, `vue-chartjs`, `marked`
+
+Remaining v1.5.x phases (42–45) are optional stretch goals.
 
 ## Verification log
 

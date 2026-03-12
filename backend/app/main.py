@@ -37,7 +37,7 @@ limiter = Limiter(
 
 app = FastAPI(
     title=settings.project_name,
-    version="1.3.1",
+    version="1.5.0",
     description=(
         "REST API for the AI Document Assistant semester project. "
         "This initial iteration provides health and status endpoints, "

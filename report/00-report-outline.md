@@ -155,3 +155,34 @@ Za vsak posnetek je navedena **lokacija v Word dokumentu** (poglavje) in **navod
 - Appendix C: Tabela uporabljenih tehnologij in verzij
 - Appendix D: Povezava do repozitorija (https://github.com/mvelkov9/ai-document-assistant)
 - Appendix E: Povezava do produkcijskega URL-ja (https://doc-ai-assist.com)
+
+## Report improvement notes (v1.5.0 additions)
+
+Ko bodo implementirane v1.5.0 faze, je treba v report dodati naslednje:
+
+### Dodatni posnetki zaslona (Slika 17–20)
+
+| # | Posnetek | Kako zajeti | Kam v Word |
+|---|----------|-------------|------------|
+| 17 | **In-app PDF viewer** | Odpri dokument v aplikaciji in prikaži PDF | Slika 17 — „Vgrajen PDF pregledovalnik" |
+| 18 | **Chat Q&A vmesnik** | Prikaži pogovorni tok z AI nad dokumentom | Slika 18 — „Pogovorni vmesnik za dokumentni Q&A" |
+| 19 | **Dashboard grafikoni** | Prikaži analitično stran z grafi | Slika 19 — „Analitična plošča z grafi" |
+| 20 | **Mobilni pogled** | Odpri aplikacijo na mobilnem ali v emulatoru | Slika 20 — „Odzivna mobilna postavitev" |
+
+### Razširitev poglavja 7 (Arhitektura)
+
+- Dodaj sekcijo **7.6 Frontend arhitektura** z opisom komponentne strukture, PDF.js integracije, chat vmesnika in Chart.js vizualizacije
+- Dodaj sekcijo **7.7 Odzivna zasnova** z opisom breakpointov in mobilne izkušnje
+
+### Razširitev poglavja 11 (Kritična ocena)
+
+- V sekcijo 11.1 (Prednosti) dodaj: bogat uporabniški vmesnik z vgrajenim PDF pregledovalnikom, pogovornim Q&A vmesnikom in analitičnimi grafi
+- To naslovi uporabnikovo skrb, da "na GUI ni ravno veliko za početi" — z v1.5.0 bo GUI postal osrednji del izkušnje
+
+### Razširitev poglavja 12 (Implementacijska validacija)
+
+- Dodaj sekcijo **12.6 Frontend validacija** s posnetki zaslona vseh novih funkcionalnosti
+
+### Posodobitev poglavja 13 (Zaključek)
+
+- Posodobi seznam realiziranih elementov za višjo oceno z novimi funkcionalnostmi

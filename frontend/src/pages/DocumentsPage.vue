@@ -1,8 +1,21 @@
 <script setup>
+  import { computed } from 'vue'
   import { useStore } from '../composables/useStore'
   import { useRouter } from 'vue-router'
   import DocumentCard from '../components/DocumentCard.vue'
   import UploadSection from '../components/UploadSection.vue'
+  import { Doughnut, Bar } from 'vue-chartjs'
+  import {
+    Chart as ChartJS,
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend,
+  } from 'chart.js'
+
+  ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
   const router = useRouter()
   const {
@@ -16,12 +29,76 @@
     activeSummaryId,
     activeQuestionId,
     documentAnswers,
+    sessionToken,
     handleSummarize,
     handleAsk,
     handleDelete,
     handleDeleteAnswer,
     handleDownload,
   } = useStore()
+
+  /* ── Chart Data ── */
+  const statusChartData = computed(() => {
+    const ready = documents.value.filter((d) => d.processing_status === 'ready').length
+    const processing = documents.value.filter((d) => d.processing_status === 'processing').length
+    const pending = documents.value.filter(
+      (d) => d.processing_status !== 'ready' && d.processing_status !== 'processing' && d.processing_status !== 'failed',
+    ).length
+    const failed = documents.value.filter((d) => d.processing_status === 'failed').length
+    return {
+      labels: ['Pripravljeni', 'V obdelavi', 'Čakajo', 'Neuspešni'],
+      datasets: [
+        {
+          data: [ready, processing, pending, failed],
+          backgroundColor: ['#10b981', '#f59e0b', '#6366f1', '#ef4444'],
+          borderWidth: 0,
+          hoverOffset: 6,
+        },
+      ],
+    }
+  })
+
+  const uploadTimelineData = computed(() => {
+    const months = {}
+    documents.value.forEach((d) => {
+      if (!d.created_at) return
+      const date = new Date(d.created_at)
+      const key = date.toLocaleDateString('sl-SI', { month: 'short', year: '2-digit' })
+      months[key] = (months[key] || 0) + 1
+    })
+    const labels = Object.keys(months).slice(-6)
+    const data = labels.map((l) => months[l])
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Naloženi dokumenti',
+          data,
+          backgroundColor: 'rgba(99, 102, 241, 0.7)',
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+      ],
+    }
+  })
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } },
+  }
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, ticks: { stepSize: 1 } },
+    },
+  }
+
+  const showCharts = computed(() => documents.value.length >= 2)
 </script>
 
 <template>
@@ -79,6 +156,30 @@
         </div>
       </div>
     </div>
+
+    <!-- ── Analytics Charts ── -->
+    <Transition name="fade">
+      <div v-if="showCharts" class="charts-row">
+        <div class="chart-card">
+          <h5 class="chart-title">Status dokumentov</h5>
+          <div class="chart-wrap chart-wrap-doughnut">
+            <Doughnut :data="statusChartData" :options="chartOptions" />
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Pripravljeni</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>V obdelavi</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>Čakajo</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Neuspešni</span>
+          </div>
+        </div>
+        <div class="chart-card chart-card-wide">
+          <h5 class="chart-title">Časovnica nalaganja</h5>
+          <div class="chart-wrap chart-wrap-bar">
+            <Bar :data="uploadTimelineData" :options="barOptions" />
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <div class="toolbar">
       <div class="search-wrap">
@@ -150,6 +251,7 @@
           :question-busy="activeQuestionId === doc.id"
           :answers="documentAnswers[doc.id] || []"
           :collapsed="index >= 3"
+          :token="sessionToken"
           @summarize="handleSummarize"
           @ask="handleAsk"
           @delete="handleDelete"
@@ -429,6 +531,77 @@
       flex-wrap: wrap;
     }
     .stats-bar {
+      grid-template-columns: 1fr;
+    }
+    .charts-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Charts ── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .chart-card:hover {
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .chart-title {
+    margin: 0 0 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-light);
+  }
+
+  .chart-wrap {
+    position: relative;
+  }
+  .chart-wrap-doughnut { height: 150px; }
+  .chart-wrap-bar { height: 150px; }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+    justify-content: center;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+  .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+  @media (max-width: 860px) {
+    .charts-row {
       grid-template-columns: 1fr;
     }
   }

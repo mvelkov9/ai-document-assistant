@@ -20,7 +20,7 @@
             </svg>
           </div>
           <span class="brand-name">AI Document Assistant</span>
-          <span class="brand-version">v1.3.1</span>
+          <span class="brand-version">v1.5.0</span>
         </div>
         <div class="landing-nav-links">
           <a href="/docs" class="nav-link-top">API Docs</a>
@@ -88,7 +88,7 @@
     </main>
 
     <footer class="landing-footer">
-      <span>AI Document Assistant v1.3.1</span>
+      <span>AI Document Assistant v1.5.0</span>
       <span class="footer-dot">&middot;</span>
       <span>ALMA MATER EUROPAEA 2025/26</span>
       <span class="footer-dot">&middot;</span>
@@ -350,6 +350,35 @@
     }
     .feature-grid {
       grid-template-columns: repeat(2, auto);
+    }
+  }
+
+  @media (max-width: 540px) {
+    .landing-grid {
+      padding: 1.5rem 1rem;
+    }
+    .landing-title {
+      font-size: 1.7rem;
+    }
+    .landing-desc {
+      font-size: 0.9rem;
+    }
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+    .tech-chips {
+      justify-content: center;
+    }
+    .landing-nav-inner {
+      padding: 0 1rem;
+    }
+    .landing-nav-links {
+      display: none;
+    }
+    .landing-footer {
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      justify-content: center;
     }
   }
 </style>
