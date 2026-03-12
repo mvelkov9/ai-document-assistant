@@ -59,26 +59,18 @@ def system_stats(
 
     # Document status breakdown
     status_rows = (
-        db.query(Document.processing_status, func.count(Document.id))
-        .group_by(Document.processing_status)
-        .all()
+        db.query(Document.processing_status, func.count(Document.id)).group_by(Document.processing_status).all()
     )
     status_breakdown = {row[0]: row[1] for row in status_rows}
 
     # Q&A source mode breakdown
     source_rows = (
-        db.query(QuestionAnswer.source_mode, func.count(QuestionAnswer.id))
-        .group_by(QuestionAnswer.source_mode)
-        .all()
+        db.query(QuestionAnswer.source_mode, func.count(QuestionAnswer.id)).group_by(QuestionAnswer.source_mode).all()
     )
     source_breakdown = {row[0]: row[1] for row in source_rows}
 
     # Job status breakdown
-    job_rows = (
-        db.query(ProcessingJob.status, func.count(ProcessingJob.id))
-        .group_by(ProcessingJob.status)
-        .all()
-    )
+    job_rows = db.query(ProcessingJob.status, func.count(ProcessingJob.id)).group_by(ProcessingJob.status).all()
     job_breakdown = {row[0]: row[1] for row in job_rows}
 
     # Admin vs user count
