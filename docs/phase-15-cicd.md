@@ -12,7 +12,7 @@ Introduce a first repository-level automation path that validates the applicatio
 
 ## CI pipeline structure
 
-The CI pipeline now runs five jobs:
+The CI/CD pipeline now runs six jobs:
 
 ### backend-lint
 - Runs on `ubuntu-24.04` (pinned)
@@ -42,6 +42,11 @@ The CI pipeline now runs five jobs:
 - Builds backend Docker image
 - Builds frontend Docker image (production target with `VITE_API_BASE_URL` build arg)
 
+### deploy (depends on docker)
+- Runs only on push to `main`
+- Uses `appleboy/ssh-action` to connect to the VPS
+- Pulls the latest code and executes `bash infrastructure/scripts/deploy.sh`
+
 ## Node.js 24 compatibility
 
 All jobs set `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` as a top-level env variable to opt into Node.js 24 for GitHub Actions runners, avoiding the deprecation warnings for Node.js 20 actions (`actions/checkout@v4`, `actions/setup-python@v5`, `actions/setup-node@v4`).
@@ -56,21 +61,22 @@ The `infrastructure/scripts/deploy.sh` now includes:
 
 ## Configuration files
 
-- `.github/workflows/ci.yml` — full CI pipeline (5 jobs)
+- `.github/workflows/ci.yml` — full CI/CD pipeline (6 jobs including deploy)
 - `backend/pyproject.toml` — ruff lint, ruff format, isort, and pytest configuration
 - `frontend/.prettierrc` — prettier formatting rules for Vue/JS/CSS
 - `.env.production.example` — production environment template
 
 ## Current limitations
 
-- no automatic VPS deployment is attached yet
+- deployment is code-pull based rather than artifact/image version based, so rollback reproducibility is limited
 - runtime integration tests against live MinIO and PostgreSQL are not part of CI
 
 ## Verification
 
-- workflow definition created successfully
-- local execution of the workflow is not possible in this environment without Node and Docker tooling
+- workflow definition exists in `.github/workflows/ci.yml`
+- deploy automation is wired for `main` pushes via SSH
+- backend coverage threshold is enforced at 70%
 
 ## Next step
 
-Add deployment automation for the VPS and extend validation toward containerized integration checks.
+Improve reproducibility by publishing versioned build artifacts or images, and extend validation toward stricter container-level integration checks.

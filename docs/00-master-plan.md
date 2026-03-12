@@ -53,7 +53,7 @@
 | 27 | GUI overhaul v1.2.1 | Completed | Sidebar layout, admin role management |
 | 28 | Hardening v1.2.2 | Completed | PDF extraction fallback, VPS specs CX33, lint fixes |
 | 29 | Formatters v1.2.3 | Completed | Ruff format + prettier auto-formatting, CI format checks |
-| 30 | Testing & CI v1.2.4 | Completed | 107 tests (90% coverage), CI split to 5 jobs, Node 24 compat |
+| 30 | Testing & CI v1.2.4 | Completed | 107 tests (90% coverage), CI evolved into 6 jobs including deploy, Node 24 compat |
 | 31 | Vue Router v1.3.0 | Completed | Vue Router 4, page splitting (5 routes), composable store, nav guards |
 | 32 | Continuous Deployment | Completed | SSH deploy step in GitHub Actions after CI, main branch only |
 | 33 | Grafana dashboard | Completed | Prometheus + Grafana containers, pre-provisioned FastAPI dashboard |
@@ -154,15 +154,11 @@
 
 ### Immediate next steps
 
-1. ~~Implement Phase 38 (in-app PDF viewer with PDF.js)~~ ✅ DONE
-2. ~~Implement Phase 39 (chat-style Q&A interface)~~ ✅ DONE
-3. ~~Implement Phase 41 (responsive mobile layout)~~ ✅ DONE
-4. ~~Implement Phase 40 (dashboard charts with Chart.js)~~ ✅ DONE
-5. Capture 16+ screenshots of running system for report (see report/00-report-outline.md)
-6. Render Mermaid diagrams (architecture.mmd, data-flow.mmd) to PNG via mermaid.live
-7. Update report with v1.5.0 features, new screenshots, and additional section on frontend architecture
-8. Finalize Word document with screenshots, formatting, and table of contents
-9. Prepare for defense demo using https://doc-ai-assist.com
+1. Capture the mandatory 16 screenshots for the Word report, plus 4 optional GUI screenshots (PDF viewer, chat Q&A, charts, mobile layout)
+2. Render both Mermaid diagrams (`architecture.mmd`, `data-flow.mmd`) to PNG and insert them into the report
+3. Unify the final written materials around the actual current numbers: 24 endpoints, 6 CI/CD jobs, 107 tests, ~90% coverage, 70% CI threshold
+4. Add one honest limitations subsection to the report: BackgroundTasks durability, missing frontend pagination, localStorage JWT trade-off, markdown sanitization follow-up
+5. Rehearse a short defense flow on https://doc-ai-assist.com: login, upload, summarize, ask, download, admin, Swagger
 
 ## Proposed phases for v1.5.0 (GUI & Feature Overhaul)
 
@@ -466,7 +462,7 @@ After every completed implementation phase:
 - Added `test_storage_and_pdf.py` (16 tests): S3 storage operations, PDF text extraction
 - Added `test_security.py` (9 tests): password hashing, JWT token creation/validation
 - Fixed ruff I001 import sorting errors in new test files
-- CI pipeline split from 4 to **5 jobs**: backend-lint, backend-test, frontend-lint, frontend-build, docker
+- CI pipeline split from 4 to **6 jobs**: backend-lint, backend-test, frontend-lint, frontend-build, docker, deploy
 - Added `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` for Node.js 24 compatibility
 - Pinned `ubuntu-24.04` runner for reproducibility, switched to `npm ci` for deterministic installs
 - Raised CI coverage threshold from 50% to 70%
@@ -526,9 +522,9 @@ Changes:
 
 | Zahteva | Status | Komentar |
 | --- | --- | --- |
-| REST API | ✅ Izpolnjeno | 14 endpointov, FastAPI, popolna OpenAPI dokumentacija |
+| REST API | ✅ Izpolnjeno | 24 endpointov, FastAPI, popolna OpenAPI dokumentacija |
 | Integracija z oblačno storitvijo | ✅ Izpolnjeno | PostgreSQL, MinIO (S3), Groq/Gemini/OpenAI AI API |
-| Gostovanje v oblaku | ⚠️ Pripravljeno, nepreverjeno | Docker Compose + prod overlay obstajata, VPS deployment ni dokazan |
+| Gostovanje v oblaku | ✅ Izpolnjeno | Docker Compose + prod overlay, Hetzner VPS deployment potrjen na doc-ai-assist.com |
 | Osnovni CI/CD | ✅ Izpolnjeno | GitHub Actions: ruff lint, pytest-cov, frontend build, auto-deploy via SSH |
 | Dokumentacija API (OpenAPI) | ✅ Izpolnjeno | /docs (Swagger) + /redoc z opisi vseh endpointov |
 
@@ -578,7 +574,7 @@ Naloga zahteva demonstracijo razumevanja **celotnega tehnološkega konteksta** �
 - Docker Compose za dev in prod z multi-stage builds
 - CI pipeline z linting, testing, coverage
 - Popolna dokumentacija z 18 fazami
-- Dejanski tekoči sistem na localhost z vsemi servisi
+- Dejanski tekoči sistem na produkcijskem VPS z javnim URL, TLS in CI/CD potjo
 
 Student pravilno ugotavlja: AI del sam po sebi ni inovativen. Ampak **bistvo naloge ni AI inovacija** — bistvo je **integracija spletnih storitev v koherentno arhitekturo**.
 

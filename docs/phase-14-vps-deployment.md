@@ -79,8 +79,8 @@ The backend Dockerfile creates a dedicated `appuser` and switches to it before r
 
 ## Current limitations
 
-- Backup retention policy is not automated yet
-- CI/CD does not auto-deploy (manual `deploy.sh` execution required)
+- backup creation exists, but there is still no scheduled off-site copy or documented restore drill
+- the deploy health check currently targets `http://localhost/health`, which is sufficient for a basic smoke test but not as strict as an HTTPS readiness check through the production proxy
 
 ## Verification — COMPLETED 2026-03-11
 
@@ -93,4 +93,4 @@ The backend Dockerfile creates a dedicated `appuser` and switches to it before r
 
 ## Next step
 
-Capture screenshots for the academic report and prepare final defense materials.
+Tighten operational evidence for submission: capture screenshots, document a restore test for backups, and harden the deploy smoke test.

@@ -1,12 +1,12 @@
 sequenceDiagram
     actor U as User
-    participant F as Vue Frontend<br/>(Components)
+    participant F as Vue SPA<br/>(Router + Pages)
     participant N as Nginx<br/>(Security Headers)
     participant R as Rate Limiter<br/>(slowapi)
     participant B as FastAPI Backend<br/>(structlog)
     participant P as PostgreSQL<br/>(Alembic)
     participant M as MinIO
-    participant A as AI Provider or Fallback
+    participant A as AI Provider Chain<br/>(Groq/Gemini/OpenAI/Fallback)
 
     U->>F: Register or login
     F->>N: Auth request
@@ -22,8 +22,8 @@ sequenceDiagram
     B->>P: Store document metadata
     B-->>F: Document metadata
 
-    U->>F: List documents (paginated)
-    F->>N: GET /documents?skip=0&limit=20
+    U->>F: List documents
+    F->>N: GET /documents
     N->>B: Forward
     B->>P: Query with offset/limit + count
     B-->>F: {items, total, skip, limit}
@@ -35,7 +35,7 @@ sequenceDiagram
     B->>P: Store processing job
     B-->>F: Job queued (202)
     B->>M: Download PDF
-    B->>A: Generate summary from extracted text
+    B->>A: Extract text and generate summary
     B->>P: Update document summary and job status
     F->>B: Poll job status
     B-->>F: Completed job and updated document state
@@ -45,6 +45,6 @@ sequenceDiagram
     N->>R: Forward (10/min limit)
     R->>B: Validated request (3-500 chars)
     B->>M: Download PDF
-    B->>A: Generate answer
+    B->>A: Rank chunks (BM25) and generate answer
     B->>P: Store Q&A record
     B-->>F: Answer payload

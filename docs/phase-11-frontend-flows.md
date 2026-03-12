@@ -16,14 +16,19 @@ Turn the Vue frontend from a visual placeholder into a usable client for the alr
 
 ## Component architecture
 
-The frontend was refactored from a monolithic `App.vue` (~700 lines) into a component-based structure:
+The frontend has since evolved into a routed SPA with shared composable state:
 
-- `App.vue` (~160 lines) — slim orchestrator with state management and API calls
-- `AuthPanel.vue` — login and registration forms with emit-based parent communication
-- `UploadSection.vue` — PDF file upload with local state management
-- `DocumentCard.vue` — document display, summary trigger, Q&A interface, delete with inline confirmation
+- `App.vue` — application shell with sidebar, topbar, dark-mode toggle, and responsive navigation
+- `router/index.js` — Vue Router 4 with guest, auth, and admin route guards
+- `composables/useStore.js` — module-level shared state for session, documents, Q&A history, admin data, filters, and async job polling
+- `pages/*.vue` — dedicated pages for Landing, Documents, Upload, Profile, and Admin
+- `components/AuthPanel.vue` — login and registration forms
+- `components/UploadSection.vue` — multi-file PDF upload with queue and progress states
+- `components/DocumentCard.vue` — document actions, summary rendering, tags, download, delete, and embedded tools
+- `components/PdfViewer.vue` — in-app PDF viewer based on PDF.js
+- `components/ChatQA.vue` — chat-style document Q&A interface with persisted history
 
-Each component is under 200 lines and communicates via props and emits.
+The result is no longer a single-screen MVP, but a page-based client with clear separation between shell, route pages, shared state, and feature components.
 
 ## Covered user flows
 
@@ -79,9 +84,9 @@ The frontend was redesigned in v1.1 with a modern, card-based visual system:
 
 ## Limitations in this phase
 
-- no router was introduced because the current MVP fits a single authenticated workflow screen
-- no state-management library is needed at this scale
-- JWT stored in localStorage (documented security trade-off)
+- JWT is still stored in localStorage, which is acceptable for the SPA demo but weaker than httpOnly cookie-based session handling
+- document pagination exists in the backend API, but the current frontend still loads the first page without exposing page navigation controls
+- markdown rendered from AI output should be sanitized before injection into the DOM
 
 ## Verification
 
@@ -90,7 +95,7 @@ The frontend was redesigned in v1.1 with a modern, card-based visual system:
 
 ## Next step
 
-Add document question-answer interactions and then wire the frontend to asynchronous processing states.
+Strengthen the submission version with pagination controls, safer markdown rendering, and clearer async-job status handling for long-running operations.
 
 ## Delta — v1.2.0 and v1.2.1
 

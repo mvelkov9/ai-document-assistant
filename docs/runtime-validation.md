@@ -38,7 +38,7 @@
 
 ## CI pipeline validation
 
-- GitHub Actions workflow runs five jobs: ruff lint + format check, pytest with coverage, prettier check, frontend build, Docker image build
+- GitHub Actions workflow runs six jobs: ruff lint + format check, pytest with coverage, prettier check, frontend build, Docker image build, and deploy on `main`
 - Pipeline triggers on push to main/master and on pull requests
 
 ## Code quality

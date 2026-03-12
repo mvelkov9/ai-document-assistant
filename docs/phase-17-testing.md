@@ -41,7 +41,7 @@ Strengthen the project with repeatable automated checks for backend user flows, 
 ### Test environment configuration
 
 - Rate limiting is disabled via `APP_ENV=test` (set at module level before app imports)
-- SQLite is used as the database for test isolation
+- a dedicated PostgreSQL test database is used for test isolation
 - Database state is cleaned between tests with `Base.metadata.drop_all()` + `init_db()`
 
 ## Covered scenarios
@@ -77,6 +77,7 @@ pytest --cov=app --cov-report=term-missing --cov-fail-under=70
 - no end-to-end browser automation
 - no container-based integration tests with live MinIO and PostgreSQL in CI
 - no load or security-specific test automation
+- the documented Docker deployment path is stronger than the ad hoc in-container pytest path, which should be standardized if containerized test execution becomes a project requirement
 
 ## Next step
 

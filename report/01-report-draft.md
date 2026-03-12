@@ -1,4 +1,4 @@
-# Razvoj integrirane spletne storitve za varno upravljanje dokumentov z AI povzetki in dokumentnim Q&A v oblacni arhitekturi
+# Razvoj integrirane spletne storitve za varno upravljanje dokumentov z AI-povzetki in dokumentnim Q&A v oblačni arhitekturi
 
 ## 1. Naslovnica
 
@@ -9,13 +9,13 @@ Program: Spletne in informacijske tehnologije
 
 Predmet: Integracija spletnih strani in servisi
 
-Studijsko leto: 2025/26
+Študijsko leto: 2025/26
 
-Nosilec predmeta: vis. pred. mag. Andrej Kositer
+Nosilec predmeta: viš. pred. mag. Andrej Kositer
 
-Vrsta naloge: MOZNOST 3 - Razvoj integrirane spletne storitve
+Vrsta naloge: MOŽNOST 3 – Razvoj integrirane spletne storitve
 
-Delovni naslov: Razvoj integrirane spletne storitve za varno upravljanje dokumentov z AI povzetki in dokumentnim Q&A v oblacni arhitekturi
+Delovni naslov: Razvoj integrirane spletne storitve za varno upravljanje dokumentov z AI-povzetki in dokumentnim Q&A v oblačni arhitekturi
 
 Avtor: Michel Velkov
 
@@ -23,17 +23,17 @@ Produkcijski URL: https://doc-ai-assist.com
 
 Repozitorij: https://github.com/mvelkov9/ai-document-assistant
 
-## 2. Povzetek in kljucne besede
+## 2. Povzetek in ključne besede
 
 ### Povzetek
 
-Naloga obravnava razvoj integrirane spletne storitve za varno upravljanje dokumentov v vecuporabniskem okolju. Resitev je zasnovana kot spletna aplikacija, ki uporabnikom omogoca registracijo, prijavo, nalaganje PDF dokumentov, samodejno generiranje povzetkov in postavljanje vprasanj nad vsebino posameznega dokumenta. Arhitektura sistema temelji na sodobnem oblacnem pristopu, kjer se uporabniski vmesnik izvaja kot spletna aplikacija Vue, poslovna logika kot FastAPI storitev, metapodatki se hranijo v relacijski bazi PostgreSQL, datoteke pa v objektni hrambi MinIO, ki je zdruzljiva z API-jem S3. Dodatna plast sistema omogoca integracijo z zunanjim AI ponudnikom ali uporabo lokalnega fallback nacina, kar zmanjsa strosek razvoja in omogoca demonstracijo tudi v omejenem okolju.
+Naloga obravnava razvoj integrirane spletne storitve za varno upravljanje dokumentov v večuporabniškem okolju. Rešitev je zasnovana kot spletna aplikacija, ki uporabnikom omogoča registracijo, prijavo, nalaganje PDF-dokumentov, samodejno generiranje povzetkov in postavljanje vprašanj nad vsebino posameznega dokumenta. Arhitektura sistema temelji na sodobnem oblačnem pristopu, v katerem uporabniški vmesnik deluje kot aplikacija Vue, poslovna logika kot storitev FastAPI, metapodatki se hranijo v relacijski podatkovni bazi PostgreSQL, dokumenti pa v objektni hrambi MinIO, združljivi z vmesnikom S3. Dodatna arhitekturna plast omogoča integracijo z zunanjimi ponudniki umetne inteligence oziroma uporabo lokalnega nadomestnega načina delovanja, kar zmanjšuje stroške in omogoča demonstracijo tudi v omejenem okolju.
 
-Poseben poudarek naloge je na integraciji storitev, varnosti in operativni izvedljivosti. Sistem uporablja JWT avtentikacijo, lastnistveno omejevanje dostopa do dokumentov, health in readiness endpointa, osnovno request logiranje ter produkcijsko usmerjen Docker Compose deployment na lastnem VPS strezniku. Za dolgotrajnejse operacije je implementiran tudi asinhroni obdelovalni model z obstojnimi job zapisi, kar izboljsa uporabnisko izkusnjo in realistično odraza sodobno arhitekturo storitev v oblaku.
+Poseben poudarek naloge je na integraciji storitev, varnosti in operativni izvedljivosti. Sistem vključuje JWT-avtentikacijo, lastniško omejevanje dostopa do dokumentov, endpointa za health in readiness, strukturirano beleženje zahtevkov ter produkcijsko usmerjen deployment z Docker Compose na lastnem VPS-strežniku. Za dolgotrajnejše operacije je uveden asinhroni obdelovalni model z obstojnimi zapisi opravil, kar izboljšuje uporabniško izkušnjo in hkrati realistično odraža sodobno zasnovo storitev v oblaku.
 
-Naloga dokazuje, da je mogoce z uporabo odprtokodnih tehnologij in omejenega proracuna razviti arhitekturno relevantno, varno in razsirljivo spletno storitev, ki odgovarja potrebam manjse slovenske organizacije. Poleg implementacije naloga vsebuje se varnostno presojo, stroškovno analizo, kriticno primerjavo z alternativo na upravljanih platformah in usmeritve za nadaljnji razvoj.
+Naloga dokazuje, da je mogoče z uporabo odprtokodnih tehnologij in omejenega proračuna razviti arhitekturno relevantno, varno in razširljivo spletno storitev, primerno za manjšo slovensko organizacijo. Poleg implementacije vključuje tudi varnostno presojo, stroškovno analizo, kritično primerjavo z upravljanimi alternativami ter usmeritve za nadaljnji razvoj sistema.
 
-### Kljucne besede
+### Ključne besede
 
 oblak, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG, BM25, TLS
 
@@ -55,21 +55,21 @@ cloud, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG
 
 ## 4. Uvod
 
-Digitalni dokumenti so v skoraj vseh organizacijah osrednji nosilec informacij. Kljub temu so dokumenti pogosto shranjeni v razprsenih mapah, skupnih diskih ali ad hoc sistemih brez ustreznega nadzora dostopa, brez sledljivosti in brez moznosti hitrega povzemanja vsebine. To povzroca izgubo casa, tezjo uporabo dokumentov in vecje tveganje za varnostne napake.
+Digitalni dokumenti so v skoraj vseh organizacijah osrednji nosilec informacij. Kljub temu so pogosto shranjeni v razpršenih mapah, skupnih diskih ali ad hoc sistemih brez ustreznega nadzora dostopa, brez sledljivosti in brez možnosti hitrega povzemanja vsebine. Posledice so manjša učinkovitost dela, otežena ponovna uporaba znanja in večje tveganje za varnostne napake.
 
-Sodobni oblačni pristopi omogocajo integracijo spletnih storitev, objektne hrambe, relacijskih baz, avtentikacije in AI funkcionalnosti v enotno storitev, ki je dostopna vec uporabnikom in primerna tako za razvoj kot za produkcijsko uporabo. V okviru te naloge je bil izbran razvoj storitve, ki zdruzuje te elemente v konkretno resitev za manjsa podjetja ali interne organizacijske ekipe.
+Sodobni oblačni pristopi omogočajo integracijo spletnih storitev, objektne hrambe, relacijskih podatkovnih baz, avtentikacije in funkcionalnosti umetne inteligence v enotno storitev, ki je dostopna več uporabnikom in primerna tako za razvoj kot za produkcijsko uporabo. V okviru te naloge je bil zato izbran razvoj rešitve, ki te elemente združuje v konkretno in tehnično utemeljeno celoto.
 
-Cilj naloge je razviti spletno storitev, ki ne bo zgolj tehnicni prototip, temvec arhitekturno utemeljena integrirana resitev. To pomeni, da mora biti jasna delitev med komponentami, evidentni podatkovni tokovi, definirani varnostni mehanizmi, ocenjeni stroški in utemeljena izbira infrastrukture.
+Cilj naloge je razviti spletno storitev, ki ni zgolj tehnični prototip, temveč arhitekturno premišljena in integrirana rešitev. To pomeni jasno razdelitev odgovornosti med komponentami, pregledne podatkovne tokove, definirane varnostne mehanizme, oceno stroškov in argumentirano izbiro infrastrukture.
 
-Pri delu je bila uporabljena iterativna metodologija. Najprej je bil definiran scenarij uporabe in arhitekturni okvir, nato je sledilo postopno uvajanje glavnih gradnikov: avtentikacije, persistentne podatkovne plasti, hrambe dokumentov, AI funkcionalnosti, asinhrone obdelave, uporabniskega vmesnika in produkcijske poti na VPS. Tak pristop je omogocil sprotno preverjanje konceptov in dosledno dokumentiranje po fazah.
+Pri delu je bila uporabljena iterativna metodologija. Najprej je bil določen scenarij uporabe in arhitekturni okvir, nato pa je sledilo postopno uvajanje ključnih gradnikov: avtentikacije, podatkovne plasti, hrambe dokumentov, AI-funkcionalnosti, asinhrone obdelave, uporabniškega vmesnika in produkcijske poti na VPS. Tak pristop je omogočil sprotno preverjanje posameznih odločitev in dosledno dokumentiranje po razvojnih fazah.
 
-Razvojni cikel je bil strukturiran v 18 faz, od katerih vsaka naslavlja dolocen vidik sistema. Dokumentacija za vsako fazo je vodena v loceni datoteki znotraj repozitorija (`docs/phase-01` do `docs/phase-18`), kar omogoca sledljivost odlocitev in kasnejso revizijo. Taksna fazna razdelitev je olajsala razvoj, saj je vsak korak prinsel merljiv rezultat, ki ga je bilo mogoce preveriti pred nadaljevanjem.
+Razvojni cikel je bil strukturiran v 18 faz, od katerih vsaka obravnava določen vidik sistema. Dokumentacija posameznih faz je zbrana v ločenih datotekah znotraj repozitorija (`docs/phase-01` do `docs/phase-18`), kar omogoča sledljivost odločitev in kasnejšo revizijo. Takšna razdelitev je olajšala razvoj, saj je vsak korak prinesel merljiv rezultat, ki ga je bilo mogoče preveriti pred nadaljevanjem dela.
 
 ## 5. Problem in cilji
 
 ### 5.1 Problem
 
-Osnovni problem, ki ga naslovlja naloga, je neučinkovito upravljanje dokumentov v organizacijskem okolju. Uporabniki pogosto potrebujejo hiter vpogled v vsebino internih dokumentov, vendar je iskanje kljucnih informacij zamudno. Obenem je pri uporabi zunanjih AI orodij pogosto prisoten problem zasebnosti, stroškov in pomanjkanja integracije z obstoječo infrastrukturo.
+Osnovni problem, ki ga naloga obravnava, je neučinkovito upravljanje dokumentov v organizacijskem okolju. Uporabniki pogosto potrebujejo hiter vpogled v vsebino internih dokumentov, vendar je iskanje ključnih informacij zamudno. Hkrati je pri uporabi zunanjih AI-orodij prisotno vprašanje zasebnosti, stroškov in pomanjkanja integracije z obstoječo infrastrukturo.
 
 ### 5.2 Cilji
 
@@ -84,13 +84,13 @@ Glavni cilji razvoja so:
 
 ## 6. Poslovni scenarij uporabe
 
-Resitev je zasnovana za manjso slovensko organizacijo, ki upravlja interne pravilnike, navodila, porocila in tehnicno dokumentacijo. Uporabniki potrebujejo sistem, v katerega lahko nalozijo dokument, ga pozneje ponovno najdejo, pregledajo AI povzetek in nad njim zastavijo konkretno vprasanje.
+Rešitev je zasnovana za manjšo slovensko organizacijo, ki upravlja interne pravilnike, navodila, poročila in tehnično dokumentacijo. Uporabniki potrebujejo sistem, v katerega lahko naložijo dokument, ga pozneje ponovno poiščejo, pregledajo AI-povzetek in nad njim zastavijo konkretno vprašanje.
 
-Primer uporabe je podjetje, ki zaposlenim redno posreduje interne procedure. Namesto rocnega branja daljsih PDF dokumentov uporabnik dokument nalozi v sistem in pridobi povzetek. Ce potrebuje bolj usmerjeno informacijo, lahko postavi vprasanje, na primer kateri del pravilnika ureja obravnavo obcutljivih dokumentov. Sistem mu vrne odgovor na podlagi vsebine konkretnega dokumenta.
+Primer uporabe predstavlja organizacija, ki zaposlenim redno posreduje interne procedure. Namesto ročnega branja daljših PDF-dokumentov uporabnik dokument naloži v sistem in pridobi povzetek. Če potrebuje natančnejšo informacijo, lahko postavi vprašanje, na primer kateri del pravilnika ureja obravnavo občutljivih dokumentov. Sistem vrne odgovor na podlagi vsebine konkretnega dokumenta.
 
-Tak scenarij je primeren za ocenjevanje, ker vkljucuje vecuporabnisko okolje, integracijo s hrambo, obdelavo vsebine dokumentov, varnostno omejevanje dostopa in jasno produkcijsko pot v oblaku.
+Tak scenarij je primeren za izpitno nalogo, ker vključuje večuporabniško okolje, integracijo s hrambo dokumentov, obdelavo vsebine, varnostno omejevanje dostopa in jasno produkcijsko pot v oblaku.
 
-## 7. Arhitekturni opis resitve
+## 7. Arhitekturni opis rešitve
 
 ### 7.1 Logična arhitektura
 
@@ -110,7 +110,7 @@ Sistem je zasnovan kot modularni monolit z zunanjimi integracijami. Sestavljajo 
 10. admin API z upravljanjem uporabniških vlog (promote/demote),
 11. Nginx reverse proxy za produkcijsko izpostavitev storitve z varnostnimi glavami, gzip kompresijo in TLS (Let's Encrypt).
 
-Ta zasnova omogoca jasno ločitev odgovornosti in hkrati ohranja dovolj nizko kompleksnost za študentski projekt.
+Takšna zasnova omogoča jasno ločitev odgovornosti in hkrati ohranja obvladljivo stopnjo kompleksnosti, ki je primerna za študentski projekt, vendar še vedno dovolj bogata za arhitekturno in integracijsko analizo.
 
 Arhitekturni diagram (Mermaid notacija):
 
@@ -143,7 +143,7 @@ flowchart TB
     Backend --> Browser
 ```
 
-Diagram prikazuje, da vsi zahtevki uporabnika prehajajo skozi reverse proxy, ki dodaja varnostne glave in posreduje zahtevke rate limiterju. Backend komunicira s PostgreSQL, MinIO in AI plastjo. Asinhroni jobe se izvajajo v ozadju in ob zakljucku posodobijo stanje v bazi.
+Diagram prikazuje, da vsi uporabniški zahtevki prehajajo skozi reverse proxy, ki dodaja varnostne glave in promet posreduje proti aplikacijski plasti. Backend nato komunicira s PostgreSQL, MinIO in AI-plastjo, asinhrona opravila pa se izvajajo v ozadju ter po zaključku posodobijo stanje v podatkovni bazi.
 
 ### 7.2 Deployment arhitektura
 
@@ -161,14 +161,14 @@ Produkcijski deployment teče na lastnem VPS strežniku pri Hetzner Cloud:
 
 Na VPS teče Docker Compose sklad, ki vsebuje reverse proxy (Nginx z TLS), frontend (produkcijski build), backend (FastAPI), PostgreSQL in MinIO. Zunaj Docker mreže je javno izpostavljen le reverse proxy, medtem ko baza in objektna hramba ostaneta zasebni znotraj vsebnika oziroma internega omrežja.
 
-Tak model ima dve pomembni prednosti. Prvic, omogoca nizje in bolj predvidljive stroške od vec samostojnih upravljanih storitev. Drugic, lokalno razvojno okolje ostane zelo podobno produkciji, kar zmanjsa tveganje za razlike med razvojem in dejanskim zagonom.
+Takšen model ima dve pomembni prednosti. Prvič, omogoča nižje in bolj predvidljive stroške kot uporaba več ločenih upravljanih storitev. Drugič, lokalno razvojno okolje ostane zelo podobno produkcijskemu, kar zmanjšuje tveganje za odstopanja med razvojem in dejanskim zagonom sistema.
 
 Docker okolje je razdeljeno na dva profila:
 
-- **Razvojni profil** (`docker-compose.yml`): frontend tece v dev nacinu z Vite dev serverjem, backend je izpostavljen na portu 8000 za neposreden dostop, PostgreSQL in MinIO porti so dostopni za diagnostiko.
+- **Razvojni profil** (`docker-compose.yml`): frontend teče v razvojskem načinu z Vite dev serverjem, backend je izpostavljen na portu 8000 za neposreden dostop, PostgreSQL in MinIO porti pa so dostopni za diagnostiko.
 - **Produkcijski overlay** (`docker-compose.prod.yml`): frontend uporablja multi-stage Dockerfile (dev → build → nginx produkcija), backend port je skrit (dostopen le prek Nginx), storitve imajo definirane healthcheke in restart politike, PostgreSQL in MinIO porti niso izpostavljeni navzven.
 
-Backend Dockerfile ustvari namenskega non-root uporabnika (`appuser`) in aplikacijo izvaja z omejenimi pravicami, kar je skladno s principom najmanjsih privilegijev (least privilege). Frontend Dockerfile v produkcijskem nacinu zgradi staticne datoteke in jih streže prek lahkega Nginx procesa.
+Backend Dockerfile ustvari namenskega non-root uporabnika (`appuser`) in aplikacijo izvaja z omejenimi pravicami, kar je skladno s principom najmanjših privilegijev (least privilege). Frontend Dockerfile v produkcijskem načinu zgradi statične datoteke in jih streže prek lahkega procesa Nginx.
 
 Arhitekturni diagram je pripravljen tudi kot Mermaid artefakt v `docs/diagrams/architecture.mmd`.
 
@@ -186,14 +186,14 @@ Backend vsebniki tečejo kot non-root uporabnik (appuser), kar zmanjša posledic
 
 ### 7.4 Podatkovni model
 
-Relacijska baza vsebuje stiri glavne tabele:
+Relacijska baza vsebuje štiri glavne tabele:
 
-- **users** — uporabniski racuni z email naslovom, bcrypt hash geslom in vlogo (user/admin)
-- **documents** — metapodatki o nalozenih PDF dokumentih, vkljucno z lastnikom, kljucem v objektni hrambi, statusom obdelave in morebitnim povzetkom
-- **processing_jobs** — zapisi asinhronih obdelovalnih nalog (summary, question), s statusom (queued, running, completed, failed), vhodom job_input in rezultatom
-- **question_answers** — trajni zapisi vprasanj in odgovorov nad posameznim dokumentom, vkljucno z nacinom generiranja (provider ali fallback)
+- **users** — uporabniški računi z e-poštnim naslovom, bcrypt-zgoščeno vrednostjo gesla in vlogo (user/admin)
+- **documents** — metapodatki o naloženih PDF-dokumentih, vključno z lastnikom, ključem v objektni hrambi, statusom obdelave in morebitnim povzetkom
+- **processing_jobs** — zapisi asinhronih obdelovalnih opravil (summary, question) s statusom (queued, running, completed, failed), vhodom `job_input` in rezultatom
+- **question_answers** — trajni zapisi vprašanj in odgovorov nad posameznim dokumentom, vključno z načinom generiranja (provider ali fallback)
 
-Shema je upravljana z Alembic migracijami. Zacetna migracija (`001_initial.py`) ustvari vse stiri tabele. Ob produkcijskem zagonu deploy skripta izvede `alembic upgrade head` pred zagonom aplikacije.
+Shema je upravljana z Alembic-migracijami. Začetna migracija (`001_initial.py`) ustvari vse štiri tabele. Ob produkcijskem zagonu deploy-skripta izvede `alembic upgrade head` pred zagonom aplikacije.
 
 ### 7.5 API zasnova
 
@@ -204,7 +204,7 @@ Backend izpostavlja 24 REST endpointov, razdeljenih v šest logičnih skupin:
 | Zdravje | `GET /health`, `GET /ready`, `GET /metrics` | Health check, preverjanje odvisnosti, Prometheus metrike |
 | Avtentikacija | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | Registracija, prijava, profil trenutnega uporabnika |
 | Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `PATCH /documents/{id}/tags`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs`, `GET /documents/{id}/answers`, `DELETE /documents/{id}/answers/{answerId}`, `DELETE /documents/{id}/answers` | CRUD, prenos PDF, oznake, povzemanje, Q&A (sinhrono in asinhrono), zgodovina odgovorov, brisanje posameznega ali vseh odgovorov |
-| Jobe | `GET /jobs/{id}` | Preverjanje statusa asinhrone obdelave |
+| Opravila | `GET /jobs/{id}` | Preverjanje statusa asinhrone obdelave |
 | Admin | `GET /admin/users`, `GET /admin/stats`, `PATCH /admin/users/{id}/role` | Seznam uporabnikov, statistike, upravljanje vlog |
 | Status | `GET /api/v1/status` | Pregled konfiguracije in zmožnosti API |
 
@@ -216,21 +216,21 @@ Vsi endpointi imajo definirane `summary` in `description` parametre za OpenAPI d
 
 ### 8.1 Registracija in prijava
 
-Uporabnik v uporabniskem vmesniku vnese podatke za registracijo ali prijavo. Backend ob registraciji ustvari uporabnika, zasciti geslo s hash funkcijo in ga shrani v relacijsko bazo. Ob prijavi backend preveri veljavnost poverilnic in izda JWT dostopni zeton. Frontend zeton shrani lokalno in ga posilja v glavi zahtevkov pri vseh zascitenih endpointih.
+Uporabnik v uporabniškem vmesniku vnese podatke za registracijo ali prijavo. Backend ob registraciji ustvari uporabniški račun, zgoščeno obdela geslo in ga shrani v relacijsko podatkovno bazo. Ob prijavi preveri veljavnost poverilnic in izda JWT-dostopni žeton. Frontend žeton shrani lokalno in ga posreduje v glavi zahtevkov pri vseh zaščitenih endpointih.
 
 ### 8.2 Upload dokumenta
 
-Ko prijavljen uporabnik nalozi PDF, backend najprej preveri tip in velikost datoteke. Datoteka se nato shrani v MinIO bucket, v PostgreSQL pa se zapiše metapodatek: lastnik dokumenta, ime datoteke, ključ v objektni hrambi, velikost, tip in stanje obdelave. Ta tok dokazuje dejansko integracijo med spletno storitvijo, podatkovno bazo in objektno hrambo.
+Ko prijavljeni uporabnik naloži PDF-dokument, backend najprej preveri tip in velikost datoteke. Datoteka se nato shrani v MinIO-bucket, v PostgreSQL pa se zapišejo metapodatki: lastnik dokumenta, ime datoteke, ključ v objektni hrambi, velikost, tip in stanje obdelave. Ta tok jasno dokazuje integracijo med spletno storitvijo, podatkovno bazo in objektno hrambo.
 
 ### 8.3 Povzemanje dokumenta
 
-Za generiranje povzetka sistem uporablja prioritetno verigo AI ponudnikov. Primarni ponudnik je Groq (Llama 4 Scout 17B-16E), ki ponuja brezplačen API z visoko hitrostjo (~750 tok/s). Če Groq ni dostopen, sistem samodejno preklopi na Google Gemini 2.0 Flash ali OpenAI gpt-4o-mini. Če nobena zunanja integracija ni na voljo, sistem uporabi lokalni fallback povzetek, kar omogoča delovanje tudi v nizkocenovnem ali demo okolju. Povzetek teče asinhrono: frontend ustvari job, backend ga obdela v ozadju, rezultat pa je dostopen prek pollinga statusa.
+Za generiranje povzetka sistem uporablja prioritetno verigo ponudnikov umetne inteligence. Primarni ponudnik je Groq (Llama 4 Scout 17B-16E), ki omogoča hitro in cenovno ugodno obdelavo. Če Groq ni dostopen, sistem samodejno preklopi na Google Gemini 2.0 Flash ali OpenAI gpt-4o-mini. Če nobena zunanja integracija ni na voljo, se uporabi lokalni nadomestni povzetek, kar omogoča delovanje tudi v nizkocenovnem ali demonstracijskem okolju. Povzemanje teče asinhrono: frontend ustvari opravilo, backend ga obdela v ozadju, rezultat pa je na voljo prek pollinga statusa.
 
 ### 8.4 Dokumentni Q&A
 
 Uporabnik lahko na ravni posameznega dokumenta odda vprašanje. Backend iz MinIO pridobi datoteko, iz PDF-ja izlušči besedilo, ga razdeli na segmente (RAG-lite pristop) in z BM25 algoritmom (k1=1,5, b=0,75) rangira segmente po relevantnosti za zastavljeno vprašanje. Top 5 najrelevantnejših segmentov se pošlje AI ponudniku, ki generira kontekstualni odgovor. Vprašanje in odgovor se trajno shranita v bazo, kar omogoča sledljivost in kasnejšo razširitev v bolj bogat pogovorni vmesnik. Ta pristop je učinkovitejši od pošiljanja celotnega dokumenta, saj zmanjša porabo tokenov in izboljša kakovost odgovorov.
 
-Podatkovni tokovi za prijavo, upload, asinhroni povzetek in dokumentni Q&A so zbrani v naslednjem diagramu:
+Podatkovni tokovi za prijavo, nalaganje dokumentov, asinhroni povzetek in dokumentni Q&A so prikazani v naslednjem diagramu:
 
 ```mermaid
 sequenceDiagram
@@ -285,37 +285,37 @@ sequenceDiagram
     B-->>F: Odgovor
 ```
 
-Diagram prikazuje celoten zivljenjski cikel podatkov od registracije do dokumentnega Q&A. Vsak zahtevek prehaja skozi Nginx (varnostne glave), nato skozi rate limiter (za obcutljive endpointe), in koncno do backend logike, ki komunicira z bazo, objektno hrambo in AI storitvijo.
+Diagram prikazuje celoten življenjski cikel podatkov od registracije do dokumentnega Q&A. Vsak zahtevek prehaja skozi Nginx, nato skozi mehanizem omejevanja hitrosti zahtevkov in končno do backend-logike, ki komunicira s podatkovno bazo, objektno hrambo in AI-storitvijo.
 
-Podrobnejsa datoteka diagramov je dostopna v repozitoriju (`docs/diagrams/data-flow.mmd`).
+Podrobnejša datoteka diagramov je dostopna v repozitoriju (`docs/diagrams/data-flow.mmd`).
 
 ## 9. Analiza varnosti
 
 ### 9.1 Identiteta in dostop
 
-Sistem uporablja JWT avtentikacijo (algoritem HS256) z uporabo knjiznice python-jose. Uporabnik po uspesni prijavi prejme podpisan zeton, ki ga uporablja za dostop do zascitenih endpointov. Lastnistvo dokumentov je preverjeno na ravni backend logike, tako da uporabnik ne more dostopati do dokumentov drugega uporabnika samo z ugibanjem identifikatorja.
+Sistem uporablja JWT-avtentikacijo (algoritem HS256) s knjižnico `python-jose`. Uporabnik po uspešni prijavi prejme podpisan žeton, ki ga uporablja za dostop do zaščitenih endpointov. Lastništvo dokumentov se preverja na ravni backend-logike, zato uporabnik ne more dostopati do dokumentov drugega uporabnika zgolj z ugibanjem identifikatorja.
 
-Ob zagonu v produkcijskem nacinu sistem preverja, da privzeti skrivni kljuc (`SECRET_KEY`) ni ostal na demo vrednosti, saj bi to pomenilo kriticno varnostno ranljivost.
+Ob zagonu v produkcijskem načinu sistem dodatno preveri, da privzeti skrivni ključ (`SECRET_KEY`) ni ostal na demonstracijski vrednosti, saj bi to pomenilo kritično varnostno ranljivost.
 
-### 9.2 Zascita gesel
+### 9.2 Zaščita gesel
 
-Gesla se ne hranijo v cisti obliki, ampak zgolj kot bcrypt hash vrednosti (knjiznica passlib). Gesla morajo imeti najmanj 8 znakov in najvec 128 znakov. Email naslovi se validirajo s knjiznico email-validator. To je osnovni, vendar nujni varnostni ukrep za vse resne spletne storitve.
+Gesla se ne hranijo v čisti obliki, temveč izključno kot bcrypt-zgoščene vrednosti z uporabo knjižnice `passlib`. Gesla morajo imeti najmanj 8 in največ 128 znakov. E-poštni naslovi se validirajo s knjižnico `email-validator`. Gre za osnovni, vendar nujni varnostni ukrep vsake resne spletne storitve.
 
-### 9.3 Zascita dokumentov
+### 9.3 Zaščita dokumentov
 
-Dokumenti niso javno dostopni v objektni hrambi. Dostop do njih poteka skozi aplikacijsko logiko, kar omogoca centraliziran nadzor. V produkciji je dodatno pomembno, da MinIO ni neposredno izpostavljen javnemu omrezju.
+Dokumenti v objektni hrambi niso javno dostopni. Dostop do njih poteka prek aplikacijske logike, kar omogoča centraliziran nadzor nad pravicami dostopa. V produkcijskem okolju je dodatno pomembno, da MinIO ni neposredno izpostavljen javnemu omrežju.
 
 ### 9.4 Omejitev hitrosti zahtevkov (rate limiting)
 
-Za zascito pred brute-force napadi in prekomerno uporabo je implementirano omejevanje hitrosti zahtevkov z uporabo knjiznice slowapi. Avtentikacijski endpointi (registracija in prijava) so omejeni na 5 zahtevkov na minuto na IP naslov. AI endpointi (povzemanje in Q&A) so omejeni na 10 zahtevkov na minuto. Ob prekoracitvi uporabnik prejme standardni HTTP odgovor 429 (Too Many Requests).
+Za zaščito pred brute-force napadi in prekomerno uporabo je implementirano omejevanje hitrosti zahtevkov s knjižnico `slowapi`. Avtentikacijski endpointi so omejeni na 5 zahtevkov na minuto na IP-naslov, AI-endpointi pa na 10 zahtevkov na minuto. Ob prekoračitvi omejitve uporabnik prejme standardni HTTP-odgovor 429.
 
 ### 9.5 Varnostne glave in reverse proxy
 
-Nginx reverse proxy v produkcijskem nacinu dodaja naslednje varnostne glave HTTP odgovorom:
+Nginx reverse proxy v produkcijskem načinu dodaja naslednje varnostne glave HTTP-odgovorom:
 
-- `X-Content-Type-Options: nosniff` — preprecitev MIME-type sniffinga
-- `X-Frame-Options: DENY` — zascita pred clickjackingom
-- `X-XSS-Protection: 1; mode=block` — dodatna XSS zascita v starejsih brskalnikih
+- `X-Content-Type-Options: nosniff` — preprečitev MIME-type sniffinga
+- `X-Frame-Options: DENY` — zaščita pred clickjackingom
+- `X-XSS-Protection: 1; mode=block` — dodatna XSS-zaščita v starejših brskalnikih
 - `Referrer-Policy: strict-origin-when-cross-origin` — nadzor nad referrer podatki
 - `Content-Security-Policy` — omejevanje virov skript, stilov in povezav
 
@@ -323,49 +323,49 @@ Dodatno je aktivirana gzip kompresija za besedilne vsebine in omejitev velikosti
 
 ### 9.6 Validacija vhodnih podatkov
 
-Vsi vhodni podatki so validirani z uporabo Pydantic shem. Vprasanja pri dokumentnem Q&A morajo imeti najmanj 3 in najvec 500 znakov, kar prepreci zlorabo z izjemno dolgimi vnosi. Email format se validira na ravni sheme, imena datotek pa se sanitizirajo ob nalaganju.
+Vsi vhodni podatki se validirajo s Pydantic-shemami. Vprašanja pri dokumentnem Q&A morajo imeti najmanj 3 in največ 500 znakov, kar zmanjšuje možnost zlorabe z izjemno dolgimi vnosi. Oblika e-poštnega naslova se preverja na ravni sheme, imena datotek pa se ob nalaganju sanitizirajo.
 
 ### 9.7 Strukturirano logiranje
 
-Backend uporablja knjiznico structlog za strukturirano JSON logiranje. Vsak HTTP zahtevek se belezi z metodo, potjo, statusno kodo in trajanjem v milisekundah. Globalni exception handler prepreci uhajanje notranjih podrobnosti napak (stack trace) v produkcijskem odgovoru — uporabnik prejme le genericno sporocilo, podrobnosti pa se zapisejo v dnevnik.
+Backend uporablja knjižnico `structlog` za strukturirano JSON-logiranje. Vsak HTTP-zahtevek se beleži z metodo, potjo, statusno kodo in trajanjem v milisekundah. Globalni obdelovalnik izjem preprečuje uhajanje notranjih podrobnosti napak v produkcijskem odgovoru; uporabnik prejme le generično sporočilo, podrobnosti pa se zapišejo v dnevnik.
 
 ### 9.8 CORS in OWASP Top 10
 
-CORS politika je omejene: dovoljene so le metode GET, POST, PATCH, DELETE in OPTIONS, le glave Authorization in Content-Type. V kontekstu OWASP Top 10 (2021) sistem naslavlja:
+CORS politika je omejena: dovoljene so le metode GET, POST, PATCH, DELETE in OPTIONS ter glavi Authorization in Content-Type. V kontekstu OWASP Top 10 (2021) sistem naslavlja:
 
-- **A01 Broken Access Control** — lastnistveno preverjanje za dokumente
+- **A01 Broken Access Control** — lastništveno preverjanje za dokumente
 - **A02 Cryptographic Failures** — bcrypt hash za gesla, HS256 za JWT
 - **A03 Injection** — Pydantic validacija, SQLAlchemy ORM namesto surovega SQL
-- **A04 Insecure Design** — modularna arhitektura z loceno podatkovno, storitveno in API plastjo
-- **A05 Security Misconfiguration** — startup validacija skrivnega kljuca, varnostne glave
+- **A04 Insecure Design** — modularna arhitektura z ločeno podatkovno, storitveno in API-plastjo
+- **A05 Security Misconfiguration** — startup-validacija skrivnega ključa, varnostne glave
 - **A07 Identification and Authentication Failures** — rate limiting na avtentikacijskih endpointih
 
 ### 9.9 Tveganja AI integracije
 
 AI integracija prinaša več posebnih tveganj:
 
-1. uhajanje obcutljivih podatkov do zunanjega ponudnika,
+1. uhajanje občutljivih podatkov do zunanjega ponudnika,
 2. prompt injection zlonamerno oblikovanih dokumentov,
 3. variabilni stroški ob večjem številu zahtevkov,
-4. netocni ali halucinirani odgovori.
+4. netočni ali halucinirani odgovori.
 
-Za zmanjsanje tveganja je bila uvedena fallback moznost brez zunanje storitve, omejitev velikosti dokumentov in arhitekturna zamenljivost AI adapterja.
+Za zmanjšanje tveganja je bila uvedena fallback-možnost brez zunanje storitve, omejitev velikosti dokumentov in arhitekturna zamenljivost AI-adapterja.
 
 ### 9.10 Znana omejitev: JWT v localStorage
 
-JWT dostopni zeton se v frontendu hrani v localStorage. To predstavlja potencialno XSS ranljivost, saj JavaScript na strani brskalnika lahko dostopa do te vrednosti. Alternativa je uporaba httpOnly piskotka, ki pa zahteva dodatno kompleksnost pri CSRF zasciti in ne omogoca enostavne rabe z Bearer shemo. Za obseg te naloge je izbira dokumentirana in sprejemljiva; v produkcijskem sistemu bi bila potrebna nadgradnja.
+JWT-dostopni žeton se v frontendu hrani v `localStorage`. To predstavlja potencialno XSS-ranljivost, saj lahko JavaScript na strani brskalnika dostopa do te vrednosti. Alternativa je uporaba `httpOnly` piškotka, ki pa zahteva dodatno kompleksnost pri CSRF-zaščiti in ne omogoča enostavne rabe z Bearer-shemo. Za obseg te naloge je taka izbira dokumentirana in sprejemljiva; v produkcijskem sistemu bi bila potrebna nadgradnja.
 
 ### 9.11 Povzetek tveganj in ukrepov
 
 | Tveganje | Posledica | Trenutni ukrep | Naslednji korak |
 | --- | --- | --- | --- |
-| Brute-force prijava | nepooblascen dostop | rate limiting (5/min na IP) | account lockout po N neuspesnih poskusih |
-| Uhajanje podatkov do zunanjega AI ponudnika | pravna in poslovna tveganja | fallback nacin brez zunanjega AI API | anonimizacija ali strozji izbor dokumentov za AI obdelavo |
+| Brute-force prijava | nepooblaščen dostop | rate limiting (5/min na IP) | account lockout po N neuspešnih poskusih |
+| Uhajanje podatkov do zunanjega AI ponudnika | pravna in poslovna tveganja | fallback-način brez zunanjega AI API | anonimizacija ali strožji izbor dokumentov za AI-obdelavo |
 | Nedostopnost baze ali MinIO | nedelovanje storitve | readiness endpoint in healthchecki | opozorila in avtomatizirano spremljanje stanja |
-| Napacna ali halucinirana AI vsebina | napacne odlocitve uporabnika | odgovor je vezan na konkreten dokument, ne na odprt klepet | prikaz opozorila in moznost revizije odgovora |
-| Rast AI stroskov | nepredvidljiv operativni strosek | fallback nacin in modularen AI adapter | omejitve porabe, merjenje uporabe in izbira cenejsega modela |
-| XSS napad na JWT | kraja uporabniskega zetona | sanitizacija vhodov, CSP glave | prehod na httpOnly piskotke |
-| Preobremenitev aplikacijskega procesa | slabsa odzivnost pri vecjem prometu | asinhroni job zapis in polling | namenska worker komponenta |
+| Napačna ali halucinirana AI-vsebina | napačne odločitve uporabnika | odgovor je vezan na konkreten dokument, ne na odprt klepet | prikaz opozorila in možnost revizije odgovora |
+| Rast AI-stroškov | nepredvidljiv operativni strošek | fallback-način in modularen AI-adapter | omejitve porabe, merjenje uporabe in izbira cenejšega modela |
+| XSS napad na JWT | kraja uporabniškega žetona | sanitizacija vhodov, CSP-glave | prehod na `httpOnly` piškotke |
+| Preobremenitev aplikacijskega procesa | slabša odzivnost pri večjem prometu | asinhroni zapis opravil in polling | namenska worker-komponenta |
 
 ## 10. Stroškovna analiza
 
@@ -392,92 +392,52 @@ JWT dostopni zeton se v frontendu hrani v localStorage. To predstavlja potencial
 | AI API | brezplačno (Groq free tier) | €0–15/mesec (OpenAI / Groq plačljiv) |
 | **Skupaj** | **~€6–7/mesec** | **€30–85/mesec** |
 
-Managed PaaS poenostavi operativni del, vendar vsaj 3–5× podrazzi mesecne stroske za primerljiv obseg. Za studentski projekt in manjso slovensko organizacijo je VPS pristop bistveno cenejsi, z dodatno odgovornostjo za sistemsko administracijo.
+Managed PaaS poenostavi operativni del, vendar praviloma vsaj 3- do 5-krat podraži mesečne stroške pri primerljivem obsegu uporabe. Za študentski projekt in manjšo slovensko organizacijo je VPS-pristop bistveno cenejši, vendar prinaša več odgovornosti za sistemsko administracijo.
 
-### 10.3 Razsirjeni scenarij
+### 10.3 Razširjeni scenarij
 
 V razširjenem scenariju se poveča število uporabnikov in dokumentov. Povečata se potreba po več prostora v objektni hrambi in bazi ter število AI poizvedb. Trenutno je Groq API brezplačen z omejitvijo hitrosti (30 zahtevkov/minuto), kar je dovolj za manjšo organizacijo. Če bi Groq omejil free tier, sistem samodejno preklopi na Gemini ali OpenAI, kjer bi strošek pri ~500 AI poizvedbah mesečno znašal ~€5–10/mesec, skupaj torej ~€8–15/mesec.
 
 ### 10.4 Skalirani scenarij
 
-Pri vecjem stevilu uporabnikov ali pogostem AI prometu glavni strosek ni vec zgolj VPS, ampak AI obdelava. Takrat bi bilo smiselno razmisliti o locenem workerju, vektorski shrambi, boljsi observability plasti in morda o delni uporabi upravljanih storitev. Prehod na vecji VPS (npr. Hetzner CX32 za ~€8/mesec) bi bil smiseln sele ob presezeni kapaciteti RAM-a.
+Pri večjem številu uporabnikov ali pogostejšem AI-prometu glavni strošek ni več zgolj VPS, temveč predvsem AI-obdelava. V takšnem primeru bi bilo smiselno razmisliti o ločenem workerju, vektorski hrambi, boljši plasti observability in morda tudi o delni uporabi upravljanih storitev. Prehod na zmogljivejši VPS bi bil smiseln šele ob dejansko preseženi kapaciteti pomnilnika ali procesorske moči.
 
-## 11. Kriticna ocena primernosti
+## 11. Kritična ocena primernosti
 
 ### 11.1 Prednosti rešitve
 
-Izbrana resitev je primerna za organizacijo, ki potrebuje cenovno ucinkovit sistem za dokumente in noce biti popolnoma odvisna od dragih upravljanih platform. Velika prednost je arhitekturna jasnost: uporabniki, dokumenti, objektna hramba, AI integracija in produkcijski deployment so jasno razmejeni.
+Izbrana rešitev je primerna za organizacijo, ki potrebuje cenovno učinkovit sistem za upravljanje dokumentov in ne želi biti popolnoma odvisna od dragih upravljanih platform. Velika prednost je arhitekturna jasnost: uporabniki, dokumenti, objektna hramba, AI-integracija in produkcijski deployment so jasno razmejeni.
 
-Dodatna prednost je modularna zasnova AI plasti. Sistem ne uporablja le enega ponudnika, temveč prioritetno verigo (Groq → Gemini → OpenAI → hevristični fallback), kar zagotavlja delovanje ne glede na razpoložljivost posameznega zunanjega API-ja. RAG-lite pristop z BM25 rangiranjem segmentov dokumenta zagotavlja, da AI ponudnik prejme le najrelevantnejše dele besedila, kar zmanjša porabo tokenov in izboljša kakovost odgovorov.
+Dodatna prednost je modularna zasnova AI-plasti. Sistem ne uporablja le enega ponudnika, temveč prioritetno verigo (Groq → Gemini → OpenAI → hevristični fallback), kar zagotavlja delovanje ne glede na razpoložljivost posameznega zunanjega API-ja. RAG-lite pristop z BM25-rangiranjem segmentov dokumenta zagotavlja, da AI-ponudnik prejme le najrelevantnejše dele besedila, kar zmanjša porabo tokenov in izboljša kakovost odgovorov.
 
 Projekt vključuje tudi celovit testni nabor (107 avtomatiziranih testov v 9 datotekah s ~90-odstotno pokritostjo), kar je za študentski projekt nadpovprečno in dokazuje zrelost razvojnega procesa.
 
 ### 11.2 Slabosti in omejitve
 
-Slabosti resitve so predvsem operativne. VPS zahteva samostojno skrb za posodobitve, TLS in delovanje vsebnikov. Varnostne kopije so avtomatizirane s skripto `backup.sh`, ki izvaja šifrirane posnetke (GPG AES-256) podatkovne baze in objektne hrambe z 7-dnevno rotacijo. Poleg tega je trenutna asinhrona obdelava izvedena z background task pristopom v aplikaciji, kar je dovolj za manjši obseg, ni pa idealno za vecjo obremenitev.
+Slabosti rešitve so predvsem operativne narave. VPS zahteva samostojno skrb za posodobitve, TLS-certifikate in delovanje vsebnikov. Varnostne kopije so sicer avtomatizirane s skripto `backup.sh`, ki izvaja šifrirane posnetke podatkovne baze in objektne hrambe, vendar tak pristop še ne dosega ravni polno upravljanih produkcijskih okolij. Poleg tega je asinhrona obdelava izvedena z uporabo znotrajprocesnih ozadnih opravil, kar je za manjši obseg uporabe ustrezno, ni pa optimalno za večje obremenitve ali strožje zahteve po zanesljivosti.
 
-CI/CD pipeline vključuje tako neprekinjeno integracijo (lint, testi, build) kot neprekinjeno dostavo — ob uspešnem push na `main` vejo se avtomatsko sproži SSH deploy na produkcijski VPS (6. job v GitHub Actions). Skripta `deploy.sh` posodobi vsebnike brez ročnega posega.
+CI/CD pipeline vključuje tako neprekinjeno integracijo (lint, testi, build) kot neprekinjeno dostavo. Ob uspešnem potisku na vejo `main` se samodejno sproži SSH-deployment na produkcijski VPS, kar predstavlja šesti job v GitHub Actions. Skripta `deploy.sh` posodobi vsebnike brez ročnega posega.
 
-Frontend je v različici v1.3.0 nadgrajen z Vue Router 4, ki omogoča prave URL poti (`/documents`, `/upload`, `/profile`, `/admin`) in lazy-loading posameznih strani. Skupno stanje je centralizirano v composable modulu (`useStore.js`) namesto Pinia/Vuex, kar ohranja enostavnost brez zunanjega upravljalnika stanja. Navigacijska zaščita (navigation guards) preprečuje dostop neprijavljenim uporabnikom in omejuje admin strani. Uporabniški vmesnik vključuje sidebar navigacijo z router-link elementi, iskanje, sortiranje, administracijsko ploščo in odzivno zasnovo.
+Z vidika uporabniške plasti je sistem v zadnjih razvojnih iteracijah prerasel osnovni demonstracijski vmesnik in postal celovita večstranska spletna aplikacija. Frontend uporablja Vue Router 4 za ločene poti (`/documents`, `/upload`, `/profile`, `/admin`), skupno stanje pa je centralizirano v modulu `useStore.js`, kar omogoča pregledno obravnavo prijave, dokumentov, administracije in asinhronih opravil. Navigacijska zaščita omejuje dostop neprijavljenim uporabnikom ter posebej varuje administrativne vsebine.
 
-V različici v1.3.2 je frontend dodatno izboljšan z naslednjimi funkcionalnostmi:
+Funkcionalno je bil uporabniški vmesnik nadgrajen z več elementi, ki izboljšujejo uporabniško izkušnjo in praktično vrednost sistema: trajna zgodovina vprašanj in odgovorov, zložljive kartice dokumentov, prikaz zadnje prijave, povezave do Swagger in ReDoc dokumentacije, temni način, statistične kartice, kopiranje povzetkov v odložišče ter vidni indikatorji obdelave. Ti elementi niso ključni zgolj z vidika videza, temveč tudi z vidika preglednosti, sledljivosti in uporabnosti sistema v realnem delovnem okolju.
 
-- **Persistenca Q&A zgodovine**: vprašanja in odgovori se zdaj nalagajo iz backend API-ja (`GET /documents/{id}/answers`) ob zagonu seje, kar prepreči izgubo podatkov ob osvežitvi strani. Uporabnik lahko postavi več zaporednih vprašanj, ki se prikažejo kronološko,
-- **Zložljive dokumentne kartice**: kartice dokumentov se samodejno zložijo od 4. dokumenta naprej, kar izboljša preglednost pri večjem številu dokumentov. Vsaka kartica ima gumb za razširitev/zložitev,
-- **Favicon**: aplikacija ima lastno ikono v brskalniku (SVG z gradientom v barvah aplikacije),
-- **Sledenje zadnje prijave**: uporabniški model vključuje polje `last_login_at`, ki se posodobi ob vsaki prijavi. Profilna stran prikazuje tako datum registracije kot datum zadnje prijave,
-- **Sidebar povezave za orodja**: administratorji imajo v stranski navigaciji neposredne povezave do API Docs (Swagger UI) in ReDoc dokumentacije.
+Pomembna nadgradnja je bila tudi podpora za zahtevnejše dokumente. Sistem uporablja tristopenjsko ekstrakcijo besedila s PyMuPDF, pypdf in OCR, kar omogoča obravnavo skeniranih ali slikovnih PDF-dokumentov. Poleg tega vključuje vgrajeni PDF-pregledovalnik, pogovorni Q&A-vmesnik, grafične prikaze stanja dokumentov in aktivnosti ter odzivno mobilno postavitev. S tem rešitev presega raven osnovnega prototipa in postane prepričljivejša tudi z vidika predstavitve pri zagovoru.
 
-V različici v1.4.0 so dodane naslednje izboljšave uporabniškega vmesnika:
+Kljub temu ostajajo nekatere pomembne omejitve. Frontend še ne izkorišča v celoti backend-podprte paginacije, prikaz AI-markdown vsebine bi bilo smiselno dodatno sanitizirati, asinhrona obdelava pa še vedno temelji na znotrajprocesnih ozadnih opravilih in ne na ločeni worker-arhitekturi. Rešitev je torej dovolj zrela za izpitno nalogo, ni pa še na ravni produkcijsko utrjenega sistema za večjo organizacijo.
 
-- **Temni način (dark mode)**: toggle gumb v stranski navigaciji omogoča preklop med svetlim in temnim načinom. Izbira se trajno shrani v localStorage. Celoten nabor CSS spremenljivk se prepiše za temno temo, kar zagotavlja konsistentno vizualno izkušnjo,
-- **Statistične kartice na pregledu dokumentov**: nad seznamom dokumentov se prikazujejo 4 kartice s statistikami — število dokumentov, generiranih povzetkov, zastavljenih vprašanj in odstotek obdelanih dokumentov,
-- **Kopiranje povzetka v odložišče**: vsak generirani povzetek ima gumb »Kopiraj«, ki z uporabo Clipboard API prekopira besedilo v sistemsko odložišče z vizualnim potrditvenim odzivom,
-- **Izboljšane animacije med AI obdelavo**: med generiranjem povzetka ali odgovora se na kartici dokumenta prikaže animiran svetleči trak in pulzirajoč okvir, ki uporabniku jasno sporočata, da operacija teče.
-
-V različici v1.4.1 je dodana podpora za skenirane in slikovne PDF dokumente:
-
-- **Tristopenjska ekstrakcija besedila**: sistem najprej poskuša z PyMuPDF (MuPDF), ki bistveno bolje obdeluje kompleksne pisave, tabele in kodiranja kot pypdf. Če PyMuPDF vrne premalo besedila (< 50 znakov), se poskuša s pypdf (vključno z layout načinom). Če tudi pypdf ne uspe, se aktivira OCR,
-- **OCR za skenirane dokumente (Tesseract)**: vsaka stran PDF-ja se renderira v sliko pri 300 DPI z uporabo PyMuPDF-ja, nato pa Tesseract opravi optično prepoznavanje znakov. Podprta sta slovenščina (`slv`) in angleščina (`eng`),
-- **Robustna obravnava napak**: vsaka stopnja ekstrakcije samostojno obravnava napake (poškodovani PDF, prazen tok bajtov), kar zagotavlja, da sistem nikoli ne preneha delovati — najslabši rezultat je prazen niz, ne pa sesutje aplikacije.
-
-V različici v1.5.0 je bila izvedena obsežna nadgradnja uporabniškega vmesnika in funkcionalnosti:
-
-- **Vgrajeni PDF pregledovalnik**: uporabnik lahko odpre PDF dokument neposredno v aplikaciji brez prenosa datoteke. Pregledovalnik temelji na knjižnici pdfjs-dist (v5.5) in ponuja navigacijo po straneh, približevanje/oddaljevanje in tipkovnične bližnjice (puščice za strani, Escape za zapiranje). Renderiranje poteka v Canvas elementu znotraj modalnega okna,
-- **Pogovorno okno za dokumentni Q&A (ChatQA)**: namesto preprostega obrazca za vprašanja je zdaj implementiran pogovorni vmesnik v slogu sodobnih klepetov — uporabnikova vprašanja se prikazujejo na desni strani, AI odgovori z avatarjem na levi. Podprti so Markdown odgovori (parsiranje z knjižnico `marked`), izpis vira odgovora (source_mode), časovni žigi ter tipkalni indikator med obdelavo,
-- **Interaktivni grafični prikazi (chart.js)**: na strani Dokumenti sta dodana dva grafikona — krožni diagram za prikaz statusov dokumentov (pripravljeni, v obdelavi, čakajoči, neuspešni) in stolpični diagram s časovnico nalaganja dokumentov po mesecih. Za izris se uporabljata knjižnici chart.js in vue-chartjs,
-- **Odzivna zasnova za mobilne naprave**: celoten GUI je prilagojen za manjše zaslone. Hamburger gumb odpre stransko navigacijo kot overlay, statistične kartice se prerazporedijo v dve ali eno kolono, stolpci dokumentnih kartic pa se zmanjšajo. CSS media queries pokrivajo tri prelomne točke (860px, 640px, 540px),
-- **Statistične kartice na pregledu dokumentov**: nad seznamom dokumentov se prikazujejo 4 kartice z ključnimi metrikami: število dokumentov, generiranih povzetkov, zastavljenih vprašanj in odstotek obdelanih dokumentov.
-
-V različici v1.5.1 so implementirane naslednje izboljšave in popravki:
-
-- **Popravek PDF pregledovalnika**: spremenjena nastavitev delavca (worker) za pdfjs-dist v5 na Vite-kompatibilen `?url` import vzorec, kar odpravlja prazno modalno okno v produkciji,
-- **Točen čas prijave in registracije**: profilna stran in administracijska tabela zdaj prikazujeta popoln datum in uro v obliki »d. mmm yyyy ob HH:MM« namesto zgolj datuma,
-- **Čiščenje celotnega pogovora (clear chat)**: nov API endpoint `DELETE /documents/{id}/answers` omogoča brisanje vseh vprašanj in odgovorov za posamezen dokument naenkrat. V ChatQA komponenti je dodan gumb »Počisti« s potrditvenim dialogom,
-- **Posodobljena OpenAPI dokumentacija**: opis aplikacije v Swagger UI in ReDoc zdaj odraža polno funkcionalnost sistema (24 endpointov). Dodan je manjkajoči PATCH v CORS dovoljenih metodah,
-- **Obogatena administracijska plošča**: statistika sistema zdaj vključuje 7 kazalnikov (uporabniki, admini, dokumenti, povzetki, vprašanja, opravila, poraba prostora) ter tri grafikone — krožni diagram statusov dokumentov, stolpični diagram odgovorov po AI viru in krožni diagram opravil po statusu,
-- **Razširjen uporabniški profil**: profilna stran prikazuje 9 informacij vključno s skupno velikostjo naloženih datotek in odstotkom obdelanih dokumentov.
-
-V različici v1.5.2 je bila dodana nova funkcionalnost:
-
-- **Nalaganje več datotek hkrati (multi-file upload)**: uporabnik lahko izbere ali povleče več PDF datotek naenkrat. UploadSection.vue prikazuje čakalno vrsto z vsako datoteko, posameznim napredkom nalaganja in statusom (čaka/nalaga/uspešno/neuspešno),
-- **Označevanje dokumentov z oznakami (tags)**: dokumenti se lahko označijo s poljubnimi oznakami (do 20). Alembic migracija 003 doda JSON stolpec za oznake. Nov endpoint `PATCH /documents/{id}/tags` omogoča posodabljanje oznak. Dokumentna kartica prikazuje oznake kot čipe z možnostjo dodajanja in odstranjevanja. Na strani Dokumenti je dodan filter po oznakah,
-- **Prikaz povzetkov v strukturiranem Markdownu**: AI povzetek ni več navadno besedilo, temveč strukturiran Markdown z naslovi, seznami in poudarki. Prompt za AI ponudnika zahteva oblikovan izhod, ki se renderira v komponenti DocumentCard z uporabo knjižnice marked.js,
-- **Čarovnik za uvajanje novih uporabnikov (onboarding wizard)**: ob prvem obisku strani s praznim seznamom dokumentov se prikaže 4-koračni čarovnik, ki uporabnika vodi skozi korake: Dobrodošli → Naloži → Povzemi → Vprašaj. Čarovnik se ohrani v localStorage in se ne prikaže več po odprtju,
-- **Izboljšana prazna stanja**: ko uporabnik nima dokumentov, se prikaže bolj informativen prikaz z vizualnimi koraki (1-2-3), ki nakazujejo potek dela.
-
-### 11.3 Razlikovanje od enostavne uporabe AI orodij
+### 11.3 Razlikovanje od enostavne uporabe AI-orodij
 
 Pomembno je poudariti, v čem se ta rešitev razlikuje od neposredne uporabe ChatGPT ali drugega AI orodja. Neposredna uporaba AI orodja omogoča posamezne poizvedbe brez konteksta, brez sledljivosti in brez integracije z obstoječo infrastrukturo. Implementirana rešitev pa ponuja:
 
-1. **večuporabniško okolje** z avtentikacijo in lastnistvenim omejevanjem dostopa — vsak uporabnik vidi samo svoje dokumente,
+1. **večuporabniško okolje** z avtentikacijo in lastništvenim omejevanjem dostopa — vsak uporabnik vidi samo svoje dokumente,
 2. **trajno hrambo dokumentov** v S3-kompatibilni objektni hrambi z metapodatki v relacijski bazi,
 3. **RAG-lite pristop** — besedilo se razdeli na segmente in rangira z BM25, AI ponudnik prejme le top 5 segmentov, kar je učinkovitejše od pošiljanja celotnega dokumenta,
 4. **stroškovno učinkovitost** — sistem stane ~€7/mesec na lastnem VPS, medtem ko komercialne AI storitve stanejo €20+/mesec na uporabnika,
 5. **popoln nadzor nad podatki** — dokumenti ne zapustijo lastne infrastrukture (razen segmentov, ki se pošljejo AI ponudniku),
 6. **operativno zrelost** — health checki, Prometheus metrike, strukturirano logiranje, CI pipeline, TLS.
 
-Cilj naloge torej ni bil razvoj drugačnega AI modela, temveč integracija obstoječih AI storitev v varno, sledljivo in arhitekturno utemeljeno oblačno storitev.
+Cilj naloge torej ni bil razvoj novega AI-modela, temveč integracija obstoječih AI-storitev v varno, sledljivo in arhitekturno utemeljeno oblačno storitev.
 
 Naslednja tabela primerja funkcionalnosti tega sistema z neposredno uporabo splošnega AI orodja:
 
@@ -490,15 +450,15 @@ Naslednja tabela primerja funkcionalnosti tega sistema z neposredno uporabo splo
 | Infrastruktura | Odvisnost od ponudnika, brez nadzora nad podatki | Self-hosted VPS z TLS, monitoringom, CI/CD, backupi |
 | Strošek | €20+/mesec/uporabnika za komercialno AI naročnino | ~€7/mesec skupno za celotno infrastrukturo |
 | Operativna zrelost | Brez health checkov, metrik ali alertov | Prometheus/Grafana metrike, structlog, /ready endpoint |
-| Rozširljivost | Brez možnosti prilagoditve logike | Modularna arhitektura s prioritetno verigo ponudnikov |
+| Razširljivost | Brez možnosti prilagoditve logike | Modularna arhitektura s prioritetno verigo ponudnikov |
 
 ### 11.4 Primernost za slovensko organizacijo
 
-Kljub omejitvam je resitev za izpitno nalogo zelo primerna, ker jasno demonstrira razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije.
+Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, saj jasno demonstrira razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije.
 
-Za manjsi slovenski kolektiv je dodatna prednost tudi to, da je celotno arhitekturo mogoce gostovati na enem razumljivo upravljanem okolju. Tak pristop olajsa razlago sistema vodstvu ali mentorju, ker ni treba uvajati vec ponudnikov ali kompleksnih pogodbenih odvisnosti ze v prvi iteraciji.
+Za manjšo slovensko organizacijo je dodatna prednost tudi ta, da je mogoče celotno arhitekturo gostovati v enem razmeroma enostavno upravljanem okolju. Tak pristop olajša razlago sistema vodstvu, naročniku ali mentorju, saj že v prvi iteraciji ni treba uvajati več ponudnikov ali kompleksnih pogodbenih odvisnosti.
 
-Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladnosti, neprekinjeni razpolozljivosti ali hitri organizacijski rasti. V takem primeru bi bilo treba del odgovornosti prestaviti na upravljane storitve, dodatne varnostne kontrole in locene obdelovalne komponente.
+Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami glede skladnosti, neprekinjene razpoložljivosti ali hitre organizacijske rasti. V takšnem primeru bi bilo treba del odgovornosti prenesti na upravljane storitve, dodatne varnostne kontrole in ločene obdelovalne komponente.
 
 ## 12. Implementacijska validacija
 
@@ -508,7 +468,7 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | --- | --- | --- | --- |
 | Frontend | Vue | 3.5 | Enostrankovska aplikacija |
 | Frontend routing | Vue Router | 4 | Lazy-loaded strani, navigacijska zaščita |
-| Frontend teme | CSS Custom Properties | — | Svetli in temni način z localStorage persistenco |
+| Frontend teme | CSS Custom Properties | — | Svetli in temni način z vztrajnostjo nastavitve v `localStorage` |
 | Frontend build | Vite | 5.4 | Razvojni strežnik in produkcijska gradnja |
 | PDF pregledovalnik | pdfjs-dist | 5.5 | Vgrajeno branje PDF dokumentov v brskalniku |
 | Grafikoni | chart.js + vue-chartjs | 4.x / 5.x | Interaktivni krožni in stolpični diagrami |
@@ -524,7 +484,7 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | AI — primarni | Groq (Llama 4 Scout 17B-16E) | — | Generiranje povzetkov in odgovorov (brezplačno) |
 | AI — fallback | Gemini 2.0 Flash, OpenAI gpt-4o-mini | — | Nadomestni ponudniki ob nedostopnosti Groq |
 | RAG-lite | BM25 (rank-bm25) | — | Rangiranje segmentov dokumenta za Q&A |
-| Metrike | Prometheus (prometheus-fastapi-instrumentator) | v3.4 | /metrics endpoint za operativno opazljivost |
+| Metrike | Prometheus (prometheus-fastapi-instrumentator) | v3.4 | Endpoint `/metrics` za operativno opazljivost |
 | Monitoring | Grafana | 11.6 | Dashboard za vizualizacijo metrik (request rate, latenca, napake) |
 | Admin API | FastAPI dependency | — | Administracijska plošča (uporabniki, statistika, vloge) |
 | Reverse proxy | Nginx | 1.27 | Varnostne glave, gzip, TLS (Let's Encrypt) |
@@ -536,7 +496,7 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | OCR | Tesseract + pytesseract | 5.x / 0.3.13 | Optično prepoznavanje znakov za skenirane PDF dokumente |
 | Obdelava slik | Pillow | 11.2 | Renderiranje PDF strani v slike za OCR |
 | Lint | ruff | 0.11 | Preverjanje kakovosti Python kode |
-| Testiranje | pytest, pytest-cov | — | 107 avtomatiziranih testov v 9 datotekah (~90 % pokritost) |
+| Testiranje | pytest, pytest-cov | — | 107 avtomatiziranih testov v 9 datotekah (~90 % pokritosti) |
 
 ### 12.2 Razvojna validacija
 
@@ -546,11 +506,11 @@ Backend vsebuje **107 avtomatiziranih testov** v **9 testnih datotekah** s pribl
 
 - **test_health.py** (5 testov) — zdravstveni endpointi (`/health`, `/ready`) in Prometheus metrike (`/metrics`),
 - **test_auth.py** (8 testov) — registracija, prijava, profil uporabnika, napake pri avtentikaciji (napačno geslo, neveljaven token, podvojen email), admin zaščita endpointov,
-- **test_documents.py** (11 testov) — nalaganje dokumentov, validacija tipov datotek, lastnistveno omejevanje dostopa med uporabniki, paginacija seznama dokumentov, prenos (download) dokumentov, brisanje dokumentov,
+- **test_documents.py** (11 testov) — nalaganje dokumentov, validacija tipov datotek, lastništveno omejevanje dostopa med uporabniki, paginacija seznama dokumentov, prenos (download) dokumentov, brisanje dokumentov,
 - **test_document_flow.py** (6 testov) — validacija dolžine vprašanj (prekratka in predolga vprašanja), sinhrono povzemanje in dokumentni Q&A, asinhrona obdelava z job polling mehanizmom,
-- **test_admin_and_download.py** (9 testov) — administracijski endpointi (statistika platforme, seznam uporabnikov, sprememba vlog), zaščita admin endpointov, prenos dokumentov in cross-user preverjanje,
-- **test_delete_and_admin.py** (11 testov) — brisanje dokumentov s kaskadnim čiščenjem Q&A zapisov in jobov, odpornost na napake pri hrambi, upravljanje uporabniških vlog,
-- **test_storage_and_pdf.py** (16 testov) — MinIO upload/download/delete z mocki, obravnava S3 napak, PDF ekstrakcija besedila, layout-mode fallback, obravnava poškodovanih in praznih PDF datotek, graceful degradation za OCR fallback,
+- **test_admin_and_download.py** (9 testov) — administracijski endpointi (statistika platforme, seznam uporabnikov, sprememba vlog), zaščita admin endpointov, prenos dokumentov in preverjanje meduporabniške ločitve dostopa,
+- **test_delete_and_admin.py** (11 testov) — brisanje dokumentov s kaskadnim čiščenjem Q&A-zapisov in opravil, odpornost na napake pri hrambi, upravljanje uporabniških vlog,
+- **test_storage_and_pdf.py** (16 testov) — MinIO upload/download/delete z mocki, obravnava S3-napak, ekstrakcija besedila iz PDF, layout fallback, obravnava poškodovanih in praznih PDF-datotek ter postopna degradacija proti OCR-fallbacku,
 - **test_summary_service.py** (32 testov) — BM25 chunking in rangiranje, tokenizacija, fallback povzetki, detekcija ponudnikov (Groq → Gemini → OpenAI), generiranje povzetkov in odgovorov,
 - **test_security.py** (9 testov) — bcrypt saltanje gesel, preverjanje gesel, potek žetona, zavrnitev potečenega žetona, zavrnitev manjkajočega uporabnika.
 
@@ -567,11 +527,11 @@ Produkcijski deployment je bil opravljen 11. marca 2026 na Hetzner CX33 VPS (Ubu
 5. **TLS certifikat** — pridobitev Let's Encrypt certifikata z orodjem certbot za domeno doc-ai-assist.com,
 6. **DNS konfiguracija** — A zapisi na Namecheap (@ in www → 178.104.25.28).
 
-Po uspešnem deploymentu so bili vsi vsebniki (backend, frontend/proxy, PostgreSQL, MinIO) v stanju healthy. Aplikacija je dostopna na **https://doc-ai-assist.com** z HSTS glavami in A+ TLS konfiguracijo.
+Po uspešnem deploymentu so bili ključni aplikacijski vsebniki v stanju healthy. Aplikacija je dostopna na **https://doc-ai-assist.com** z HSTS glavami in TLS konfiguracijo prek Let's Encrypt.
 
 > 📸 **[POSNETEK 13: Security headers]** — V terminalu poženi: `curl -I https://doc-ai-assist.com`. Vstavi kot **Slika 13 — „Varnostne glave HTTP odgovorov“** v Word.
 
-> 📸 **[POSNETEK 14: docker compose ps]** — Na VPS poženi: `docker compose -f docker-compose.yml -f docker-compose.prod.yml ps`. Vstavi kot **Slika 14 — „Stanje Docker containerjev na VPS“** v Word.
+> 📸 **[POSNETEK 14: docker compose ps]** — Na VPS poženi: `docker compose -f docker-compose.yml -f docker-compose.prod.yml ps`. Vstavi kot **Slika 14 — „Stanje Docker-vsebnikov na VPS“** v Word.
 
 > 📸 **[POSNETEK 15: Deploy script output]** — Na VPS poženi `bash infrastructure/scripts/deploy.sh` (ali uporabi prejšnji screenshot). Vstavi kot **Slika 15 — „Uspešen deployment na VPS“** v Word.
 
@@ -579,9 +539,9 @@ Po uspešnem deploymentu so bili vsi vsebniki (backend, frontend/proxy, PostgreS
 
 ### 12.4 CI/CD pipeline
 
-GitHub Actions CI/CD pipeline izvaja šest ločenih jobov ob vsakem push ali pull request:
-1. **Backend lint** — preverjanje kakovosti Python kode z orodjem ruff (lint + format check),
-2. **Backend test** — zagon vseh 107 testov s pokritostjo (minimalni prag 70 %), uporaba pytest-cov,
+GitHub Actions CI/CD pipeline izvaja šest ločenih jobov ob vsakem pushu ali pull requestu:
+1. **Backend lint** — preverjanje kakovosti Python-kode z orodjem ruff (lint + format check),
+2. **Backend test** — zagon vseh 107 testov s pokritostjo (minimalni prag 70 %), z uporabo pytest-cov,
 3. **Frontend lint** — preverjanje formatiranja s Prettier,
 4. **Frontend build** — preverjanje gradnje Vue.js frontend aplikacije z Vite,
 5. **Docker build** — preverjanje da se backend in frontend Docker sliki uspešno zgradita,
@@ -593,7 +553,7 @@ Prvih pet jobov mora uspeti, preden je pull request odobren za merge. Deploy job
 
 Polna end-to-end validacija je bila opravljena na produkcijskem okolju (https://doc-ai-assist.com):
 
-1. **Registracija in prijava** — ustvarjen nov uporabniški račun, pridobljen JWT token,
+1. **Registracija in prijava** — ustvarjen nov uporabniški račun in pridobljen JWT-žeton,
 
 > 📸 **[POSNETEK 3: Landing page]** — Odpri https://doc-ai-assist.com (brez prijave). Vstavi kot **Slika 3 — „Začetna stran aplikacije“** v Word.
 
@@ -605,11 +565,11 @@ Polna end-to-end validacija je bila opravljena na produkcijskem okolju (https://
 
 > 📸 **[POSNETEK 6: Upload stran]** — Klikni „Naloži“ v sidebar-u. Vstavi kot **Slika 6 — „Nalaganje dokumenta“** v Word.
 
-3. **AI povzetek** — asinhroni job uspešno generiral povzetek prek Groq API,
+3. **AI povzetek** — asinhrono opravilo je uspešno generiralo povzetek prek Groq API-ja,
 
 > 📸 **[POSNETEK 7: AI povzetek]** — Na dokumentu klikni Povzemi in počakaj rezultat. Vstavi kot **Slika 7 — „AI-generiran povzetek dokumenta“** v Word.
 
-4. **Dokumentni Q&A** — vprašanje nad dokumentom vrnilo kontekstualni odgovor z RAG-lite BM25 pristopom,
+4. **Dokumentni Q&A** — vprašanje nad dokumentom je vrnilo kontekstualni odgovor z RAG-lite BM25-pristopom,
 
 > 📸 **[POSNETEK 8: Q&A primer]** — Postavi vprašanje nad dokumentom. Vstavi kot **Slika 8 — „Dokumentni Q&A — vprašanje in odgovor“** v Word.
 
@@ -633,17 +593,19 @@ Vsi scenariji so bili uspešno izvedeni brez napak.
 
 ## 13. Zaključek
 
-Naloga je pokazala, da je mogoče razviti integrirano spletno storitev, ki presega raven enostavne demonstracije orodij. Implementirana rešitev združuje spletni uporabniški vmesnik (Vue 3.5 z Vue Router 4), REST API (FastAPI), relacijsko podatkovno bazo (PostgreSQL 17), objektno hrambo (MinIO), AI integracijo s prioritetno verigo ponudnikov (Groq → Gemini → OpenAI), RAG-lite dokumentni Q&A z BM25 rangiranjem, administracijsko ploščo, Prometheus metrike z Grafana dashboardom in produkcijsko pot na VPS z avtomatskim TLS ter neprekinjeno dostavo. Prav ta povezava med gradniki predstavlja bistvo sodobnih cloud-native oziroma cloud-style arhitektur.
+Naloga je pokazala, da je mogoče razviti integrirano spletno storitev, ki presega raven enostavne demonstracije posameznih orodij. Implementirana rešitev povezuje spletni uporabniški vmesnik (Vue 3.5 z Vue Router 4), REST API (FastAPI), relacijsko podatkovno bazo (PostgreSQL 17), objektno hrambo (MinIO), AI-integracijo s prioritetno verigo ponudnikov (Groq → Gemini → OpenAI), RAG-lite dokumentni Q&A z BM25-rangiranjem, administracijsko ploščo, Prometheus-metrike z Grafana-dashboardom ter produkcijsko pot na VPS z avtomatskim TLS in neprekinjeno dostavo. Prav ta povezava med gradniki predstavlja bistvo sodobnih cloud-native oziroma cloud-style arhitektur.
 
 Sistem je v celoti nameščen in dostopen na **https://doc-ai-assist.com** (Hetzner CX33, Ubuntu 24.04, Let's Encrypt TLS).
 
-Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI dokumentacijo (23 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in CI/CD mehanizem prek GitHub Actions (6 jobov: backend-lint, backend-test, frontend-lint, frontend-build, Docker build, deploy). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Docker (vključno z multi-stage buildom), JWT avtentikacija z admin vlogami, integracija AI API s prioritetno verigo ponudnikov, RAG-lite BM25 pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus metrike z Grafana dashboardom za operativno opazljivost, Vue Router 4 z lazy-loading stranmi, šifrirane varnostne kopije (GPG AES-256) z avtomatsko rotacijo, administracijska plošča s statistiko in upravljanjem vlog, ter health in readiness endpointi. Skupaj 107 avtomatiziranih testov v 9 datotekah pokriva ~90 % kode.
+Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI-dokumentacijo (24 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in CI/CD-mehanizem prek GitHub Actions (6 jobov: backend-lint, backend-test, frontend-lint, frontend-build, Docker build, deploy). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Dockerjem, vključno z multi-stage buildom, JWT-avtentikacija z admin vlogami, integracija AI API z verigo ponudnikov, RAG-lite BM25-pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus-metrike z Grafana-dashboardom za operativno opazljivost, Vue Router 4 z lazy-loading stranmi, šifrirane varnostne kopije (GPG AES-256) z rotacijo, administracijska plošča s statistiko in upravljanjem vlog ter health in readiness endpointi. Skupaj 107 avtomatiziranih testov v 9 datotekah pokriva približno 90 % kode.
 
-Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastnistvenostnim omejevanjem dostopa, bcrypt zaščito gesel, rate limitingom, Pydantic validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €7/mesec na lastnem VPS z brezplačnim Groq AI API, kar je bistveno ceneje od primerljivih upravljanih platform.
+Pomembno je poudariti, da vrednost projekta ni v tem, da »AI nekaj napiše«, temveč v tem, da je umetna inteligenca umeščena v dejansko večuporabniško spletno storitev z avtentikacijo, lastništvom dokumentov, objektno hrambo, testiranjem, nadzorom dostopa, deploymentom in operativno opazljivostjo. Prav to predstavlja bistveno razliko med samostojnim pozivom v ChatGPT in integrirano spletno storitvijo v oblačni arhitekturi.
 
-Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za ločeno obdelavo, bogatejši Q&A kontekst z večvrstno pogovorno zgodovino, napredne varnostne politike (refresh token rotacija, account lockout) in uporaba vektorske shrambe za naprednejše semantično iskanje po dokumentih. OCR podpora za skenirane dokumente je bila v verziji v1.4.1 že implementirana s Tesseract in PyMuPDF.
+Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastništvenostnim omejevanjem dostopa, bcrypt-zaščito gesel, rate limitingom, Pydantic-validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €7 na mesec na lastnem VPS-strežniku z brezplačnim Groq API-jem, kar je bistveno ceneje od primerljivih upravljanih platform.
 
-Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, ker jasno demonstrira razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije v realnem tehnološkem okolju — z živečo produkcijsko instanco na https://doc-ai-assist.com.
+Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgraditi v bolj zrel sistem. Smiselne nadaljnje nadgradnje so boljši worker-model za ločeno obdelavo, frontend-paginacija za večje zbirke dokumentov, varnejše prikazovanje AI-markdown vsebine, bogatejši Q&A-kontekst z večvrstno pogovorno zgodovino, naprednejše varnostne politike (rotacija refresh-tokenov, account lockout) in uporaba vektorske hrambe za naprednejše semantično iskanje po dokumentih. Podpora OCR za skenirane dokumente je v rešitvi že vključena s Tesseractom in PyMuPDF-jem.
+
+Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, saj jasno dokazuje razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije v realnem tehnološkem okolju, kar dodatno potrjuje delujoča produkcijska instanca na https://doc-ai-assist.com.
 
 ## 14. Seznam virov
 

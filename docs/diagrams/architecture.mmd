@@ -1,26 +1,28 @@
 flowchart TB
     User[User or Professor]
-    Browser[Vue Frontend<br/>AuthPanel · UploadSection · DocumentCard]
-    Proxy[Nginx Reverse Proxy<br/>Security Headers · Gzip · TLS]
-    RateLimit[slowapi Rate Limiter<br/>Auth: 5/min · AI: 10/min]
-    Backend[FastAPI Backend<br/>structlog JSON Logging]
-    DB[(PostgreSQL<br/>Alembic Migrations)]
-    Storage[(MinIO S3-Compatible Storage)]
-    AI[AI Provider or Fallback Mode]
-    Jobs[(Processing Jobs<br/>Background Tasks)]
-    VPS[Personal VPS with Docker Compose]
+    Browser[Browser]
+    Frontend[Vue SPA<br/>Router · Pages · useStore<br/>PDF Viewer · Chat Q&A · Admin]
+    Proxy[Nginx Reverse Proxy<br/>TLS · Security Headers · Gzip]
+    RateLimit[slowapi Rate Limiter<br/>Auth 5/min · AI 10/min]
+    Backend[FastAPI Backend<br/>REST API · OpenAPI · structlog]
+    DB[(PostgreSQL<br/>Users · Documents · Jobs · Q&A)]
+    Storage[(MinIO<br/>S3-Compatible Object Storage)]
+    AI[AI Provider Chain<br/>Groq → Gemini → OpenAI → Fallback]
+    Jobs[(Async Processing<br/>Background Tasks + Job Records)]
+    Metrics[Prometheus Metrics<br/>/metrics]
+    Observe[Grafana Dashboards]
 
-    User --> Browser
-    Browser --> Proxy
-
-    subgraph VPS
+    subgraph VPS[Hetzner VPS · Docker Compose]
         Proxy --> RateLimit
         RateLimit --> Backend
         Backend --> DB
         Backend --> Storage
         Backend --> AI
         Backend --> Jobs
+        Backend --> Metrics
+        Metrics --> Observe
     end
 
+    User --> Browser --> Frontend --> Proxy
+    Backend --> Frontend
     Jobs --> Backend
-    Backend --> Browser

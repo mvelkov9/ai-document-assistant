@@ -13,12 +13,12 @@ This document consolidates the main logical architecture, deployment view, and k
 
 The system is built as a modular monolith with external integrations:
 
-1. Vue frontend for user interaction (component-based: AuthPanel, UploadSection, DocumentCard)
+1. Vue frontend for user interaction (Vue Router pages plus feature components such as AuthPanel, UploadSection, DocumentCard, PdfViewer, and ChatQA)
 2. FastAPI backend for API and orchestration with structured JSON logging (structlog)
 3. PostgreSQL for users, documents, Q&A records, and processing jobs (managed by Alembic migrations)
 4. MinIO for object storage of PDF files
 5. AI provider adapter with provider and fallback modes
-6. Background-task based async summary and Q&A processing with session lifecycle management
+6. Background-task based async summary and Q&A processing with persisted job records and polling
 7. Nginx reverse proxy with security headers, gzip, TLS preparation, and `/redoc` + `/docs` proxying
 8. slowapi rate limiting on authentication (5/min) and AI endpoints (10/min)
 
@@ -36,7 +36,7 @@ The production deployment runs on a Hetzner CX33 VPS (4 vCPU, 8 GB RAM, Ubuntu 2
 
 ### CI/CD
 
-GitHub Actions pipeline: ruff lint + format check → pytest with coverage (min 50%) → prettier check + frontend build → Docker image build. Deploy script runs Alembic migration and health check polling.
+GitHub Actions pipeline: ruff lint + format check → pytest with coverage (min 70%) → prettier check → frontend build → Docker image build → SSH deploy on `main`. The deploy script runs Alembic migration and health check polling.
 
 ## Main flows
 
