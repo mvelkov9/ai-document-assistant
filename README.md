@@ -20,7 +20,7 @@ AI Document Assistant is a semester project for the course *Integracija spletnih
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Vue 3.5 + Vite 5 + Vue Router 4, pdfjs-dist 5.5, chart.js, marked.js, Inter font, sidebar layout with admin panel |
+| Frontend | Vue 3.5 + Vite 5 + Vue Router 4, pdfjs-dist 5.5, chart.js, marked.js, Inter font, command center analytics, sidebar layout with admin panel |
 | Backend | Python 3.13, FastAPI 0.116, SQLAlchemy 2.0, Alembic |
 | Database | PostgreSQL 17 |
 | Object storage | MinIO (S3-compatible) |
@@ -78,6 +78,7 @@ uvicorn app.main:app --reload
 | `GET` | `/api/v1/auth/me` | Current user profile |
 | `POST` | `/api/v1/documents/upload` | Upload PDF |
 | `GET` | `/api/v1/documents` | List documents (paginated) |
+| `GET` | `/api/v1/documents/insights` | Portfolio insights, rankings, and recommendations |
 | `GET` | `/api/v1/documents/{id}` | Get document |
 | `GET` | `/api/v1/documents/{id}/download` | Download PDF |
 | `POST` | `/api/v1/documents/{id}/summarize` | Summarize (sync) |
@@ -129,7 +130,7 @@ pytest                                         # Run all tests
 pytest --cov=app --cov-report=term-missing     # With coverage
 ```
 
-Test suite covers: auth validation, upload constraints, document access control, pagination, Q&A validation, async jobs, health endpoints, admin endpoints, document download, Prometheus metrics, AI summary service, storage operations, PDF extraction, password hashing, JWT tokens. 107 test cases across 9 test files (~90% code coverage).
+Test suite covers: auth validation, upload constraints, document access control, pagination, workspace insights, Q&A validation, async jobs, health endpoints, admin endpoints, document download, Prometheus metrics, AI summary service, storage operations, PDF extraction, password hashing, JWT tokens. 107 test cases across 9 test files (~90% code coverage).
 
 Rate limiting is automatically disabled when `APP_ENV=test` to prevent cascade failures.
 

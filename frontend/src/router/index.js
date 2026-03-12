@@ -9,6 +9,12 @@ const routes = [
     meta: { guest: true },
   },
   {
+    path: '/workspace',
+    name: 'workspace',
+    component: () => import('../pages/WorkspacePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/documents',
     name: 'documents',
     component: () => import('../pages/DocumentsPage.vue'),
@@ -55,10 +61,10 @@ router.beforeEach(async (to) => {
     return '/'
   }
   if (to.meta.requiresAdmin && !isAdmin.value) {
-    return '/documents'
+    return '/workspace'
   }
   if (to.meta.guest && isAuthenticated.value) {
-    return '/documents'
+    return '/workspace'
   }
 })
 

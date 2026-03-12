@@ -46,3 +46,61 @@ class QuestionAnswerPublic(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class DocumentInsightEntry(BaseModel):
+    id: str
+    original_filename: str
+    processing_status: str
+    size_bytes: int
+    created_at: datetime
+    tags: list[str] = Field(default_factory=list)
+    has_summary: bool
+    answer_count: int = 0
+    insight_score: int = Field(ge=0, le=100)
+    badge: str
+    reason_key: str
+
+
+class InsightBreakdownItem(BaseModel):
+    label: str
+    count: int = Field(ge=0)
+
+
+class InsightActionItem(BaseModel):
+    key: str
+    count: int = Field(ge=0, default=0)
+    severity: str = Field(pattern="^(high|medium|low)$")
+
+
+class DocumentInsightsOverview(BaseModel):
+    total_documents: int = Field(ge=0)
+    ready_documents: int = Field(ge=0)
+    summary_documents: int = Field(ge=0)
+    tagged_documents: int = Field(ge=0)
+    documents_with_questions: int = Field(ge=0)
+    total_questions: int = Field(ge=0)
+    total_size_bytes: int = Field(ge=0)
+    workspace_score: int = Field(ge=0, le=100)
+    summary_coverage_pct: int = Field(ge=0, le=100)
+    tag_coverage_pct: int = Field(ge=0, le=100)
+    question_coverage_pct: int = Field(ge=0, le=100)
+
+
+class DocumentInsightsActivity(BaseModel):
+    uploads_last_7_days: int = Field(ge=0)
+    questions_last_7_days: int = Field(ge=0)
+    last_upload_at: datetime | None = None
+    last_question_at: datetime | None = None
+
+
+class DocumentInsightsResponse(BaseModel):
+    overview: DocumentInsightsOverview
+    activity: DocumentInsightsActivity
+    status_breakdown: list[InsightBreakdownItem] = Field(default_factory=list)
+    tag_breakdown: list[InsightBreakdownItem] = Field(default_factory=list)
+    action_items: list[InsightActionItem] = Field(default_factory=list)
+    most_active_documents: list[DocumentInsightEntry] = Field(default_factory=list)
+    ready_for_review: list[DocumentInsightEntry] = Field(default_factory=list)
+    needs_attention: list[DocumentInsightEntry] = Field(default_factory=list)
+    recently_uploaded: list[DocumentInsightEntry] = Field(default_factory=list)

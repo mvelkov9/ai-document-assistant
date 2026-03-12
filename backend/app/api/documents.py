@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.schemas.auth import UserPublic
 from app.schemas.document import (
     DocumentListResponse,
+    DocumentInsightsResponse,
     DocumentPublic,
     DocumentQuestionRequest,
     DocumentTagsRequest,
@@ -56,6 +57,20 @@ def list_documents(
     service = DocumentService(db)
     items, total = service.list_documents(current_user, skip=skip, limit=limit)
     return DocumentListResponse(items=items, total=total, skip=skip, limit=limit)
+
+
+@router.get(
+    "/insights",
+    response_model=DocumentInsightsResponse,
+    summary="Get document workspace insights",
+    description="Return aggregate portfolio analytics, recommendations, and ranked document collections for the authenticated user.",
+)
+def get_document_insights(
+    db: Session = Depends(get_db),
+    current_user: UserPublic = Depends(get_current_user),
+) -> DocumentInsightsResponse:
+    service = DocumentService(db)
+    return service.get_document_insights(current_user)
 
 
 @router.get(

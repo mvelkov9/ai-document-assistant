@@ -72,6 +72,68 @@ def test_list_documents_limit_capped(client, auth_headers) -> None:
     assert body["limit"] <= 100
 
 
+def test_document_insights_empty_workspace(client, auth_headers) -> None:
+    resp = client.get("/api/v1/documents/insights", headers=auth_headers)
+    body = resp.json()
+
+    assert resp.status_code == 200
+    assert body["overview"]["total_documents"] == 0
+    assert body["overview"]["workspace_score"] == 0
+    assert body["action_items"][0]["severity"] == "low"
+    assert body["action_items"][0]["key"] == "start-workspace"
+
+
+def test_document_insights_aggregate_workspace_metrics(client, auth_headers, mock_storage, mock_ai) -> None:
+    first_upload = client.post(
+        "/api/v1/documents/upload",
+        headers=auth_headers,
+        files={"file": ("analysis.pdf", BytesIO(b"%PDF-1.4 first"), "application/pdf")},
+    )
+    second_upload = client.post(
+        "/api/v1/documents/upload",
+        headers=auth_headers,
+        files={"file": ("notes.pdf", BytesIO(b"%PDF-1.4 second"), "application/pdf")},
+    )
+    first_id = first_upload.json()["id"]
+    second_id = second_upload.json()["id"]
+
+    tag_resp = client.patch(
+        f"/api/v1/documents/{first_id}/tags",
+        headers=auth_headers,
+        json={"tags": ["analiza", "porocilo"]},
+    )
+    summary_resp = client.post(f"/api/v1/documents/{first_id}/summarize", headers=auth_headers)
+    question_resp = client.post(
+        f"/api/v1/documents/{first_id}/ask",
+        headers=auth_headers,
+        json={"question": "Kaj je glavno sporocilo dokumenta?"},
+    )
+
+    assert tag_resp.status_code == 200
+    assert summary_resp.status_code == 200
+    assert question_resp.status_code == 200
+
+    insights_resp = client.get("/api/v1/documents/insights", headers=auth_headers)
+    body = insights_resp.json()
+
+    assert insights_resp.status_code == 200
+    assert body["overview"]["total_documents"] == 2
+    assert body["overview"]["ready_documents"] == 1
+    assert body["overview"]["summary_documents"] == 1
+    assert body["overview"]["tagged_documents"] == 1
+    assert body["overview"]["documents_with_questions"] == 1
+    assert body["overview"]["total_questions"] == 1
+    assert body["activity"]["uploads_last_7_days"] == 2
+    assert body["activity"]["questions_last_7_days"] == 1
+    assert body["most_active_documents"][0]["id"] == first_id
+    assert all(item["id"] != second_id or item["has_summary"] is False for item in body["recently_uploaded"])
+    assert any(item["label"] == "ready" and item["count"] == 1 for item in body["status_breakdown"])
+    assert any(item["label"] == "uploaded" and item["count"] == 1 for item in body["status_breakdown"])
+    assert any(item["label"] == "analiza" and item["count"] == 1 for item in body["tag_breakdown"])
+    assert any(item["key"] == "generate-missing-summaries" and item["count"] == 1 for item in body["action_items"])
+    assert any(item["reason_key"] == "next-step" for item in body["recently_uploaded"] if item["id"] == second_id)
+
+
 # ── Summarize / Q&A errors ──
 
 

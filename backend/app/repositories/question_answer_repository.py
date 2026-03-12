@@ -35,6 +35,16 @@ class QuestionAnswerRepository:
         )
         return list(self.db.scalars(statement).all())
 
+    def list_for_documents(self, document_ids: list[str]) -> list[QuestionAnswer]:
+        if not document_ids:
+            return []
+        statement = (
+            select(QuestionAnswer)
+            .where(QuestionAnswer.document_id.in_(document_ids))
+            .order_by(QuestionAnswer.created_at.desc())
+        )
+        return list(self.db.scalars(statement).all())
+
     def get_by_id(self, answer_id: str) -> QuestionAnswer | None:
         return self.db.get(QuestionAnswer, answer_id)
 

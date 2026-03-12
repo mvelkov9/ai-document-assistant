@@ -58,6 +58,16 @@ export async function listDocuments(token) {
   return parseResponse(response)
 }
 
+export async function getDocumentInsights(token) {
+  const response = await fetch(`${API_BASE_URL}/documents/insights`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  return parseResponse(response)
+}
+
 export async function uploadDocument(token, file) {
   const formData = new FormData()
   formData.append('file', file)

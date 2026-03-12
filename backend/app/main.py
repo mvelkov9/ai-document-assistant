@@ -43,6 +43,7 @@ app = FastAPI(
         "**Core features:**\n"
         "- JWT authentication with role-based access control (user / admin)\n"
         "- PDF document upload, storage (MinIO), download and in-app viewing\n"
+        "- Portfolio command center with document rankings, readiness insights and action items\n"
         "- AI-powered document summarization (Groq → Gemini → OpenAI → heuristic fallback)\n"
         "- RAG-lite document Q&A with BM25 segment ranking\n"
         "- Async background job processing with polling\n"
@@ -50,7 +51,7 @@ app = FastAPI(
         "- Admin dashboard with system statistics and user management\n"
         "- Prometheus metrics, structured logging, health & readiness checks\n"
         "- Rate limiting on auth and AI endpoints\n\n"
-        "**Endpoints:** 24 REST endpoints organized in auth, documents, jobs, admin, health and monitoring groups."
+        "**Endpoints:** 25 REST endpoints organized in auth, documents, jobs, admin, health and monitoring groups."
     ),
 )
 

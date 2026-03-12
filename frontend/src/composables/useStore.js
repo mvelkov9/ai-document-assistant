@@ -9,6 +9,7 @@ import {
   downloadDocument,
   getAdminStats,
   getAdminUsers,
+  getDocumentInsights,
   getJobStatus,
   getCurrentUser,
   listDocuments,
@@ -40,9 +41,11 @@ const sortField = ref('date')
 const selectedTag = ref('')
 const adminStats = ref(null)
 const adminUsers = ref([])
+const documentInsights = ref(null)
 const sidebarCollapsed = ref(false)
 const LANGUAGE_KEY = 'docassist-language'
 const language = ref(localStorage.getItem(LANGUAGE_KEY) || 'sl')
+const insightsBusy = ref(false)
 
 /* ── Dark mode ── */
 const DARK_KEY = 'docassist-dark'
@@ -148,6 +151,7 @@ function clearSession() {
   sessionToken.value = ''
   currentUser.value = null
   documents.value = []
+  documentInsights.value = null
   localStorage.removeItem(TOKEN_KEY)
 }
 
@@ -180,6 +184,18 @@ async function loadAllAnswers() {
   await Promise.all(documents.value.map((d) => loadAnswersForDocument(d.id)))
 }
 
+async function refreshInsights() {
+  if (!sessionToken.value) return
+  insightsBusy.value = true
+  try {
+    documentInsights.value = await getDocumentInsights(sessionToken.value)
+  } catch (e) {
+    setError(e.message)
+  } finally {
+    insightsBusy.value = false
+  }
+}
+
 async function bootstrapSession() {
   if (!sessionToken.value) {
     _sessionReadyResolve()
@@ -189,7 +205,7 @@ async function bootstrapSession() {
   try {
     currentUser.value = await getCurrentUser(sessionToken.value)
     await refreshDocuments()
-    await loadAllAnswers()
+    await Promise.all([loadAllAnswers(), refreshInsights()])
     if (isAdmin.value) await loadAdminData()
   } catch {
     clearSession()
@@ -214,7 +230,7 @@ async function handleLogin(form) {
     const tp = await loginUser(form)
     persistToken(tp.access_token)
     currentUser.value = await getCurrentUser(sessionToken.value)
-    void refreshDocuments().then(loadAllAnswers)
+    void refreshDocuments().then(() => Promise.all([loadAllAnswers(), refreshInsights()]))
     if (isAdmin.value) void loadAdminData()
     setMessage(t('messages.loginSuccess'))
     return true
@@ -243,6 +259,7 @@ async function handleUpload(file) {
   try {
     await uploadDocument(sessionToken.value, file)
     await refreshDocuments()
+    await Promise.all([loadAllAnswers(), refreshInsights()])
     setMessage(t('messages.uploadSuccess'))
     return true
   } catch (e) {
@@ -269,6 +286,7 @@ async function handleSummarize(documentId) {
     const job = await createSummaryJob(sessionToken.value, documentId)
     const result = await pollJob(job.id)
     await refreshDocuments()
+    await refreshInsights()
     setMessage(result ? t('messages.summaryReady') : t('messages.jobRunning'))
   } catch (e) {
     setError(e.message)
@@ -300,16 +318,7 @@ async function handleAsk(documentId, question) {
 
     // Remove the pending entry and add the real one
     documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== pendingId)
-    if (result) {
-      documentAnswers[documentId].push({
-        id: result.id || Date.now().toString(),
-        document_id: documentId,
-        question_text: result.job_input || question,
-        answer_text: result.result_text || t('messages.generatedNoContent'),
-        source_mode: 'async-job',
-        created_at: new Date().toISOString(),
-      })
-    }
+    if (result) await Promise.all([refreshDocuments(), loadAnswersForDocument(documentId), refreshInsights()])
     setMessage(result ? t('messages.answerReady') : t('messages.jobRunning'))
   } catch (e) {
     // Remove pending entry on error
@@ -327,6 +336,7 @@ function logout() {
   searchQuery.value = ''
   selectedTag.value = ''
   sortField.value = 'date'
+  documentInsights.value = null
   setMessage(t('messages.logoutSuccess'))
 }
 
@@ -335,6 +345,7 @@ async function handleDelete(documentId) {
     await deleteDocument(sessionToken.value, documentId)
     delete documentAnswers[documentId]
     await refreshDocuments()
+    await refreshInsights()
     setMessage(t('messages.documentDeleted'))
   } catch (e) {
     setError(e.message)
@@ -347,6 +358,7 @@ async function handleDeleteAnswer(documentId, answerId) {
     if (documentAnswers[documentId]) {
       documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== answerId)
     }
+    await refreshInsights()
     setMessage(t('messages.answerDeleted'))
   } catch (e) {
     setError(e.message)
@@ -357,6 +369,7 @@ async function handleClearAnswers(documentId) {
   try {
     await clearDocumentAnswers(sessionToken.value, documentId)
     documentAnswers[documentId] = []
+    await refreshInsights()
     setMessage(t('messages.conversationCleared'))
   } catch (e) {
     setError(e.message)
@@ -368,6 +381,7 @@ async function handleUpdateTags(documentId, tags) {
     const updated = await updateDocumentTags(sessionToken.value, documentId, tags)
     const idx = documents.value.findIndex((d) => d.id === documentId)
     if (idx !== -1) documents.value[idx] = updated
+    await refreshInsights()
   } catch (e) {
     setError(e.message)
   }
@@ -432,9 +446,11 @@ export function useStore() {
     selectedTag,
     adminStats,
     adminUsers,
+    documentInsights,
     sidebarCollapsed,
     darkMode,
     language,
+    insightsBusy,
 
     /* computed */
     isAuthenticated,
@@ -449,6 +465,7 @@ export function useStore() {
     setError,
     clearSession,
     refreshDocuments,
+    refreshInsights,
     bootstrapSession,
     loadAdminData,
     handleLogin,

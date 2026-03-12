@@ -35,7 +35,7 @@
   /* Provide store slices for child pages (e.g. LandingPage needs auth handlers) */
   async function loginAndRedirect(form) {
     const ok = await handleLogin(form)
-    if (ok && route.name !== 'documents') await router.replace('/documents')
+    if (ok && route.name !== 'workspace') await router.replace('/workspace')
   }
   provide('app', { authBusy, handleLogin: loginAndRedirect, handleRegister })
 
@@ -47,6 +47,7 @@
 
   /* Page metadata driven by current route */
   const pageMeta = computed(() => ({
+    workspace: { title: t('page.workspaceTitle'), subtitle: t('page.workspaceSubtitle') },
     documents: { title: t('page.documentsTitle'), subtitle: t('page.documentsSubtitle') },
     upload: { title: t('page.uploadTitle'), subtitle: t('page.uploadSubtitle') },
     profile: { title: t('page.profileTitle'), subtitle: t('page.profileSubtitle') },
@@ -111,6 +112,15 @@
           </div>
 
           <nav class="sidebar-nav">
+            <router-link to="/workspace" class="nav-item" active-class="active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 13h8V3H3z" />
+                <path d="M13 21h8v-6h-8z" />
+                <path d="M13 3h8v8h-8z" />
+                <path d="M3 21h8v-4H3z" />
+              </svg>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.workspace') }}</span>
+            </router-link>
             <router-link to="/documents" class="nav-item" active-class="active">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

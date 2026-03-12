@@ -38,6 +38,10 @@ class DocumentRepository:
         )
         return list(self.db.scalars(statement).all())
 
+    def list_all_for_owner(self, owner_id: str) -> list[Document]:
+        statement = select(Document).where(Document.owner_id == owner_id).order_by(Document.created_at.desc())
+        return list(self.db.scalars(statement).all())
+
     def count_for_owner(self, owner_id: str) -> int:
         from sqlalchemy import func
 
