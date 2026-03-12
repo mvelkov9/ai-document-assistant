@@ -45,7 +45,7 @@ class Settings(BaseSettings):
 
 
 def _validate_production_settings(s: Settings) -> None:
-    if s.app_env != "development" and s.secret_key == "change-me":
+    if s.app_env not in ("development", "test") and s.secret_key == "change-me":
         raise RuntimeError("SECRET_KEY must be changed from the default in non-development environments")
 
 
