@@ -17,6 +17,7 @@
     handleSummarize,
     handleAsk,
     handleDelete,
+    handleDeleteAnswer,
     handleDownload,
   } = useStore()
 </script>
@@ -96,6 +97,7 @@
           @summarize="handleSummarize"
           @ask="handleAsk"
           @delete="handleDelete"
+          @delete-answer="handleDeleteAnswer"
           @download="handleDownload"
         />
       </TransitionGroup>

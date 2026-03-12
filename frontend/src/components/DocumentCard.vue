@@ -9,7 +9,7 @@
     collapsed: { type: Boolean, default: false },
   })
 
-  const emit = defineEmits(['summarize', 'ask', 'delete', 'download'])
+  const emit = defineEmits(['summarize', 'ask', 'delete', 'delete-answer', 'download'])
   const questionDraft = ref('')
   const confirmingDelete = ref(false)
   const isCollapsed = ref(props.collapsed)
@@ -322,6 +322,18 @@
                   <span v-if="answer.created_at" class="answer-time">{{
                     formatDateTime(answer.created_at)
                   }}</span>
+                  <button
+                    class="btn-delete-answer"
+                    title="Izbriši odgovor"
+                    @click="emit('delete-answer', props.document.id, answer.id)"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path
+                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
               <div class="answer-bubble answer-q">
@@ -769,6 +781,29 @@
   .answer-time {
     font-size: 0.68rem;
     color: var(--text-light);
+  }
+
+  .btn-delete-answer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 0;
+  }
+  .btn-delete-answer svg {
+    width: 13px;
+    height: 13px;
+  }
+  .btn-delete-answer:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
   }
 
   .source-badge {

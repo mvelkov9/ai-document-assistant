@@ -214,3 +214,17 @@ export async function listDocumentAnswers(token, documentId) {
 
   return parseResponse(response)
 }
+
+export async function deleteDocumentAnswer(token, documentId, answerId) {
+  const response = await fetch(`${API_BASE_URL}/documents/${documentId}/answers/${answerId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}))
+    throw new Error(payload?.detail || 'Delete failed.')
+  }
+}

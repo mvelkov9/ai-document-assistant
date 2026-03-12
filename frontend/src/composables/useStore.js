@@ -4,6 +4,7 @@ import {
   createQuestionJob,
   createSummaryJob,
   deleteDocument,
+  deleteDocumentAnswer,
   downloadDocument,
   getAdminStats,
   getAdminUsers,
@@ -36,6 +37,12 @@ const sortField = ref('date')
 const adminStats = ref(null)
 const adminUsers = ref([])
 const sidebarCollapsed = ref(false)
+
+/* ── Session bootstrap promise ── */
+let _sessionReadyResolve
+const sessionReady = new Promise((resolve) => {
+  _sessionReadyResolve = resolve
+})
 
 /* ── Computed ── */
 const isAuthenticated = computed(() => Boolean(sessionToken.value && currentUser.value))
@@ -106,7 +113,10 @@ async function loadAllAnswers() {
 }
 
 async function bootstrapSession() {
-  if (!sessionToken.value) return
+  if (!sessionToken.value) {
+    _sessionReadyResolve()
+    return
+  }
   dashboardBusy.value = true
   try {
     currentUser.value = await getCurrentUser(sessionToken.value)
@@ -117,6 +127,7 @@ async function bootstrapSession() {
     clearSession()
   } finally {
     dashboardBusy.value = false
+    _sessionReadyResolve()
   }
 }
 
@@ -240,6 +251,18 @@ async function handleDelete(documentId) {
   }
 }
 
+async function handleDeleteAnswer(documentId, answerId) {
+  try {
+    await deleteDocumentAnswer(sessionToken.value, documentId, answerId)
+    if (documentAnswers[documentId]) {
+      documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== answerId)
+    }
+    setMessage('Odgovor je bil izbrisan.')
+  } catch (e) {
+    setError(e.message)
+  }
+}
+
 async function handleDownload(documentId, filename) {
   try {
     await downloadDocument(sessionToken.value, documentId, filename)
@@ -307,8 +330,10 @@ export function useStore() {
     handleAsk,
     logout,
     handleDelete,
+    handleDeleteAnswer,
     handleDownload,
     handleSetRole,
     formatDate,
+    sessionReady,
   }
 }

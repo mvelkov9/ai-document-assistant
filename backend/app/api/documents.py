@@ -180,6 +180,27 @@ def list_document_answers(
     return answers
 
 
+@router.delete(
+    "/{document_id}/answers/{answer_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a Q&A answer",
+    description="Delete a specific question-answer pair. Only the document owner can delete.",
+)
+def delete_answer(
+    document_id: str,
+    answer_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserPublic = Depends(get_current_user),
+) -> None:
+    service = DocumentService(db)
+    document = service.get_document(current_user, document_id)
+    if not document:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+    deleted = service.delete_answer(document_id, answer_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Answer not found.")
+
+
 @router.get(
     "/{document_id}/download",
     summary="Download a document",

@@ -1,7 +1,7 @@
 <script setup>
   import { useStore } from '../composables/useStore'
 
-  const { adminStats, adminUsers, currentUser, handleSetRole } = useStore()
+  const { adminStats, adminUsers, currentUser, handleSetRole, formatDate } = useStore()
 </script>
 
 <template>
@@ -55,6 +55,8 @@
               <th>Email</th>
               <th>Ime</th>
               <th>Vloga</th>
+              <th>Registriran</th>
+              <th>Zadnja prijava</th>
               <th>Akcije</th>
             </tr>
           </thead>
@@ -65,6 +67,8 @@
               <td>
                 <span class="role-pill" :class="'rp-' + u.role">{{ u.role }}</span>
               </td>
+              <td class="td-date">{{ formatDate(u.created_at) }}</td>
+              <td class="td-date">{{ formatDate(u.last_login_at) || '—' }}</td>
               <td class="td-actions">
                 <template v-if="u.id !== currentUser.id">
                   <button
@@ -218,6 +222,12 @@
 
   .td-email {
     font-weight: 500;
+  }
+
+  .td-date {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    white-space: nowrap;
   }
 
   .td-actions {

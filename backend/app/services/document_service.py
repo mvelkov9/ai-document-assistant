@@ -147,6 +147,12 @@ class DocumentService:
         records = self.qa_repository.list_for_document(document_id)
         return [QuestionAnswerPublic.model_validate(r) for r in records]
 
+    def delete_answer(self, document_id: str, answer_id: str) -> bool:
+        record = self.qa_repository.get_by_id(answer_id)
+        if not record or record.document_id != document_id:
+            return False
+        return self.qa_repository.delete_by_id(answer_id)
+
     async def ask_document_question_for_owner(
         self,
         owner_id: str,

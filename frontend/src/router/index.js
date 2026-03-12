@@ -43,8 +43,10 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
-  const { isAuthenticated, isAdmin } = useStore()
+router.beforeEach(async (to) => {
+  const { isAuthenticated, isAdmin, sessionReady } = useStore()
+
+  await sessionReady
 
   if (to.meta.requiresAuth && !isAuthenticated.value) {
     return '/'

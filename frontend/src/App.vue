@@ -45,9 +45,6 @@
 
   onMounted(async () => {
     await bootstrapSession()
-    if (isAuthenticated.value && route.path === '/') {
-      router.push('/documents')
-    }
   })
 </script>
 
