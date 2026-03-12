@@ -19,7 +19,10 @@ class PdfService:
 
     @staticmethod
     def _extract_with_pymupdf(content: bytes) -> str:
-        doc = fitz.open(stream=content, filetype="pdf")
+        try:
+            doc = fitz.open(stream=content, filetype="pdf")
+        except Exception:
+            return ""
         parts: list[str] = []
         for page in doc:
             text = page.get_text().strip()
