@@ -59,6 +59,7 @@
 | 33 | Grafana dashboard | Completed | Prometheus + Grafana containers, pre-provisioned FastAPI dashboard |
 | 34 | Backup encryption | Completed | GPG AES-256 encryption, 7-day rotation, verification step |
 | 35 | UX & persistence v1.3.2 | Completed | Favicon, last-login tracking, Q&A history persistence, collapsible cards, sidebar tool links |
+| 36 | Frontend UX v1.4.0 | Completed | Dark mode, stats dashboard, copy summary, AI loading animations |
 
 ## Current implementation state
 
@@ -95,6 +96,11 @@
 - profile page expanded with created_at and last_login_at
 - admin sidebar links for API Docs, ReDoc added
 - Alembic migration 002_add_last_login_at created
+- Dark mode with CSS custom properties and localStorage persistence
+- Stats dashboard cards on DocumentsPage (documents, summaries, questions, % processed)
+- Copy-to-clipboard button for AI summaries
+- Shimmer + pulse loading animations during AI processing
+- questionsCount computed property in store
 
 ### Immediate next steps
 
@@ -538,7 +544,21 @@ Posnetki za 01-report-draft.md in Word dokument:
 15. Posnetek 15: Terminal output `deploy.sh` — uspešen deployment
 16. Posnetek 16: GitHub Actions CI — zelena pipeline
 
+### Phase 27: Frontend UX izboljšave ✅ ZAKLJUČENO 2026-03-12
 
+**Izvedeno:**
+1. **Dark mode** — toggle v sidebaru, persistenca v localStorage, polne CSS spremenljivke za temno temo (html.dark)
+2. **Stats dashboard kartice** — DocumentsPage prikazuje 4 statistične kartice (dokumenti, povzetki, vprašanja, % obdelanih)
+3. **Kopiraj povzetek** — gumb "Kopiraj" na vsakem povzetku z clipboard API in vizualnim feedbackom
+4. **Izboljšane AI animacije** — shimmer progress bar in pulse border med generiranjem povzetka ali odgovora
+5. **questionsCount computed** — novo computed polje v store ki šteje vsa vprašanja čez vse dokumente
+
+**Tehnični delta:**
+- `frontend/src/assets/main.css` — dodan `html.dark` blok s polnim setom CSS custom properties
+- `frontend/src/composables/useStore.js` — dodani `darkMode`, `toggleDarkMode()`, `questionsCount`
+- `frontend/src/App.vue` — dark mode toggle gumb v sidebaru (ikona sonce/luna)
+- `frontend/src/pages/DocumentsPage.vue` — 4 stat kartice nad toolbarom
+- `frontend/src/components/DocumentCard.vue` — kopiraj gumb, `.is-processing` animacija
 
 
 

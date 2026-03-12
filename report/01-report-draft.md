@@ -426,6 +426,13 @@ V različici v1.3.2 je frontend dodatno izboljšan z naslednjimi funkcionalnostm
 - **Sledenje zadnje prijave**: uporabniški model vključuje polje `last_login_at`, ki se posodobi ob vsaki prijavi. Profilna stran prikazuje tako datum registracije kot datum zadnje prijave,
 - **Sidebar povezave za orodja**: administratorji imajo v stranski navigaciji neposredne povezave do API Docs (Swagger UI) in ReDoc dokumentacije.
 
+V različici v1.4.0 so dodane naslednje izboljšave uporabniškega vmesnika:
+
+- **Temni način (dark mode)**: toggle gumb v stranski navigaciji omogoča preklop med svetlim in temnim načinom. Izbira se trajno shrani v localStorage. Celoten nabor CSS spremenljivk se prepiše za temno temo, kar zagotavlja konsistentno vizualno izkušnjo,
+- **Statistične kartice na pregledu dokumentov**: nad seznamom dokumentov se prikazujejo 4 kartice s statistikami — število dokumentov, generiranih povzetkov, zastavljenih vprašanj in odstotek obdelanih dokumentov,
+- **Kopiranje povzetka v odložišče**: vsak generirani povzetek ima gumb »Kopiraj«, ki z uporabo Clipboard API prekopira besedilo v sistemsko odložišče z vizualnim potrditvenim odzivom,
+- **Izboljšane animacije med AI obdelavo**: med generiranjem povzetka ali odgovora se na kartici dokumenta prikaže animiran svetleči trak in pulzirajoč okvir, ki uporabniku jasno sporočata, da operacija teče.
+
 ### 11.3 Razlikovanje od enostavne uporabe AI orodij
 
 Pomembno je poudariti, v čem se ta rešitev razlikuje od neposredne uporabe ChatGPT ali drugega AI orodja. Neposredna uporaba AI orodja omogoča posamezne poizvedbe brez konteksta, brez sledljivosti in brez integracije z obstoječo infrastrukturo. Implementirana rešitev pa ponuja:
@@ -438,6 +445,19 @@ Pomembno je poudariti, v čem se ta rešitev razlikuje od neposredne uporabe Cha
 6. **operativno zrelost** — health checki, Prometheus metrike, strukturirano logiranje, CI pipeline, TLS.
 
 Cilj naloge torej ni bil razvoj drugačnega AI modela, temveč integracija obstoječih AI storitev v varno, sledljivo in arhitekturno utemeljeno oblačno storitev.
+
+Naslednja tabela primerja funkcionalnosti tega sistema z neposredno uporabo splošnega AI orodja:
+
+| Vidik | Neposredna uporaba AI orodja (npr. ChatGPT) | Implementirana rešitev |
+| --- | --- | --- |
+| Uporabniki | Posameznik brez ločevanja | Večuporabniško okolje z JWT avtentikacijo in RBAC |
+| Hramba dokumentov | Brez trajne hrambe; uporabnik ročno kopira besedilo | S3-kompatibilna objektna hramba (MinIO) z metapodatki v PostgreSQL |
+| Kontekst vprašanj | Celoten dokument v enem sporočilu ali brez konteksta | RAG-lite: BM25 rangiranje segmentov, top-5 poslanih AI |
+| Sledljivost | Brez revizijske sledi; pogovor se izbriše | Polna Q&A zgodovina s časovnimi žigi in virom odgovora |
+| Infrastruktura | Odvisnost od ponudnika, brez nadzora nad podatki | Self-hosted VPS z TLS, monitoringom, CI/CD, backupi |
+| Strošek | €20+/mesec/uporabnika za komercialno AI naročnino | ~€7/mesec skupno za celotno infrastrukturo |
+| Operativna zrelost | Brez health checkov, metrik ali alertov | Prometheus/Grafana metrike, structlog, /ready endpoint |
+| Rozširljivost | Brez možnosti prilagoditve logike | Modularna arhitektura s prioritetno verigo ponudnikov |
 
 ### 11.4 Primernost za slovensko organizacijo
 
@@ -455,6 +475,7 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | --- | --- | --- | --- |
 | Frontend | Vue | 3.5 | Enostrankovska aplikacija |
 | Frontend routing | Vue Router | 4 | Lazy-loaded strani, navigacijska zaščita |
+| Frontend teme | CSS Custom Properties | — | Svetli in temni način z localStorage persistenco |
 | Frontend build | Vite | 5.4 | Razvojni strežnik in produkcijska gradnja |
 | Backend | FastAPI | 0.116 | REST API, OpenAPI, asinhrona podpora |
 | ORM | SQLAlchemy | 2.0 | Objektno-relacijsko mapiranje |

@@ -13,6 +13,7 @@
   const questionDraft = ref('')
   const confirmingDelete = ref(false)
   const isCollapsed = ref(props.collapsed)
+  const copied = ref(false)
 
   function handleAsk() {
     const q = questionDraft.value.trim()
@@ -24,6 +25,13 @@
   function handleDelete() {
     emit('delete', props.document.id)
     confirmingDelete.value = false
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      copied.value = true
+      setTimeout(() => (copied.value = false), 2000)
+    })
   }
 
   function formatBytes(bytes) {
@@ -52,7 +60,7 @@
 </script>
 
 <template>
-  <article class="doc-card" :class="{ 'is-collapsed': isCollapsed }">
+  <article class="doc-card" :class="{ 'is-collapsed': isCollapsed, 'is-processing': summaryBusy || questionBusy }">
     <!-- ── Header ── -->
     <div class="doc-header" @click="isCollapsed = !isCollapsed" style="cursor: pointer">
       <div class="doc-icon-wrap">
@@ -245,6 +253,16 @@
           </div>
           <div v-else class="summary-content">
             <p class="summary-text">{{ document.summary_text }}</p>
+            <button class="btn-copy" @click="copyToClipboard(document.summary_text)" :title="copied ? 'Skopirano!' : 'Kopiraj povzetek'">
+              <svg v-if="copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="copy-icon">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="copy-icon">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              {{ copied ? 'Skopirano' : 'Kopiraj' }}
+            </button>
           </div>
         </div>
 
@@ -369,6 +387,33 @@
     box-shadow:
       var(--shadow-md),
       0 0 0 1px rgba(99, 102, 241, 0.05);
+  }
+
+  .doc-card.is-processing {
+    border-color: rgba(99, 102, 241, 0.3);
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+
+  .doc-card.is-processing::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.1); }
+    50% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08); }
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 
   /* ── Collapse toggle ── */
@@ -640,6 +685,34 @@
     background: var(--surface-alt);
     border-radius: var(--radius-sm);
     border-left: 3px solid var(--primary);
+    position: relative;
+  }
+
+  .btn-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.6rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-copy:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  .copy-icon {
+    width: 13px;
+    height: 13px;
   }
 
   .summary-text {

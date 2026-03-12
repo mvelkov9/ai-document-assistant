@@ -1,4 +1,4 @@
-# AI Document Assistant — v1.3.2
+# AI Document Assistant — v1.4.0
 
 AI Document Assistant is a semester project for the course *Integracija spletnih strani in servisi* (2025/26, ALMA MATER EUROPAEA). The solution targets **MOŽNOST 3 — Razvoj integrirane spletne storitve** and implements a multi-user web service for secure PDF upload, AI summarization, and document question-answering.
 

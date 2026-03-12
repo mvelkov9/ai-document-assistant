@@ -38,6 +38,19 @@ const adminStats = ref(null)
 const adminUsers = ref([])
 const sidebarCollapsed = ref(false)
 
+/* ── Dark mode ── */
+const DARK_KEY = 'docassist-dark'
+const darkMode = ref(localStorage.getItem(DARK_KEY) === 'true')
+function applyDarkClass() {
+  document.documentElement.classList.toggle('dark', darkMode.value)
+}
+applyDarkClass()
+function toggleDarkMode() {
+  darkMode.value = !darkMode.value
+  localStorage.setItem(DARK_KEY, darkMode.value)
+  applyDarkClass()
+}
+
 /* ── Session bootstrap promise ── */
 let _sessionReadyResolve
 const sessionReady = new Promise((resolve) => {
@@ -62,6 +75,10 @@ const filteredDocuments = computed(() => {
 })
 
 const summaryCount = computed(() => documents.value.filter((d) => d.summary_text).length)
+
+const questionsCount = computed(() =>
+  Object.values(documentAnswers).reduce((sum, arr) => sum + (arr?.length || 0), 0),
+)
 
 /* ── Helpers ── */
 function setMessage(msg) {
@@ -309,12 +326,14 @@ export function useStore() {
     adminStats,
     adminUsers,
     sidebarCollapsed,
+    darkMode,
 
     /* computed */
     isAuthenticated,
     isAdmin,
     filteredDocuments,
     summaryCount,
+    questionsCount,
 
     /* actions */
     setMessage,
@@ -333,6 +352,7 @@ export function useStore() {
     handleDeleteAnswer,
     handleDownload,
     handleSetRole,
+    toggleDarkMode,
     formatDate,
     sessionReady,
   }

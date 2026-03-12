@@ -11,6 +11,8 @@
     searchQuery,
     sortField,
     filteredDocuments,
+    summaryCount,
+    questionsCount,
     activeSummaryId,
     activeQuestionId,
     documentAnswers,
@@ -24,6 +26,56 @@
 
 <template>
   <section class="page">
+    <!-- ── Stats Bar ── -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-docs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-num">{{ documents.length }}</span>
+          <span class="stat-label">Dokumentov</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-summaries">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" />
+            <line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" />
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-num">{{ summaryCount }}</span>
+          <span class="stat-label">Povzetkov</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-qa">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-num">{{ questionsCount }}</span>
+          <span class="stat-label">Vprašanj</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-rate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-num">{{ documents.length ? Math.round((summaryCount / documents.length) * 100) : 0 }}%</span>
+          <span class="stat-label">Obdelanih</span>
+        </div>
+      </div>
+    </div>
+
     <div class="toolbar">
       <div class="search-wrap">
         <svg
@@ -109,6 +161,86 @@
   .page {
     flex: 1;
     padding: 1.5rem 2rem;
+  }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .stat-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-icon-docs {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .stat-icon-summaries {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .stat-icon-qa {
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--warning);
+  }
+
+  .stat-icon-rate {
+    background: rgba(239, 68, 68, 0.06);
+    color: #f87171;
+  }
+
+  .stat-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-num {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-light);
+    margin-top: 0.15rem;
   }
 
   .toolbar {
@@ -281,11 +413,17 @@
     .page {
       padding: 1.25rem 1rem;
     }
+    .stats-bar {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   @media (max-width: 540px) {
     .toolbar {
       flex-wrap: wrap;
+    }
+    .stats-bar {
+      grid-template-columns: 1fr;
     }
   }
 </style>
