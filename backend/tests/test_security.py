@@ -2,8 +2,10 @@
 
 from datetime import UTC, datetime, timedelta
 
+from fastapi import Request
 from jose import jwt
 
+from app.core.rate_limit import get_client_ip
 from app.core.security import create_access_token, hash_password, verify_password
 
 # Must match the SECRET_KEY set by the autouse test_environment fixture in conftest.py
@@ -83,3 +85,18 @@ def test_token_nonexistent_user_rejected(client):
     token = create_access_token("nonexistent@example.com")
     resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 401
+
+
+def test_rate_limit_uses_forwarded_for_when_present():
+    request = Request(
+        {
+            "type": "http",
+            "headers": [
+                (b"x-forwarded-for", b"203.0.113.5, 10.0.0.2"),
+                (b"x-real-ip", b"10.0.0.2"),
+            ],
+            "client": ("10.0.0.2", 8080),
+        }
+    )
+
+    assert get_client_ip(request) == "203.0.113.5"

@@ -105,10 +105,47 @@
     plugins: { legend: { display: false }, tooltip: { boxPadding: 4 } },
     scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } },
   }
+
+  const readyPercent = computed(() => {
+    if (!adminStats.value?.documents) return 0
+    const ready = adminStats.value.status_breakdown?.ready || 0
+    return Math.round((ready / adminStats.value.documents) * 100)
+  })
+
+  const queuedJobs = computed(() => adminStats.value?.job_breakdown?.queued || 0)
+
+  const activeUsers = computed(() =>
+    adminUsers.value.filter((user) => Boolean(user.last_login_at)).length,
+  )
 </script>
 
 <template>
   <section class="page">
+    <div class="admin-hero" v-if="adminStats">
+      <div class="admin-hero-main">
+        <span class="admin-kicker">Administracija</span>
+        <h2 class="admin-title">Pregled sistema, uporabnikov in stanja obdelave dokumentov.</h2>
+        <p class="admin-text">
+          V enem pogledu spremljaš uporabo sistema, uspešnost obdelave ter upravljaš uporabniške vloge.
+        </p>
+      </div>
+      <div class="admin-hero-side">
+        <div class="admin-side-card">
+          <span class="admin-side-label">Pripravljenost dokumentov</span>
+          <strong>{{ readyPercent }}%</strong>
+          <p>Dokumentov je že pripravljenih za pregled, vprašanja ali nadaljnjo uporabo.</p>
+        </div>
+        <div class="admin-side-card compact">
+          <span>Aktivni uporabniki</span>
+          <strong>{{ activeUsers }}</strong>
+        </div>
+        <div class="admin-side-card compact">
+          <span>Opravila v čakalni vrsti</span>
+          <strong>{{ queuedJobs }}</strong>
+        </div>
+      </div>
+    </div>
+
     <div class="stats-row" v-if="adminStats">
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.users }}</span
@@ -207,7 +244,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
-                    Admin
+                    Dodeli skrbnika
                   </button>
                   <button
                     v-else
@@ -219,7 +256,7 @@
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
-                    User
+                    Nastavi uporabnika
                   </button>
                 </template>
                 <span v-else class="td-you">Ti</span>
@@ -238,6 +275,94 @@
     padding: 1.5rem 2rem;
   }
 
+  .admin-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.9fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .admin-hero-main,
+  .admin-hero-side {
+    padding: 1.3rem 1.4rem;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 24px;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(12px);
+  }
+
+  .admin-kicker {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    padding: 0.28rem 0.56rem;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .admin-title {
+    margin: 0;
+    max-width: 18ch;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    line-height: 1.05;
+    color: var(--text);
+  }
+
+  .admin-text {
+    margin: 0.9rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 60ch;
+  }
+
+  .admin-hero-side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-content: start;
+  }
+
+  .admin-side-card {
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  .admin-side-card:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .admin-side-label {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+  }
+
+  .admin-side-card strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1.3rem;
+    color: var(--primary);
+  }
+
+  .admin-side-card p,
+  .admin-side-card span {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.8rem;
+  }
+
   .stats-row {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -252,7 +377,8 @@
     padding: 1rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
   }
 
   .stat-num {
@@ -280,8 +406,9 @@
   .chart-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 22px;
     padding: 1rem;
+    box-shadow: var(--shadow-sm);
   }
   .chart-card-wide {
   }
@@ -301,6 +428,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     overflow: hidden;
+    box-shadow: var(--shadow-md);
   }
 
   .table-header {
@@ -448,6 +576,10 @@
   @media (max-width: 860px) {
     .page {
       padding: 1.25rem 1rem;
+    }
+    .admin-hero,
+    .admin-hero-side {
+      grid-template-columns: 1fr;
     }
     .stats-row {
       grid-template-columns: repeat(2, 1fr);

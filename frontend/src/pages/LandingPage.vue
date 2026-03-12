@@ -55,6 +55,18 @@
             Varno naloži PDF dokumente, generiraj AI povzetke in postavljaj vprašanja nad vsebino
             dokumentov.
           </p>
+          <div class="hero-panels">
+            <div class="hero-panel">
+              <span class="hero-panel-label">Varna platforma</span>
+              <strong>Dokumenti, dostop in obdelava v enem nadzorovanem toku.</strong>
+              <p>Prijava, hramba, predogled in AI funkcije so združeni v enotnem poslovnem vmesniku.</p>
+            </div>
+            <div class="hero-panel">
+              <span class="hero-panel-label">Hitra analiza</span>
+              <strong>Povzetki, vprašanja in pregled stanja brez odpiranja več orodij.</strong>
+              <p>Po nalaganju lahko takoj preveriš PDF, sprožiš obdelavo in nadaljuješ z vprašanji nad vsebino.</p>
+            </div>
+          </div>
           <div class="feature-grid">
             <div class="feature-item">
               <span class="feature-dot dot-indigo"></span>JWT avtentikacija
@@ -78,6 +90,12 @@
             <span class="tech-chip">Docker</span>
             <span class="tech-chip">Groq AI</span>
             <span class="tech-chip">MinIO</span>
+          </div>
+          <div class="trust-strip">
+            <span>Predogled PDF</span>
+            <span>Administracija uporabnikov</span>
+            <span>Večuporabniški dostop</span>
+            <span>Prometheus metrike</span>
           </div>
         </div>
 
@@ -251,6 +269,45 @@
     max-width: 48ch;
   }
 
+  .hero-panels {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .hero-panel {
+    padding: 1rem 1.05rem;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(255, 255, 255, 0.68);
+    border-radius: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .hero-panel-label {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+  }
+
+  .hero-panel strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+
+  .hero-panel p {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
   .feature-grid {
     display: grid;
     grid-template-columns: repeat(3, auto);
@@ -305,6 +362,23 @@
     color: var(--text-light);
   }
 
+  .trust-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 1.2rem;
+  }
+
+  .trust-strip span {
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
   .landing-auth {
     position: sticky;
     top: 72px;
@@ -344,6 +418,9 @@
     }
     .landing-auth {
       position: static;
+    }
+    .hero-panels {
+      grid-template-columns: 1fr;
     }
     .landing-title {
       font-size: 2.2rem;

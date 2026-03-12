@@ -123,10 +123,41 @@
     dismissWizard()
     router.push('/upload')
   }
+
+  function resetWorkspaceFilters() {
+    searchQuery.value = ''
+    selectedTag.value = ''
+    sortField.value = 'date'
+  }
 </script>
 
 <template>
   <section class="page">
+    <div v-if="documents.length" class="documents-hero">
+      <div class="documents-hero-main">
+        <span class="documents-kicker">Pregled dokumentov</span>
+        <h2 class="documents-title">Osrednji pogled za dokumente, povzetke in vprašanja.</h2>
+        <p class="documents-text">
+          Filtriraj zbirko, spremljaj stanje obdelave ter odpri posamezen dokument za predogled, povzetek ali vprašanja nad vsebino.
+        </p>
+      </div>
+      <div class="documents-hero-side">
+        <div class="documents-side-card">
+          <span class="documents-side-label">Oznake v uporabi</span>
+          <strong>{{ allTags.length }}</strong>
+          <p>Na voljo so oznake za hitrejše filtriranje in organizacijo dokumentov.</p>
+        </div>
+        <div class="documents-side-card compact">
+          <span>Vidni rezultati</span>
+          <strong>{{ filteredDocuments.length }}</strong>
+        </div>
+        <div class="documents-side-card compact">
+          <span>Aktivna vprašanja</span>
+          <strong>{{ Object.keys(documentAnswers).length }}</strong>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Stats Bar ── -->
     <div class="stats-bar">
       <div class="stat-card">
@@ -242,6 +273,13 @@
         <option value="">Vse oznake</option>
         <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
       </select>
+      <button
+        v-if="searchQuery || selectedTag || sortField !== 'date'"
+        class="toolbar-reset"
+        @click="resetWorkspaceFilters"
+      >
+        Ponastavi filtre
+      </button>
       <span class="result-count">{{ filteredDocuments.length }} rezultatov</span>
     </div>
 
@@ -326,6 +364,93 @@
     padding: 1.5rem 2rem;
   }
 
+  .documents-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.9fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .documents-hero-main,
+  .documents-hero-side {
+    padding: 1.3rem 1.4rem;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 24px;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(12px);
+  }
+
+  .documents-kicker {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    padding: 0.28rem 0.56rem;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .documents-title {
+    margin: 0;
+    max-width: 20ch;
+    font-size: clamp(1.7rem, 2.8vw, 2.2rem);
+    line-height: 1.08;
+    color: var(--text);
+  }
+
+  .documents-text {
+    margin: 0.9rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 60ch;
+  }
+
+  .documents-hero-side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .documents-side-card {
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  .documents-side-card:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .documents-side-label {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+  }
+
+  .documents-side-card strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1.3rem;
+    color: var(--primary);
+  }
+
+  .documents-side-card p,
+  .documents-side-card span {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
   /* ── Stats Bar ── */
   .stats-bar {
     display: grid;
@@ -341,7 +466,7 @@
     padding: 0.85rem 1rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 18px;
     transition:
       border-color 0.2s,
       box-shadow 0.2s;
@@ -413,6 +538,7 @@
     gap: 0.75rem;
     align-items: center;
     margin-bottom: 1.25rem;
+    flex-wrap: wrap;
   }
 
   .search-wrap {
@@ -470,6 +596,17 @@
   .sort-select:focus {
     border-color: var(--primary);
     box-shadow: var(--shadow-glow);
+  }
+
+  .toolbar-reset {
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
   }
 
   .result-count {
@@ -606,15 +743,16 @@
     .page {
       padding: 1.25rem 1rem;
     }
+    .documents-hero,
+    .documents-hero-side,
     .stats-bar {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (max-width: 540px) {
-    .toolbar {
-      flex-wrap: wrap;
-    }
+    .documents-hero,
+    .documents-hero-side,
     .stats-bar {
       grid-template-columns: 1fr;
     }

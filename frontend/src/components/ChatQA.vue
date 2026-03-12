@@ -1,8 +1,7 @@
 <script setup>
   import { ref, nextTick, watch, computed } from 'vue'
-  import { marked } from 'marked'
 
-  marked.setOptions({ breaks: true, gfm: true })
+  import { renderMarkdown } from '../lib/markdown'
 
   const props = defineProps({
     answers: { type: Array, default: () => [] },
@@ -41,7 +40,7 @@
   }
 
   function renderMd(text) {
-    return marked.parse(text || '')
+    return renderMarkdown(text)
   }
 
   function formatTime(iso) {

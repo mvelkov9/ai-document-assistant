@@ -7,11 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 from sqlalchemy import text
 
 from app.api.routes import api_router
 from app.core.config import get_settings
+from app.core.rate_limit import get_client_ip
 from app.db.session import SessionLocal, init_db
 from app.services.storage_service import StorageService
 
@@ -31,7 +31,7 @@ structlog.configure(
 logger = structlog.get_logger("docassist")
 
 limiter = Limiter(
-    key_func=get_remote_address,
+    key_func=get_client_ip,
     enabled=settings.app_env != "test",
 )
 

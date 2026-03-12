@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.rate_limit import get_client_ip
 from app.core.security import create_access_token
 from app.db.session import get_db
 from app.schemas.auth import (
@@ -19,7 +19,7 @@ from app.services.auth_service import AuthService
 _settings = get_settings()
 router = APIRouter(prefix="/auth")
 bearer_scheme = HTTPBearer()
-limiter = Limiter(key_func=get_remote_address, enabled=_settings.app_env != "test")
+limiter = Limiter(key_func=get_client_ip, enabled=_settings.app_env != "test")
 
 
 @router.post(

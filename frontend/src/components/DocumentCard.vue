@@ -1,10 +1,9 @@
 <script setup>
-  import { ref } from 'vue'
-  import { marked } from 'marked'
+  import { computed, ref } from 'vue'
+
+  import { renderMarkdown } from '../lib/markdown'
   import PdfViewer from './PdfViewer.vue'
   import ChatQA from './ChatQA.vue'
-
-  marked.setOptions({ breaks: true, gfm: true })
 
   const props = defineProps({
     document: { type: Object, required: true },
@@ -29,6 +28,7 @@
   const copied = ref(false)
   const showPdfViewer = ref(false)
   const tagInput = ref('')
+  const renderedSummary = computed(() => renderMarkdown(props.document.summary_text || ''))
 
   function addTag() {
     const tag = tagInput.value.trim().toLowerCase()
@@ -134,7 +134,7 @@
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
-        <button class="btn-action btn-view" @click="showPdfViewer = true" title="Preberi PDF">
+        <button class="btn-action btn-view" @click="showPdfViewer = true" title="Predogled PDF">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -145,7 +145,7 @@
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          Preberi
+          Predogled
         </button>
         <button
           class="btn-action btn-download"
@@ -323,7 +323,7 @@
             <span>Klikni <strong>Povzetek</strong> za generiranje AI povzetka</span>
           </div>
           <div v-else class="summary-content">
-            <div class="summary-md" v-html="marked.parse(document.summary_text || '')"></div>
+            <div class="summary-md" v-html="renderedSummary"></div>
             <button
               class="btn-copy"
               @click="copyToClipboard(document.summary_text)"

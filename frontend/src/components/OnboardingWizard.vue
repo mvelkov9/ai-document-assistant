@@ -6,8 +6,8 @@
 
   const steps = [
     {
-      title: 'Dobrodošli v DocAssist!',
-      text: 'Tvoj AI asistent za dokumente. Nauči se, kako v treh korakih izkoristiš vse.',
+      title: 'Dobrodošli v DocAssist',
+      text: 'Kratek uvod pokaže, kako začneš z nalaganjem, pregledi, povzetki in vprašanji nad dokumenti.',
       icon: 'welcome',
     },
     {
@@ -122,15 +122,16 @@
     padding: 1rem;
   }
   .wizard-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 24px;
     padding: 2rem 2.5rem;
     max-width: 440px;
     width: 100%;
     text-align: center;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(14px);
   }
   .wizard-close {
     position: absolute;
@@ -211,7 +212,7 @@
     color: #8b5cf6;
   }
   .wizard-title {
-    font-size: 1.1rem;
+    font-size: 1.18rem;
     font-weight: 700;
     margin: 0 0 0.5rem;
     color: var(--text);

@@ -41,6 +41,34 @@ def test_upload_document(client, monkeypatch) -> None:
     assert response.json()["original_filename"] == "sample.pdf"
 
 
+def test_upload_document_cleans_up_storage_on_db_failure(client, monkeypatch) -> None:
+    deleted_keys = []
+
+    monkeypatch.setattr(
+        document_service_module.StorageService,
+        "upload_bytes",
+        lambda self, object_name, content, content_type: None,
+    )
+    monkeypatch.setattr(
+        document_service_module.StorageService,
+        "delete_object",
+        lambda self, object_name: deleted_keys.append(object_name),
+    )
+
+    def fail_create(self, **kwargs):
+        raise RuntimeError("db write failed")
+
+    monkeypatch.setattr(document_service_module.DocumentRepository, "create", fail_create)
+
+    headers = register_and_login(client, email="upload-failure@example.com")
+    files = {"file": ("sample.pdf", BytesIO(b"%PDF-1.4 sample"), "application/pdf")}
+    response = client.post("/api/v1/documents/upload", headers=headers, files=files)
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Document metadata could not be persisted."
+    assert len(deleted_keys) == 1
+
+
 def test_summarize_document(client, monkeypatch) -> None:
     async def fake_summarize(self, text):
         return "Short generated summary."

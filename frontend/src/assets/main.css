@@ -1,6 +1,18 @@
-/* Inter font loaded locally via @fontsource/inter (see main.js) */
+/* Fonts loaded locally via @fontsource packages (see main.js) */
 
 :root {
+  --font-ui:
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  --font-display:
+    'Space Grotesk',
+    'Inter',
+    system-ui,
+    sans-serif;
+
   /* ── Palette ── */
   --bg: #f0f2f5;
   --bg-mesh:
@@ -40,12 +52,7 @@
   --radius-xl: 20px;
 
   /* ── Typography ── */
-  font-family:
-    'Inter',
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    sans-serif;
+  font-family: var(--font-ui);
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -100,7 +107,16 @@ body,
 body {
   min-height: 100vh;
   margin: 0;
-  background: var(--bg);
+  background: var(--bg-mesh), var(--bg);
+  font-family: var(--font-ui);
+}
+
+h1,
+h2,
+h3,
+h4,
+.display-font {
+  font-family: var(--font-ui);
 }
 
 button,
@@ -125,4 +141,8 @@ button:not(:disabled):active {
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+::selection {
+  background: var(--primary-light);
 }

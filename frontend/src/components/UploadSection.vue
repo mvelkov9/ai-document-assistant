@@ -16,6 +16,8 @@
       hasFiles.value && fileQueue.value.every((f) => f.status === 'done' || f.status === 'failed'),
   )
   const pendingCount = computed(() => fileQueue.value.filter((f) => f.status === 'pending').length)
+  const doneCount = computed(() => fileQueue.value.filter((f) => f.status === 'done').length)
+  const failedCount = computed(() => fileQueue.value.filter((f) => f.status === 'failed').length)
 
   function addFiles(files) {
     for (const file of files) {
@@ -94,7 +96,25 @@
     @dragleave="isDragOver = false"
     @drop.prevent="onDrop"
   >
-    <!-- Drop prompt area -->
+    <div class="upload-summary-bar">
+      <div class="summary-pill">
+        <strong>{{ fileQueue.length }}</strong>
+        <span>Izbranih datotek</span>
+      </div>
+      <div class="summary-pill">
+        <strong>{{ pendingCount }}</strong>
+        <span>Pripravljenih za nalaganje</span>
+      </div>
+      <div class="summary-pill" :class="{ success: doneCount }">
+        <strong>{{ doneCount }}</strong>
+        <span>Uspešno naloženih</span>
+      </div>
+      <div class="summary-pill" :class="{ danger: failedCount }">
+        <strong>{{ failedCount }}</strong>
+        <span>Napak</span>
+      </div>
+    </div>
+
     <div class="upload-prompt">
       <div class="upload-icon-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -129,7 +149,21 @@
       <p class="upload-formats">Podprti formati: PDF (do 15 MB na datoteko) · Več datotek hkrati</p>
     </div>
 
-    <!-- File queue -->
+    <div class="upload-guidance">
+      <div class="guidance-item">
+        <span class="guidance-title">Več dokumentov</span>
+        <span class="guidance-text">Dodaj več PDF datotek hkrati in nato upravljaj nadaljnjo obdelavo iz pregleda dokumentov.</span>
+      </div>
+      <div class="guidance-item">
+        <span class="guidance-title">Jasen status</span>
+        <span class="guidance-text">Vsaka datoteka v čakalni vrsti prikazuje stanje nalaganja in jasno označi morebitno napako.</span>
+      </div>
+      <div class="guidance-item">
+        <span class="guidance-title">Naslednji korak</span>
+        <span class="guidance-text">Po nalaganju odpri predogled dokumenta, sproži povzetek in nato zastavi vprašanja nad vsebino.</span>
+      </div>
+    </div>
+
     <Transition name="fade">
       <div v-if="hasFiles" class="file-queue">
         <div class="queue-header">
@@ -240,20 +274,62 @@
 
 <style scoped>
   .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 2.25rem;
-    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 28px;
+    padding: 1.35rem;
+    text-align: left;
     transition: all 0.3s ease;
-    background: var(--surface-alt);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(12px);
     position: relative;
   }
   .upload-zone.drag-over {
     border-color: var(--primary);
-    background: var(--primary-light);
+    background: rgba(99, 102, 241, 0.06);
     box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.08);
   }
+
+  .upload-summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .summary-pill {
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  .summary-pill strong {
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 1.05rem;
+    color: var(--primary);
+  }
+
+  .summary-pill span {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .summary-pill.success strong {
+    color: #059669;
+  }
+
+  .summary-pill.danger strong {
+    color: #dc2626;
+  }
+
   .upload-prompt {
+    padding: 1.4rem 1.25rem;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.06), rgba(99, 102, 241, 0.01));
+    border: 1px solid rgba(99, 102, 241, 0.09);
+    border-radius: 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -312,6 +388,35 @@
     margin: 0.5rem 0 0;
     font-size: 0.72rem;
     color: var(--text-light);
+  }
+
+  .upload-guidance {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .guidance-item {
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+
+  .guidance-title {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .guidance-text {
+    display: block;
+    font-size: 0.74rem;
+    line-height: 1.55;
+    color: var(--text-muted);
   }
   .sr-only {
     position: absolute;
@@ -536,6 +641,10 @@
   @media (max-width: 520px) {
     .upload-zone {
       padding: 1.25rem;
+    }
+    .upload-summary-bar,
+    .upload-guidance {
+      grid-template-columns: 1fr;
     }
     .qi-bar-wrap {
       width: 50px;

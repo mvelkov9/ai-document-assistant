@@ -247,12 +247,14 @@
                   <line x1="3" y1="18" x2="21" y2="18" />
                 </svg>
               </button>
-              <h1 class="page-title">
-                {{ pageMeta[route.name]?.title || '' }}
-              </h1>
-              <p class="page-subtitle">
-                {{ pageMeta[route.name]?.subtitle || '' }}
-              </p>
+              <div>
+                <h1 class="page-title">
+                  {{ pageMeta[route.name]?.title || '' }}
+                </h1>
+                <p class="page-subtitle">
+                  {{ pageMeta[route.name]?.subtitle || '' }}
+                </p>
+              </div>
             </div>
             <div class="topbar-stats">
               <div class="mini-stat">

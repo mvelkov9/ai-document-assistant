@@ -36,6 +36,9 @@ _TEST_DB_URL = f"{_BASE_URL}/docassist_test"
 
 @pytest.fixture(autouse=True)
 def test_environment(monkeypatch):
+    from app.core.config import get_settings
+
+    get_settings.cache_clear()
     monkeypatch.setenv("DATABASE_URL", _TEST_DB_URL)
     monkeypatch.setenv("SECRET_KEY", "test-secret-key")
     monkeypatch.setenv("MINIO_ENDPOINT", "localhost:9000")
@@ -45,6 +48,7 @@ def test_environment(monkeypatch):
     monkeypatch.setenv("MINIO_SECURE", "false")
     monkeypatch.setenv("SUMMARY_MAX_CHARS", "6000")
     monkeypatch.setenv("APP_ENV", "test")
+    get_settings.cache_clear()
 
 
 @pytest.fixture

@@ -65,13 +65,25 @@ class DocumentService:
                 detail=str(exc),
             ) from exc
 
-        document = self.repository.create(
-            owner_id=current_user.id,
-            original_filename=filename,
-            storage_key=storage_key,
-            content_type=content_type,
-            size_bytes=len(content),
-        )
+        try:
+            document = self.repository.create(
+                owner_id=current_user.id,
+                original_filename=filename,
+                storage_key=storage_key,
+                content_type=content_type,
+                size_bytes=len(content),
+            )
+        except Exception as exc:
+            self.db.rollback()
+            try:
+                self.storage.delete_object(storage_key)
+            except RuntimeError:
+                pass
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Document metadata could not be persisted.",
+            ) from exc
+
         return DocumentPublic.model_validate(document)
 
     def list_documents(
