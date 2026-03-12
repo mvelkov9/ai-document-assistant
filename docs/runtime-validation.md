@@ -31,14 +31,14 @@
 
 ## Automated test suite
 
-- 39 test cases across 5 test files
-- Covers: auth validation, document operations, pagination, access control, error handling, async jobs, admin endpoints, document download, Prometheus metrics
+- 107 test cases across 9 test files (~90% code coverage)
+- Covers: auth validation, document operations, pagination, access control, error handling, async jobs, admin endpoints, document download, Prometheus metrics, AI summary service, storage service, PDF extraction, password hashing, JWT tokens
 - Uses mocked storage and AI layers for deterministic execution
-- Coverage threshold enforced in CI (≥50%)
+- Coverage threshold enforced in CI (≥70%)
 
 ## CI pipeline validation
 
-- GitHub Actions workflow runs four jobs: ruff lint + format check, pytest with coverage, prettier check + frontend build, Docker image build
+- GitHub Actions workflow runs five jobs: ruff lint + format check, pytest with coverage, prettier check, frontend build, Docker image build
 - Pipeline triggers on push to main/master and on pull requests
 
 ## Code quality

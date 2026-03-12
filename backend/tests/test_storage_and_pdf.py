@@ -9,7 +9,6 @@ from minio.error import S3Error
 from app.services.pdf_service import PdfService
 from app.services.storage_service import StorageService
 
-
 # ── StorageService ───────────────────────────────────────────────
 
 
@@ -48,9 +47,7 @@ class TestStorageService:
     def test_download_bytes_s3_error(self, mock_minio_cls):
         mock_client = MagicMock()
         mock_client.bucket_exists.return_value = True
-        mock_client.get_object.side_effect = S3Error(
-            "NoSuchKey", "Object not found", "test", "test", "test", "test"
-        )
+        mock_client.get_object.side_effect = S3Error("NoSuchKey", "Object not found", "test", "test", "test", "test")
         mock_minio_cls.return_value = mock_client
 
         svc = StorageService()
@@ -72,9 +69,7 @@ class TestStorageService:
     def test_delete_object_s3_error(self, mock_minio_cls):
         mock_client = MagicMock()
         mock_client.bucket_exists.return_value = True
-        mock_client.remove_object.side_effect = S3Error(
-            "AccessDenied", "Access denied", "test", "test", "test", "test"
-        )
+        mock_client.remove_object.side_effect = S3Error("AccessDenied", "Access denied", "test", "test", "test", "test")
         mock_minio_cls.return_value = mock_client
 
         svc = StorageService()
@@ -120,7 +115,8 @@ class TestStorageService:
 class TestPdfService:
     def test_extract_text_returns_string(self):
         """PdfService.extract_text returns a string for valid PDF content."""
-        from unittest.mock import patch as _patch, MagicMock
+        from unittest.mock import MagicMock
+        from unittest.mock import patch as _patch
 
         svc = PdfService()
         # Mock PdfReader to avoid needing a real PDF with proper fonts
@@ -136,7 +132,8 @@ class TestPdfService:
 
     def test_extract_text_layout_fallback_when_short(self):
         """When standard extraction yields < 50 chars, layout mode is tried."""
-        from unittest.mock import patch as _patch, MagicMock
+        from unittest.mock import MagicMock
+        from unittest.mock import patch as _patch
 
         svc = PdfService()
         mock_page = MagicMock()

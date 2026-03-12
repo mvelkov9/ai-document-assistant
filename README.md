@@ -1,4 +1,4 @@
-# AI Document Assistant — v1.2.3
+# AI Document Assistant — v1.2.4
 
 AI Document Assistant is a semester project for the course *Integracija spletnih strani in servisi* (2025/26, ALMA MATER EUROPAEA). The solution targets **MOŽNOST 3 — Razvoj integrirane spletne storitve** and implements a multi-user web service for secure PDF upload, AI summarization, and document question-answering.
 
@@ -123,7 +123,7 @@ pytest                                         # Run all tests
 pytest --cov=app --cov-report=term-missing     # With coverage
 ```
 
-Test suite covers: auth validation, upload constraints, document access control, pagination, Q&A validation, async jobs, health endpoints, admin endpoints, document download, Prometheus metrics. 39 test cases across 5 test files.
+Test suite covers: auth validation, upload constraints, document access control, pagination, Q&A validation, async jobs, health endpoints, admin endpoints, document download, Prometheus metrics, AI summary service, storage operations, PDF extraction, password hashing, JWT tokens. 107 test cases across 9 test files (~90% code coverage).
 
 Rate limiting is automatically disabled when `APP_ENV=test` to prevent cascade failures.
 
@@ -131,9 +131,10 @@ Rate limiting is automatically disabled when `APP_ENV=test` to prevent cascade f
 
 GitHub Actions pipeline (`.github/workflows/ci.yml`):
 1. **Lint** — `ruff check` + `ruff format --check` on backend code
-2. **Test** — `pytest` with coverage (≥50% threshold)
-3. **Frontend** — `prettier --check` + `npm run build`
-4. **Docker** — Build backend and frontend images
+2. **Test** — `pytest` with coverage (≥70% threshold)
+3. **Frontend lint** — `prettier --check`
+4. **Frontend build** — `npm run build`
+5. **Docker** — Build backend and frontend images
 
 ## Demo Seed
 

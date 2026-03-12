@@ -21,7 +21,11 @@ Strengthen the project with repeatable automated checks for backend user flows, 
 | `test_auth.py` | 8 | Short password, invalid email, missing fields, wrong password, nonexistent user, no token, invalid token, duplicate email |
 | `test_documents.py` | 11 | Non-PDF upload, no auth upload, 404 document, cross-user access, pagination, empty list, limit cap, 404 summarize, short question, long question, 404 job |
 | `test_admin_and_download.py` | 9 | Admin stats, admin users, 403 regular user, 401 unauthorized, document download (happy/404/cross-user), Prometheus metrics |
-| **Total** | **39** | |
+| `test_summary_service.py` | 32 | Chunking, BM25 ranking, fallback modes, provider detection, Groq/Gemini/OpenAI dispatch with mocked httpx (success, 429 retry, auth failure, max retries) |
+| `test_delete_and_admin.py` | 11 | Document deletion (success, nonexistent, cross-user, unauthenticated, cascade, storage failure tolerance), admin role management (promote/demote, self-change blocked, invalid role, nonexistent user, forbidden) |
+| `test_storage_and_pdf.py` | 16 | StorageService (upload, download, delete, S3Error, bucket creation), PdfService (text extraction, layout fallback, corruption, empty bytes), integration (empty PDF→422, storage failure→503) |
+| `test_security.py` | 9 | Password hashing (different salts, correct/wrong verify), JWT token creation (subject, expiry, custom expiry), expired/missing-subject/nonexistent-user token rejection |
+| **Total** | **107** | **~90% coverage** |
 
 ## Shared fixtures (conftest.py)
 
@@ -61,10 +65,12 @@ Strengthen the project with repeatable automated checks for backend user flows, 
 
 Tests run in CI with:
 ```bash
-pytest --cov=app --cov-report=term-missing --cov-fail-under=50
+pytest --cov=app --cov-report=term-missing --cov-fail-under=70
 ```
 
 **Update (v1.2.0):** Test suite expanded to 39 tests across 5 files. Added `test_admin_and_download.py` with 9 tests covering admin stats/users (admin role, 403 for regular users, 401 unauthorized), document download (happy/404/cross-user), and Prometheus metrics endpoint.
+
+**Update (v1.2.4):** Test suite expanded to **107 tests** across **9 files** with **~90% code coverage**. Added 4 new test files: `test_summary_service.py` (32 tests — chunking, BM25 ranking, AI provider dispatch with mocked httpx), `test_delete_and_admin.py` (11 tests — document deletion and admin role management), `test_storage_and_pdf.py` (16 tests — S3 storage and PDF extraction), `test_security.py` (9 tests — password hashing and JWT tokens). CI coverage threshold raised from 50% to 70%.
 
 ## Current limitations
 

@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from app.services.summary_service import SummaryService, _CHUNK_OVERLAP, _CHUNK_SIZE, _TOP_K_CHUNKS
+from app.services.summary_service import _CHUNK_OVERLAP, _CHUNK_SIZE, _TOP_K_CHUNKS, SummaryService
 
 
 def _run(coro):

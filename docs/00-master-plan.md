@@ -53,6 +53,7 @@
 | 27 | GUI overhaul v1.2.1 | Completed | Sidebar layout, admin role management |
 | 28 | Hardening v1.2.2 | Completed | PDF extraction fallback, VPS specs CX33, lint fixes |
 | 29 | Formatters v1.2.3 | Completed | Ruff format + prettier auto-formatting, CI format checks |
+| 30 | Testing & CI v1.2.4 | Completed | 107 tests (90% coverage), CI split to 5 jobs, Node 24 compat |
 
 ## Current implementation state
 
@@ -151,7 +152,7 @@ After every completed implementation phase:
 
 **Phase E7: CI/CD improvements**
 - Added ruff linting step to CI pipeline
-- pytest-cov with --cov-fail-under=50 in CI
+- pytest-cov with --cov-fail-under=70 in CI
 - Deploy script enhanced with Alembic migration and health check
 - Created .env.production.example and pyproject.toml with ruff config
 
@@ -298,6 +299,20 @@ After every completed implementation phase:
 - Deduplicated `ruff==0.11.13` line in requirements.txt
 - Updated all stale docs: phase-15 (4 jobs, format checks), runtime-validation (39 tests, 4 jobs, formatters), architecture-and-dataflows (CI line), README (CI section, test count)
 - Version bumped to v1.2.3 in backend (FastAPI), frontend (package.json, App.vue), README
+
+**Phase E18: Version 1.2.4 — Comprehensive test coverage & CI improvements**
+- Expanded test suite from 39 to **107 tests** across **9 files** with **~90% code coverage**
+- Added `test_summary_service.py` (32 tests): chunking, BM25 ranking, AI provider dispatch with mocked httpx
+- Added `test_delete_and_admin.py` (11 tests): document deletion, admin role management
+- Added `test_storage_and_pdf.py` (16 tests): S3 storage operations, PDF text extraction
+- Added `test_security.py` (9 tests): password hashing, JWT token creation/validation
+- Fixed ruff I001 import sorting errors in new test files
+- CI pipeline split from 4 to **5 jobs**: backend-lint, backend-test, frontend-lint, frontend-build, docker
+- Added `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` for Node.js 24 compatibility
+- Pinned `ubuntu-24.04` runner for reproducibility, switched to `npm ci` for deterministic installs
+- Raised CI coverage threshold from 50% to 70%
+- Fixed stale v1.2.1 version in App.vue landing footer
+- Version bumped to v1.2.4 in frontend (package.json, App.vue), README
 
 ## Supporting operational documents
 
@@ -459,7 +474,7 @@ Koraki:
 
 ### Phase 26: Report finalizacija s posnetki ✅ ZAKLJUČENO
 
-**Status:** Report in outline v celoti posodobljena. 16 screenshot placeholderjev vstavljen v report draft. Stroškovna analiza, tehnološka tabela, zaključek, reference — vse posodobljeno na dejansko stanje (Groq, BM25, 39 testov, VPS €5.49, doc-ai-assist.com). Student mora zajeti posnetke in jih vstaviti v Word dokument.
+**Status:** Report in outline v celoti posodobljena. 16 screenshot placeholderjev vstavljen v report draft. Stroškovna analiza, tehnološka tabela, zaključek, reference — vse posodobljeno na dejansko stanje (Groq, BM25, 107 testov, VPS €5.49, doc-ai-assist.com). Student mora zajeti posnetke in jih vstaviti v Word dokument.
 
 Posnetki za 01-report-draft.md in Word dokument:
 1. Posnetek 1: Arhitekturni diagram (Mermaid → PNG iz architecture.mmd)

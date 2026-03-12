@@ -122,7 +122,7 @@ docker compose down
 - security headers visible in HTTP responses (`curl -I https://doc-ai-assist.com`)
 - HSTS header present (TLS deployment)
 - deployment scripts and backup script are present in `infrastructure/scripts`
-- 39 automated backend tests pass:
+- 107 automated backend tests pass:
   ```bash
   docker compose exec backend python -m pytest tests/ -v
   ```
