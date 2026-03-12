@@ -1,9 +1,11 @@
 <script setup>
-  import { computed, ref } from 'vue'
+  import { computed, defineAsyncComponent, ref } from 'vue'
+  import { useStore } from '../composables/useStore'
 
   import { renderMarkdown } from '../lib/markdown'
-  import PdfViewer from './PdfViewer.vue'
   import ChatQA from './ChatQA.vue'
+
+  const PdfViewer = defineAsyncComponent(() => import('./PdfViewer.vue'))
 
   const props = defineProps({
     document: { type: Object, required: true },
@@ -24,6 +26,7 @@
     'update-tags',
   ])
   const confirmingDelete = ref(false)
+  const { t, formatDate, translateStatus } = useStore()
   const isCollapsed = ref(props.collapsed)
   const copied = ref(false)
   const showPdfViewer = ref(false)
@@ -65,12 +68,6 @@
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
-
-  function formatDate(iso) {
-    if (!iso) return ''
-    const d = new Date(iso)
-    return d.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' })
-  }
 </script>
 
 <template>
@@ -92,7 +89,7 @@
           <span class="meta-badge">{{ formatBytes(document.size_bytes) }}</span>
           <span class="meta-badge" :class="'status-' + document.processing_status">
             <span class="status-dot"></span>
-            {{ document.processing_status }}
+            {{ translateStatus(document.processing_status) }}
           </span>
           <span v-if="document.created_at" class="meta-badge meta-date">
             <svg
@@ -110,7 +107,7 @@
             {{ formatDate(document.created_at) }}
           </span>
           <span v-if="answers.length" class="meta-badge meta-qa-count">
-            {{ answers.length }} V&amp;O
+            {{ answers.length }} {{ t('docCard.qaShort') }}
           </span>
           <span v-for="tag in document.tags || []" :key="tag" class="meta-badge meta-tag">
             {{ tag }}
@@ -121,7 +118,7 @@
         <button
           class="btn-collapse"
           @click="isCollapsed = !isCollapsed"
-          :title="isCollapsed ? 'Razširi' : 'Skrči'"
+          :title="isCollapsed ? t('docCard.expand') : t('docCard.collapse')"
         >
           <svg
             viewBox="0 0 24 24"
@@ -134,7 +131,11 @@
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
-        <button class="btn-action btn-view" @click="showPdfViewer = true" title="Predogled PDF">
+        <button
+          class="btn-action btn-view"
+          @click="showPdfViewer = true"
+          :title="t('docCard.previewPdf')"
+        >
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -145,12 +146,12 @@
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          Predogled
+          {{ t('docCard.preview') }}
         </button>
         <button
           class="btn-action btn-download"
           @click="emit('download', document.id, document.original_filename)"
-          title="Prenesi PDF"
+          :title="t('docCard.downloadPdf')"
         >
           <svg
             viewBox="0 0 24 24"
@@ -163,7 +164,7 @@
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          Prenesi
+          {{ t('docCard.download') }}
         </button>
         <button
           class="btn-action btn-summarize"
@@ -193,12 +194,12 @@
               d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
             />
           </svg>
-          {{ summaryBusy ? 'Generiranje...' : 'Povzetek' }}
+          {{ summaryBusy ? t('docCard.generating') : t('docCard.summary') }}
         </button>
         <button
           class="btn-icon-only btn-danger"
           @click="confirmingDelete = true"
-          title="Izbriši dokument"
+          :title="t('docCard.deleteDocument')"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6" />
@@ -226,15 +227,14 @@
                 </svg>
               </div>
               <p class="confirm-text">
-                Izbrisati <strong>{{ document.original_filename }}</strong
-                >?
+                {{ t('docCard.deleteQuestion', { name: document.original_filename }) }}
               </p>
               <p class="confirm-sub">
-                To bo trajno izbrisalo datoteko in vse povezane povzetke ter vprašanja.
+                {{ t('docCard.deleteWarning') }}
               </p>
               <div class="confirm-actions">
                 <button class="btn-confirm btn-cancel" @click="confirmingDelete = false">
-                  Prekliči
+                  {{ t('docCard.cancel') }}
                 </button>
                 <button class="btn-confirm btn-delete" @click="handleDelete">
                   <svg
@@ -249,7 +249,7 @@
                       d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
                     />
                   </svg>
-                  Izbriši
+                  {{ t('docCard.delete') }}
                 </button>
               </div>
             </div>
@@ -271,12 +271,12 @@
               />
               <line x1="7" y1="7" x2="7.01" y2="7" />
             </svg>
-            Oznake
+            {{ t('docCard.tags') }}
           </div>
           <div class="tags-wrap">
             <span v-for="tag in document.tags || []" :key="tag" class="tag-chip">
               {{ tag }}
-              <button class="tag-remove" @click="removeTag(tag)" title="Odstrani oznako">
+              <button class="tag-remove" @click="removeTag(tag)" :title="t('docCard.removeTag')">
                 &times;
               </button>
             </span>
@@ -285,7 +285,7 @@
                 v-model="tagInput"
                 @keydown.enter.prevent="addTag"
                 type="text"
-                placeholder="Nova oznaka..."
+                :placeholder="t('docCard.newTag')"
                 maxlength="30"
                 class="tag-input"
               />
@@ -309,7 +309,7 @@
               <line x1="21" y1="14" x2="3" y2="14" />
               <line x1="17" y1="18" x2="3" y2="18" />
             </svg>
-            Povzetek
+            {{ t('docCard.summary') }}
           </div>
           <div v-if="!document.summary_text" class="empty-summary">
             <div class="empty-summary-graphic">
@@ -320,14 +320,14 @@
                 />
               </svg>
             </div>
-            <span>Klikni <strong>Povzetek</strong> za generiranje AI povzetka</span>
+            <span>{{ t('docCard.clickSummary') }}</span>
           </div>
           <div v-else class="summary-content">
             <div class="summary-md" v-html="renderedSummary"></div>
             <button
               class="btn-copy"
               @click="copyToClipboard(document.summary_text)"
-              :title="copied ? 'Skopirano!' : 'Kopiraj povzetek'"
+              :title="copied ? t('docCard.copiedTitle') : t('docCard.copySummary')"
             >
               <svg
                 v-if="copied"
@@ -350,7 +350,7 @@
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
-              {{ copied ? 'Skopirano' : 'Kopiraj' }}
+              {{ copied ? t('docCard.copied') : t('docCard.copy') }}
             </button>
           </div>
         </div>
@@ -367,7 +367,7 @@
             >
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
-            Vprašanja &amp; Odgovori
+            {{ t('docCard.qa') }}
           </div>
           <ChatQA
             :answers="answers"
@@ -394,14 +394,19 @@
 
 <style scoped>
   .doc-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface) 96%, white 4%),
+      var(--surface)
+    );
+    border: 1px solid color-mix(in srgb, var(--border) 78%, white 22%);
     border-radius: var(--radius-lg);
     overflow: hidden;
     position: relative;
     transition:
       border-color 0.25s ease,
       box-shadow 0.25s ease;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
   }
 
   .doc-card:hover {
@@ -499,7 +504,11 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1rem 1.25rem;
-    background: var(--surface-alt);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-alt) 90%, white 10%),
+      color-mix(in srgb, var(--surface) 90%, white 10%)
+    );
     border-bottom: 1px solid var(--border-subtle);
   }
 
@@ -551,7 +560,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.18rem 0.55rem;
-    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 90%, white 10%);
     border: 1px solid var(--border);
     border-radius: 999px;
     font-size: 0.72rem;
@@ -608,7 +617,7 @@
     padding: 0.5rem 0.9rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 92%, white 8%);
     color: var(--text);
     font-size: 0.82rem;
     font-weight: 500;
@@ -713,10 +722,15 @@
 
   .summary-content {
     padding: 0.85rem 1rem;
-    background: var(--surface-alt);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-alt) 88%, white 12%),
+      color-mix(in srgb, var(--surface) 92%, white 8%)
+    );
     border-radius: var(--radius-sm);
     border-left: 3px solid var(--primary);
     position: relative;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   }
 
   .btn-copy {

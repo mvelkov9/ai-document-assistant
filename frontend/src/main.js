@@ -7,7 +7,8 @@ import '@fontsource/space-grotesk/400.css'
 import '@fontsource/space-grotesk/500.css'
 import '@fontsource/space-grotesk/700.css'
 import App from './App.vue'
+import { i18n } from './lib/i18n'
 import router from './router'
 import './assets/main.css'
 
-createApp(App).use(router).mount('#app')
+createApp(App).use(i18n).use(router).mount('#app')

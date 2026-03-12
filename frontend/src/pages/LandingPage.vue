@@ -1,8 +1,10 @@
 <script setup>
   import { inject } from 'vue'
+  import { useStore } from '../composables/useStore'
   import AuthPanel from '../components/AuthPanel.vue'
 
   const { authBusy, handleLogin, handleRegister } = inject('app')
+  const { language, toggleLanguage, t } = useStore()
 </script>
 
 <template>
@@ -19,12 +21,15 @@
               <path d="M9 15l2 2 4-4" />
             </svg>
           </div>
-          <span class="brand-name">AI Document Assistant</span>
+          <span class="brand-name">{{ t('shell.appName') }}</span>
           <span class="brand-version">v1.5.3</span>
         </div>
         <div class="landing-nav-links">
-          <a href="/docs" class="nav-link-top">API Docs</a>
-          <a href="/redoc" class="nav-link-top">ReDoc</a>
+          <a href="/docs" class="nav-link-top">{{ t('shell.apiDocs') }}</a>
+          <a href="/redoc" class="nav-link-top">{{ t('shell.redoc') }}</a>
+          <button class="lang-toggle" @click="toggleLanguage">
+            {{ language === 'sl' ? 'EN' : 'SL' }}
+          </button>
         </div>
       </div>
     </nav>
@@ -44,44 +49,48 @@
               <path d="M2 17l10 5 10-5" />
               <path d="M2 12l10 5 10-5" />
             </svg>
-            Projektna naloga 2025/26 - Integracija spletnih strani in servisi
+            {{ t('landing.project') }}
           </span>
           <h1 class="landing-title">
-            Pametni<br />
-            <span class="gradient-text">Dokumentni</span><br />
-            Pomočnik
+            {{ t('landing.title1') }}<br />
+            <span class="gradient-text">{{ t('landing.title2') }}</span
+            ><br />
+            {{ t('landing.title3') }}
           </h1>
           <p class="landing-desc">
-            Varno naloži PDF dokumente, generiraj AI povzetke in postavljaj vprašanja nad vsebino
-            dokumentov.
+            {{ t('landing.desc') }}
           </p>
           <div class="hero-panels">
             <div class="hero-panel">
-              <span class="hero-panel-label">Varna platforma</span>
-              <strong>Dokumenti, dostop in obdelava v enem nadzorovanem toku.</strong>
-              <p>Prijava, hramba, predogled in AI funkcije so združeni v enotnem poslovnem vmesniku.</p>
+              <span class="hero-panel-label">{{ t('landing.secureLabel') }}</span>
+              <strong>{{ t('landing.secureTitle') }}</strong>
+              <p>{{ t('landing.secureText') }}</p>
             </div>
             <div class="hero-panel">
-              <span class="hero-panel-label">Hitra analiza</span>
-              <strong>Povzetki, vprašanja in pregled stanja brez odpiranja več orodij.</strong>
-              <p>Po nalaganju lahko takoj preveriš PDF, sprožiš obdelavo in nadaljuješ z vprašanji nad vsebino.</p>
+              <span class="hero-panel-label">{{ t('landing.fastLabel') }}</span>
+              <strong>{{ t('landing.fastTitle') }}</strong>
+              <p>{{ t('landing.fastText') }}</p>
             </div>
           </div>
           <div class="feature-grid">
             <div class="feature-item">
-              <span class="feature-dot dot-indigo"></span>JWT avtentikacija
+              <span class="feature-dot dot-indigo"></span>{{ t('landing.jwtAuth') }}
             </div>
             <div class="feature-item">
-              <span class="feature-dot dot-emerald"></span>MinIO hramba
+              <span class="feature-dot dot-emerald"></span>{{ t('landing.minioStorage') }}
             </div>
             <div class="feature-item">
-              <span class="feature-dot dot-amber"></span>AI povzetki (Groq)
+              <span class="feature-dot dot-amber"></span>{{ t('landing.aiSummaries') }}
             </div>
             <div class="feature-item">
-              <span class="feature-dot dot-rose"></span>RAG-lite Q&amp;A
+              <span class="feature-dot dot-rose"></span>{{ t('landing.ragQa') }}
             </div>
-            <div class="feature-item"><span class="feature-dot dot-sky"></span>Admin panel</div>
-            <div class="feature-item"><span class="feature-dot dot-violet"></span>Prometheus</div>
+            <div class="feature-item">
+              <span class="feature-dot dot-sky"></span>{{ t('landing.adminPanel') }}
+            </div>
+            <div class="feature-item">
+              <span class="feature-dot dot-violet"></span>{{ t('landing.prometheus') }}
+            </div>
           </div>
           <div class="tech-chips">
             <span class="tech-chip">Vue 3</span>
@@ -92,10 +101,10 @@
             <span class="tech-chip">MinIO</span>
           </div>
           <div class="trust-strip">
-            <span>Predogled PDF</span>
-            <span>Administracija uporabnikov</span>
-            <span>Večuporabniški dostop</span>
-            <span>Prometheus metrike</span>
+            <span>{{ t('landing.previewPdf') }}</span>
+            <span>{{ t('landing.userAdmin') }}</span>
+            <span>{{ t('landing.multiUser') }}</span>
+            <span>{{ t('landing.metrics') }}</span>
           </div>
         </div>
 
@@ -106,11 +115,11 @@
     </main>
 
     <footer class="landing-footer">
-      <span>AI Document Assistant v1.5.3</span>
+      <span>{{ t('shell.appName') }} v1.5.3</span>
       <span class="footer-dot">&middot;</span>
-      <span>ALMA MATER EUROPAEA 2025/26</span>
+      <span>{{ t('shell.footerSchool') }}</span>
       <span class="footer-dot">&middot;</span>
-      <a href="/docs" class="footer-link">API Docs</a>
+      <a href="/docs" class="footer-link">{{ t('shell.apiDocs') }}</a>
     </footer>
   </div>
 </template>
@@ -137,7 +146,7 @@
     position: sticky;
     top: 0;
     z-index: 20;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--panel-bg-strong);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border-subtle);
   }
@@ -190,6 +199,7 @@
   .landing-nav-links {
     display: flex;
     gap: 0.75rem;
+    align-items: center;
   }
 
   .nav-link-top {
@@ -204,6 +214,16 @@
   .nav-link-top:hover {
     background: var(--surface-alt);
     color: var(--text);
+  }
+
+  .lang-toggle {
+    border: 1px solid var(--border-subtle);
+    background: var(--panel-bg-soft);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 700;
   }
 
   .landing-content {
@@ -278,8 +298,8 @@
 
   .hero-panel {
     padding: 1rem 1.05rem;
-    background: rgba(255, 255, 255, 0.74);
-    border: 1px solid rgba(255, 255, 255, 0.68);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 18px;
     box-shadow: var(--shadow-sm);
   }
@@ -372,7 +392,7 @@
   .trust-strip span {
     padding: 0.35rem 0.65rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--panel-bg-soft);
     border: 1px solid var(--border-subtle);
     font-size: 0.74rem;
     font-weight: 600;

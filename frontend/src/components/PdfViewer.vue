@@ -2,6 +2,7 @@
   import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef } from 'vue'
   import * as pdfjsLib from 'pdfjs-dist'
   import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+  import { useStore } from '../composables/useStore'
 
   // Use the bundled worker URL; Vite emits it as a static asset
   pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
@@ -14,6 +15,7 @@
   })
 
   const emit = defineEmits(['close'])
+  const { t } = useStore()
 
   const canvasRef = ref(null)
   const containerRef = ref(null)
@@ -56,7 +58,7 @@
       const response = await fetch(`${apiBase}/documents/${props.documentId}/download`, {
         headers: { Authorization: `Bearer ${props.token}` },
       })
-      if (!response.ok) throw new Error('Prenos datoteke PDF ni uspel')
+      if (!response.ok) throw new Error(t('pdf.downloadingFailed'))
       const arrayBuffer = await response.arrayBuffer()
       const data = new Uint8Array(arrayBuffer)
       const doc = await pdfjsLib.getDocument({ data }).promise
@@ -64,10 +66,12 @@
       totalPages.value = doc.numPages
       currentPage.value = 1
       syncPageInput()
+      loading.value = false
       await nextTick()
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
       await renderPage(1)
     } catch (e) {
-      error.value = e.message || 'Datoteke PDF ni bilo mogoče naložiti'
+      error.value = e.message || t('pdf.loadingFailed')
     } finally {
       loading.value = false
     }
@@ -107,7 +111,7 @@
       renderTask.value = null
     } catch (e) {
       if (e?.name !== 'RenderingCancelledException') {
-        error.value = e.message || 'Strani PDF ni bilo mogoče izrisati'
+        error.value = e.message || t('pdf.renderFailed')
       }
     } finally {
       rendering.value = false
@@ -183,26 +187,32 @@
     <div class="pdf-viewer" ref="containerRef">
       <div class="pdf-toolbar">
         <div class="pdf-toolbar-left">
-          <div class="pdf-badge">Predogled PDF</div>
+          <div class="pdf-badge">{{ t('pdf.badge') }}</div>
           <button
             class="pdf-btn"
             @click="prevPage"
             :disabled="currentPage <= 1"
-            title="Prejšnja stran"
+            :title="t('pdf.prev')"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
           <label class="pdf-page-jump">
-            <input v-model="pageInput" type="number" min="1" :max="totalPages || 1" @change="jumpToPage" />
+            <input
+              v-model="pageInput"
+              type="number"
+              min="1"
+              :max="totalPages || 1"
+              @change="jumpToPage"
+            />
             <span>/ {{ totalPages }}</span>
           </label>
           <button
             class="pdf-btn"
             @click="nextPage"
             :disabled="currentPage >= totalPages"
-            title="Naslednja stran"
+            :title="t('pdf.next')"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="9 18 15 12 9 6" />
@@ -210,7 +220,12 @@
           </button>
         </div>
         <div class="pdf-toolbar-center">
-          <button class="pdf-btn" :class="{ active: fitWidth }" @click="resetFitWidth" title="Prilagodi širini">
+          <button
+            class="pdf-btn"
+            :class="{ active: fitWidth }"
+            @click="resetFitWidth"
+            :title="t('pdf.fitWidth')"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 7V5a2 2 0 0 1 2-2h2" />
               <path d="M21 7V5a2 2 0 0 0-2-2h-2" />
@@ -219,7 +234,7 @@
               <line x1="8" y1="12" x2="16" y2="12" />
             </svg>
           </button>
-          <button class="pdf-btn" @click="zoomOut" title="Pomanjšaj">
+          <button class="pdf-btn" @click="zoomOut" :title="t('pdf.zoomOut')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -227,7 +242,7 @@
             </svg>
           </button>
           <span class="pdf-zoom-info">{{ zoomPercent }}%</span>
-          <button class="pdf-btn" @click="zoomIn" title="Povečaj">
+          <button class="pdf-btn" @click="zoomIn" :title="t('pdf.zoomIn')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -237,7 +252,7 @@
           </button>
         </div>
         <div class="pdf-toolbar-right">
-          <button class="pdf-btn pdf-btn-close" @click="emit('close')" title="Zapri (Esc)">
+          <button class="pdf-btn pdf-btn-close" @click="emit('close')" :title="t('pdf.close')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -257,7 +272,7 @@
           >
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
-          <span>Nalagam PDF...</span>
+          <span>{{ t('pdf.loading') }}</span>
         </div>
         <div v-else-if="error" class="pdf-error">
           <svg
@@ -276,10 +291,10 @@
         <div v-else class="pdf-canvas-wrap">
           <div class="pdf-surface-header">
             <div>
-              <strong>Stran {{ currentPage }}</strong>
-              <span>{{ fitWidth ? 'Prilagojeno širini' : 'Ročna povečava' }}</span>
+              <strong>{{ t('pdf.page', { count: currentPage }) }}</strong>
+              <span>{{ fitWidth ? t('pdf.fitMode') : t('pdf.manualZoom') }}</span>
             </div>
-            <span v-if="rendering" class="pdf-rendering">Pripravljam prikaz...</span>
+            <span v-if="rendering" class="pdf-rendering">{{ t('pdf.preparing') }}</span>
           </div>
           <canvas ref="canvasRef"></canvas>
         </div>
@@ -321,7 +336,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.85rem 1rem;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--surface-alt) 82%, white 18%), var(--surface));
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-alt) 82%, white 18%),
+      var(--surface)
+    );
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     gap: 1rem;
@@ -440,10 +459,13 @@
     width: min(100%, 1120px);
     margin: 0 auto;
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     border-radius: 28px;
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    background: var(--panel-bg-soft);
+    border: 1px solid var(--panel-border);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--panel-bg-strong) 76%, transparent 24%);
   }
 
   .pdf-surface-header {

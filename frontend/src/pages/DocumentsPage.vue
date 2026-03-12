@@ -1,22 +1,12 @@
 <script setup>
-  import { computed, ref } from 'vue'
+  import { computed, defineAsyncComponent, ref } from 'vue'
   import { useStore } from '../composables/useStore'
   import { useRouter } from 'vue-router'
   import DocumentCard from '../components/DocumentCard.vue'
-  import UploadSection from '../components/UploadSection.vue'
   import OnboardingWizard from '../components/OnboardingWizard.vue'
-  import { Doughnut, Bar } from 'vue-chartjs'
-  import {
-    Chart as ChartJS,
-    ArcElement,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip,
-    Legend,
-  } from 'chart.js'
 
-  ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
+  const DoughnutChart = defineAsyncComponent(() => import('../components/charts/DoughnutChart.vue'))
+  const BarChart = defineAsyncComponent(() => import('../components/charts/BarChart.vue'))
 
   const router = useRouter()
   const {
@@ -40,6 +30,10 @@
     handleClearAnswers,
     handleUpdateTags,
     handleDownload,
+    language,
+    t,
+    countLabel,
+    translateStatus,
   } = useStore()
 
   /* ── Chart Data ── */
@@ -54,7 +48,12 @@
     ).length
     const failed = documents.value.filter((d) => d.processing_status === 'failed').length
     return {
-      labels: ['Pripravljeni', 'V obdelavi', 'Čakajo', 'Neuspešni'],
+      labels: [
+        t('documents.ready'),
+        t('documents.processing'),
+        t('documents.waiting'),
+        t('documents.failed'),
+      ],
       datasets: [
         {
           data: [ready, processing, pending, failed],
@@ -71,7 +70,10 @@
     documents.value.forEach((d) => {
       if (!d.created_at) return
       const date = new Date(d.created_at)
-      const key = date.toLocaleDateString('sl-SI', { month: 'short', year: '2-digit' })
+      const key = date.toLocaleDateString(language.value === 'en' ? 'en-US' : 'sl-SI', {
+        month: 'short',
+        year: '2-digit',
+      })
       months[key] = (months[key] || 0) + 1
     })
     const labels = Object.keys(months).slice(-6)
@@ -80,7 +82,7 @@
       labels,
       datasets: [
         {
-          label: 'Naloženi dokumenti',
+          label: t('documents.uploadedDocs'),
           data,
           backgroundColor: 'rgba(99, 102, 241, 0.7)',
           borderRadius: 6,
@@ -135,24 +137,22 @@
   <section class="page">
     <div v-if="documents.length" class="documents-hero">
       <div class="documents-hero-main">
-        <span class="documents-kicker">Pregled dokumentov</span>
-        <h2 class="documents-title">Osrednji pogled za dokumente, povzetke in vprašanja.</h2>
-        <p class="documents-text">
-          Filtriraj zbirko, spremljaj stanje obdelave ter odpri posamezen dokument za predogled, povzetek ali vprašanja nad vsebino.
-        </p>
+        <span class="documents-kicker">{{ t('documents.heroKicker') }}</span>
+        <h2 class="documents-title">{{ t('documents.heroTitle') }}</h2>
+        <p class="documents-text">{{ t('documents.heroText') }}</p>
       </div>
       <div class="documents-hero-side">
         <div class="documents-side-card">
-          <span class="documents-side-label">Oznake v uporabi</span>
+          <span class="documents-side-label">{{ t('documents.tagsInUse') }}</span>
           <strong>{{ allTags.length }}</strong>
-          <p>Na voljo so oznake za hitrejše filtriranje in organizacijo dokumentov.</p>
+          <p>{{ t('documents.tagsHelp') }}</p>
         </div>
         <div class="documents-side-card compact">
-          <span>Vidni rezultati</span>
+          <span>{{ t('documents.visibleResults') }}</span>
           <strong>{{ filteredDocuments.length }}</strong>
         </div>
         <div class="documents-side-card compact">
-          <span>Aktivna vprašanja</span>
+          <span>{{ t('documents.activeQuestions') }}</span>
           <strong>{{ Object.keys(documentAnswers).length }}</strong>
         </div>
       </div>
@@ -169,7 +169,7 @@
         </div>
         <div class="stat-body">
           <span class="stat-num">{{ documents.length }}</span>
-          <span class="stat-label">Dokumentov</span>
+          <span class="stat-label">{{ t('documents.docsReady') }}</span>
         </div>
       </div>
       <div class="stat-card">
@@ -183,7 +183,7 @@
         </div>
         <div class="stat-body">
           <span class="stat-num">{{ summaryCount }}</span>
-          <span class="stat-label">Povzetkov</span>
+          <span class="stat-label">{{ t('documents.summariesReady') }}</span>
         </div>
       </div>
       <div class="stat-card">
@@ -194,7 +194,7 @@
         </div>
         <div class="stat-body">
           <span class="stat-num">{{ questionsCount }}</span>
-          <span class="stat-label">Vprašanj</span>
+          <span class="stat-label">{{ t('documents.questionsReady') }}</span>
         </div>
       </div>
       <div class="stat-card">
@@ -207,7 +207,7 @@
           <span class="stat-num"
             >{{ documents.length ? Math.round((summaryCount / documents.length) * 100) : 0 }}%</span
           >
-          <span class="stat-label">Obdelanih</span>
+          <span class="stat-label">{{ t('documents.processed') }}</span>
         </div>
       </div>
     </div>
@@ -216,29 +216,33 @@
     <Transition name="fade">
       <div v-if="showCharts" class="charts-row">
         <div class="chart-card">
-          <h5 class="chart-title">Status dokumentov</h5>
+          <h5 class="chart-title">{{ t('documents.statusTitle') }}</h5>
           <div class="chart-wrap chart-wrap-doughnut">
-            <Doughnut :data="statusChartData" :options="chartOptions" />
+            <DoughnutChart :data="statusChartData" :options="chartOptions" />
           </div>
           <div class="chart-legend">
             <span class="legend-item"
-              ><span class="legend-dot" style="background: #10b981"></span>Pripravljeni</span
+              ><span class="legend-dot" style="background: #10b981"></span
+              >{{ t('documents.ready') }}</span
             >
             <span class="legend-item"
-              ><span class="legend-dot" style="background: #f59e0b"></span>V obdelavi</span
+              ><span class="legend-dot" style="background: #f59e0b"></span
+              >{{ t('documents.processing') }}</span
             >
             <span class="legend-item"
-              ><span class="legend-dot" style="background: #6366f1"></span>Čakajo</span
+              ><span class="legend-dot" style="background: #6366f1"></span
+              >{{ t('documents.waiting') }}</span
             >
             <span class="legend-item"
-              ><span class="legend-dot" style="background: #ef4444"></span>Neuspešni</span
+              ><span class="legend-dot" style="background: #ef4444"></span
+              >{{ t('documents.failed') }}</span
             >
           </div>
         </div>
         <div class="chart-card chart-card-wide">
-          <h5 class="chart-title">Časovnica nalaganja</h5>
+          <h5 class="chart-title">{{ t('documents.timelineTitle') }}</h5>
           <div class="chart-wrap chart-wrap-bar">
-            <Bar :data="uploadTimelineData" :options="barOptions" />
+            <BarChart :data="uploadTimelineData" :options="barOptions" />
           </div>
         </div>
       </div>
@@ -259,18 +263,18 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Išči po imenu datoteke..."
+          :placeholder="t('documents.searchPlaceholder')"
           class="search-input"
         />
       </div>
       <select v-model="sortField" class="sort-select">
-        <option value="date">Najnovejši</option>
-        <option value="name">Po imenu</option>
-        <option value="size">Po velikosti</option>
-        <option value="status">Po statusu</option>
+        <option value="date">{{ t('documents.newest') }}</option>
+        <option value="name">{{ t('documents.byName') }}</option>
+        <option value="size">{{ t('documents.bySize') }}</option>
+        <option value="status">{{ t('documents.byStatus') }}</option>
       </select>
       <select v-if="allTags.length" v-model="selectedTag" class="sort-select">
-        <option value="">Vse oznake</option>
+        <option value="">{{ t('documents.allTags') }}</option>
         <option v-for="tag in allTags" :key="tag" :value="tag">{{ tag }}</option>
       </select>
       <button
@@ -278,9 +282,14 @@
         class="toolbar-reset"
         @click="resetWorkspaceFilters"
       >
-        Ponastavi filtre
+        {{ t('documents.resetFilters') }}
       </button>
-      <span class="result-count">{{ filteredDocuments.length }} rezultatov</span>
+      <span class="result-count">{{
+        countLabel(filteredDocuments.length, {
+          sl: ['rezultat', 'rezultata', 'rezultati', 'rezultatov'],
+          en: ['result', 'results'],
+        })
+      }}</span>
     </div>
 
     <div v-if="dashboardBusy" class="state-box">
@@ -293,7 +302,7 @@
       >
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
-      <span>Nalagam dokumente...</span>
+      <span>{{ t('documents.loadingDocs') }}</span>
     </div>
 
     <div v-else-if="!documents.length" class="state-box state-empty">
@@ -303,20 +312,20 @@
           <polyline points="13 2 13 9 20 9" />
         </svg>
       </div>
-      <p class="empty-title">Ni dokumentov</p>
-      <p class="empty-sub">Naloži prvi PDF dokument in pusti AI, da ga analizira namesto tebe.</p>
+      <p class="empty-title">{{ t('documents.noDocuments') }}</p>
+      <p class="empty-sub">{{ t('documents.noDocumentsText') }}</p>
       <div class="empty-hints">
         <div class="empty-hint">
           <span class="hint-num">1</span>
-          <span>Naloži PDF</span>
+          <span>{{ t('documents.uploadPdf') }}</span>
         </div>
         <div class="empty-hint">
           <span class="hint-num">2</span>
-          <span>Generiraj povzetek</span>
+          <span>{{ t('documents.generateSummary') }}</span>
         </div>
         <div class="empty-hint">
           <span class="hint-num">3</span>
-          <span>Zastavi vprašanje</span>
+          <span>{{ t('documents.askQuestion') }}</span>
         </div>
       </div>
       <button class="btn-primary-sm" @click="router.push('/upload')">
@@ -325,7 +334,7 @@
           <polyline points="17 8 12 3 7 8" />
           <line x1="12" y1="3" x2="12" y2="15" />
         </svg>
-        Naloži dokument
+        {{ t('documents.uploadDocument') }}
       </button>
     </div>
 
@@ -374,8 +383,8 @@
   .documents-hero-main,
   .documents-hero-side {
     padding: 1.3rem 1.4rem;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 24px;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(12px);

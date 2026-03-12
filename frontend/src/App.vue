@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, provide, ref } from 'vue'
+  import { computed, onMounted, provide, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { useStore } from './composables/useStore'
 
@@ -19,12 +19,17 @@
     globalError,
     sidebarCollapsed,
     darkMode,
+    language,
     authBusy,
     handleLogin,
     handleRegister,
     toggleDarkMode,
+    toggleLanguage,
     logout: storeLogout,
     bootstrapSession,
+    t,
+    countLabel,
+    translateRole,
   } = store
 
   /* Provide store slices for child pages (e.g. LandingPage needs auth handlers) */
@@ -40,12 +45,12 @@
   }
 
   /* Page metadata driven by current route */
-  const pageMeta = {
-    documents: { title: 'Dokumenti', subtitle: 'Pregled, iskanje in upravljanje dokumentov' },
-    upload: { title: 'Naloži dokument', subtitle: 'PDF datoteke do 15 MB' },
-    profile: { title: 'Uporabniški profil', subtitle: 'Podatki o tvojem računu' },
-    admin: { title: 'Administracija', subtitle: 'Sistemske statistike in uporabniki' },
-  }
+  const pageMeta = computed(() => ({
+    documents: { title: t('page.documentsTitle'), subtitle: t('page.documentsSubtitle') },
+    upload: { title: t('page.uploadTitle'), subtitle: t('page.uploadSubtitle') },
+    profile: { title: t('page.profileTitle'), subtitle: t('page.profileSubtitle') },
+    admin: { title: t('page.adminTitle'), subtitle: t('page.adminSubtitle') },
+  }))
 
   onMounted(async () => {
     await bootstrapSession()
@@ -94,7 +99,7 @@
             <button
               class="sidebar-toggle"
               @click="sidebarCollapsed = !sidebarCollapsed"
-              :title="sidebarCollapsed ? 'Razširi' : 'Skrči'"
+              :title="sidebarCollapsed ? t('shell.expand') : t('shell.collapse')"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12" />
@@ -110,7 +115,7 @@
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
-              <span class="nav-label" v-if="!sidebarCollapsed">Dokumenti</span>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.documents') }}</span>
               <span class="nav-badge" v-if="!sidebarCollapsed && documents.length">{{
                 documents.length
               }}</span>
@@ -121,24 +126,26 @@
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <span class="nav-label" v-if="!sidebarCollapsed">Naloži</span>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.upload') }}</span>
             </router-link>
             <router-link to="/profile" class="nav-item" active-class="active">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-              <span class="nav-label" v-if="!sidebarCollapsed">Profil</span>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.profile') }}</span>
             </router-link>
             <router-link v-if="isAdmin" to="/admin" class="nav-item" active-class="active">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              <span class="nav-label" v-if="!sidebarCollapsed">Admin</span>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.admin') }}</span>
             </router-link>
 
             <div v-if="isAdmin && !sidebarCollapsed" class="nav-divider"></div>
-            <span v-if="isAdmin && !sidebarCollapsed" class="nav-section-label">Orodja</span>
+            <span v-if="isAdmin && !sidebarCollapsed" class="nav-section-label">{{
+              t('shell.tools')
+            }}</span>
 
             <a v-if="isAdmin" href="/docs" target="_blank" class="nav-item nav-item-ext">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -148,7 +155,7 @@
                 <line x1="16" y1="17" x2="8" y2="17" />
                 <polyline points="10 9 9 9 8 9" />
               </svg>
-              <span class="nav-label" v-if="!sidebarCollapsed">API Docs</span>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.apiDocs') }}</span>
               <svg
                 v-if="!sidebarCollapsed"
                 viewBox="0 0 24 24"
@@ -167,7 +174,7 @@
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
-              <span class="nav-label" v-if="!sidebarCollapsed">ReDoc</span>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.redoc') }}</span>
               <svg
                 v-if="!sidebarCollapsed"
                 viewBox="0 0 24 24"
@@ -191,14 +198,31 @@
               <div class="user-meta">
                 <span class="user-name-sm">{{ currentUser.full_name }}</span>
                 <span class="user-role-sm" :class="'role-' + currentUser.role">{{
-                  currentUser.role
+                  translateRole(currentUser.role)
                 }}</span>
               </div>
             </div>
             <button
+              class="nav-item nav-item-language"
+              @click="toggleLanguage"
+              :title="t('shell.language')"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 8l6 6" />
+                <path d="M4 14l6-6 2-3" />
+                <path d="M2 5h12" />
+                <path d="M7 2h1" />
+                <path d="M22 22l-5-10-5 10" />
+                <path d="M14 18h6" />
+              </svg>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{
+                language === 'sl' ? 'English' : 'Slovenščina'
+              }}</span>
+            </button>
+            <button
               class="nav-item nav-item-theme"
               @click="toggleDarkMode"
-              :title="darkMode ? 'Svetli način' : 'Temni način'"
+              :title="darkMode ? t('shell.lightMode') : t('shell.darkMode')"
             >
               <svg
                 v-if="darkMode"
@@ -221,7 +245,7 @@
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               </svg>
               <span class="nav-label" v-if="!sidebarCollapsed">{{
-                darkMode ? 'Svetli način' : 'Temni način'
+                darkMode ? t('shell.lightMode') : t('shell.darkMode')
               }}</span>
             </button>
             <button class="nav-item nav-item-logout" @click="handleLogout">
@@ -230,7 +254,7 @@
                 <polyline points="16 17 21 12 16 7" />
                 <line x1="21" y1="12" x2="9" y2="12" />
               </svg>
-              <span class="nav-label" v-if="!sidebarCollapsed">Odjava</span>
+              <span class="nav-label" v-if="!sidebarCollapsed">{{ t('shell.logout') }}</span>
             </button>
           </div>
         </aside>
@@ -259,11 +283,11 @@
             <div class="topbar-stats">
               <div class="mini-stat">
                 <span class="mini-stat-num">{{ documents.length }}</span>
-                <span class="mini-stat-lbl">Dokumentov</span>
+                <span class="mini-stat-lbl">{{ t('shell.documents') }}</span>
               </div>
               <div class="mini-stat">
                 <span class="mini-stat-num">{{ summaryCount }}</span>
-                <span class="mini-stat-lbl">Povzetkov</span>
+                <span class="mini-stat-lbl">{{ t('shell.summaries') }}</span>
               </div>
             </div>
           </header>
@@ -275,11 +299,11 @@
           <footer class="main-footer">
             <span>AI Document Assistant v1.5.3</span>
             <span class="footer-dot">&middot;</span>
-            <span>ALMA MATER EUROPAEA 2025/26</span>
+            <span>{{ t('shell.footerSchool') }}</span>
             <span class="footer-dot">&middot;</span>
-            <a href="/docs" class="footer-link">API Docs</a>
+            <a href="/docs" class="footer-link">{{ t('shell.apiDocs') }}</a>
             <span class="footer-dot">&middot;</span>
-            <a href="/redoc" class="footer-link">ReDoc</a>
+            <a href="/redoc" class="footer-link">{{ t('shell.redoc') }}</a>
           </footer>
         </main>
       </div>
@@ -334,8 +358,8 @@
   /* ── Sidebar ── */
   .sidebar {
     width: 256px;
-    background: #1a1d23;
-    color: #e2e8ef;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -356,7 +380,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--sidebar-divider);
     min-height: 60px;
   }
 
@@ -395,16 +419,16 @@
   }
   .sb-ver {
     font-size: 0.62rem;
-    color: #8b92a0;
+    color: var(--sidebar-muted);
   }
 
   .sidebar-toggle {
     width: 32px;
     height: 32px;
     border: none;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--sidebar-soft);
     border-radius: 6px;
-    color: #8b92a0;
+    color: var(--sidebar-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -416,8 +440,8 @@
     height: 16px;
   }
   .sidebar-toggle:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #e2e8ef;
+    background: var(--sidebar-soft-strong);
+    color: var(--sidebar-text);
   }
 
   .sidebar-nav {
@@ -435,13 +459,14 @@
     padding: 0.6rem 0.85rem;
     border: none;
     background: transparent;
-    color: #8b92a0;
-    border-radius: 8px;
+    color: var(--sidebar-muted);
+    border-radius: 12px;
     font-size: 0.85rem;
     font-weight: 500;
-    transition: all 0.15s;
+    transition: all 0.18s;
     width: 100%;
     text-align: left;
+    text-decoration: none;
   }
 
   .nav-item svg {
@@ -451,13 +476,23 @@
   }
 
   .nav-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: #e2e8ef;
+    background: var(--sidebar-soft);
+    color: var(--sidebar-text);
   }
 
   .nav-item.active {
-    background: rgba(99, 102, 241, 0.15);
-    color: #a5b4fc;
+    background: var(--sidebar-active-bg);
+    color: #c7d2fe;
+    box-shadow: inset 0 0 0 1px rgba(165, 180, 252, 0.12);
+  }
+
+  .nav-item-language {
+    color: #7dd3fc;
+  }
+
+  .nav-item-language:hover {
+    background: rgba(125, 211, 252, 0.12);
+    color: #bae6fd;
   }
 
   .nav-badge {
@@ -472,7 +507,7 @@
 
   .nav-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--sidebar-divider);
     margin: 0.5rem 0.85rem;
   }
 
@@ -483,7 +518,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #5a6070;
+    color: var(--sidebar-muted);
   }
 
   .nav-item-ext {
@@ -499,7 +534,8 @@
 
   .sidebar-bottom {
     padding: 0.75rem 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid var(--sidebar-divider);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--sidebar-soft));
   }
 
   .sidebar-user {
@@ -534,7 +570,7 @@
   .user-name-sm {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #e2e8ef;
+    color: var(--sidebar-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -551,7 +587,7 @@
     color: #fbbf24;
   }
   .role-user {
-    color: #8b92a0;
+    color: var(--sidebar-muted);
   }
 
   .nav-item-theme {
@@ -576,7 +612,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background: var(--bg);
+    background: transparent;
     overflow-x: hidden;
   }
 
@@ -586,8 +622,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 2rem;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    background: var(--topbar-bg);
+    border-bottom: 1px solid var(--topbar-border);
+    backdrop-filter: blur(14px);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -617,10 +654,11 @@
     flex-direction: column;
     align-items: center;
     padding: 0.4rem 1rem;
-    background: var(--surface-alt);
-    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface-alt) 82%, white 18%);
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 82%, white 18%);
     border-radius: var(--radius);
     min-width: 72px;
+    box-shadow: var(--shadow-xs);
   }
 
   .mini-stat-num {
@@ -650,7 +688,8 @@
     font-size: 0.75rem;
     color: var(--text-light);
     margin-top: auto;
-    background: var(--surface);
+    background: var(--footer-bg);
+    backdrop-filter: blur(10px);
   }
 
   /* ── Toasts ── */

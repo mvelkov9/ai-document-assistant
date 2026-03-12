@@ -19,6 +19,7 @@ import {
   updateDocumentTags,
   uploadDocument,
 } from '../lib/api'
+import { formatCountLabel, i18n, setI18nLanguage, translate } from '../lib/i18n'
 
 const TOKEN_KEY = 'docassist-token'
 
@@ -40,6 +41,8 @@ const selectedTag = ref('')
 const adminStats = ref(null)
 const adminUsers = ref([])
 const sidebarCollapsed = ref(false)
+const LANGUAGE_KEY = 'docassist-language'
+const language = ref(localStorage.getItem(LANGUAGE_KEY) || 'sl')
 
 /* ── Dark mode ── */
 const DARK_KEY = 'docassist-dark'
@@ -48,10 +51,48 @@ function applyDarkClass() {
   document.documentElement.classList.toggle('dark', darkMode.value)
 }
 applyDarkClass()
+
+function applyLanguageAttr() {
+  setI18nLanguage(language.value)
+}
+
+applyLanguageAttr()
+
 function toggleDarkMode() {
   darkMode.value = !darkMode.value
   localStorage.setItem(DARK_KEY, darkMode.value)
   applyDarkClass()
+}
+
+function setLanguage(nextLanguage) {
+  language.value = nextLanguage === 'en' ? 'en' : 'sl'
+  localStorage.setItem(LANGUAGE_KEY, language.value)
+  applyLanguageAttr()
+}
+
+function toggleLanguage() {
+  setLanguage(language.value === 'sl' ? 'en' : 'sl')
+}
+
+function t(key, params) {
+  language.value
+  i18n.global.locale.value
+  return translate(language.value, key, params)
+}
+
+function countLabel(count, forms) {
+  language.value
+  return formatCountLabel(language.value, count, forms)
+}
+
+function translateStatus(status) {
+  if (!status) return ''
+  return t(`status.${status}`)
+}
+
+function translateRole(role) {
+  if (!role) return ''
+  return t(`roles.${role}`)
 }
 
 /* ── Session bootstrap promise ── */
@@ -175,7 +216,7 @@ async function handleLogin(form) {
     currentUser.value = await getCurrentUser(sessionToken.value)
     await refreshDocuments()
     if (isAdmin.value) await loadAdminData()
-    setMessage('Prijava je uspela.')
+    setMessage(t('messages.loginSuccess'))
     return true
   } catch (e) {
     setError(e.message)
@@ -189,7 +230,7 @@ async function handleRegister(form) {
   authBusy.value = true
   try {
     await registerUser(form)
-    setMessage('Registracija je uspela. Zdaj se prijavi z novim računom.')
+    setMessage(t('messages.registerSuccess'))
   } catch (e) {
     setError(e.message)
   } finally {
@@ -202,7 +243,7 @@ async function handleUpload(file) {
   try {
     await uploadDocument(sessionToken.value, file)
     await refreshDocuments()
-    setMessage('Dokument je bil uspešno naložen.')
+    setMessage(t('messages.uploadSuccess'))
     return true
   } catch (e) {
     setError(e.message)
@@ -228,7 +269,7 @@ async function handleSummarize(documentId) {
     const job = await createSummaryJob(sessionToken.value, documentId)
     const result = await pollJob(job.id)
     await refreshDocuments()
-    setMessage(result ? 'Povzetek je bil generiran.' : 'Job se v teku. Osveži pozneje.')
+    setMessage(result ? t('messages.summaryReady') : t('messages.jobRunning'))
   } catch (e) {
     setError(e.message)
   } finally {
@@ -264,12 +305,12 @@ async function handleAsk(documentId, question) {
         id: result.id || Date.now().toString(),
         document_id: documentId,
         question_text: result.job_input || question,
-        answer_text: result.result_text || 'Odgovor generiran brez vsebine.',
+        answer_text: result.result_text || t('messages.generatedNoContent'),
         source_mode: 'async-job',
         created_at: new Date().toISOString(),
       })
     }
-    setMessage(result ? 'Odgovor je bil generiran.' : 'Job se v teku. Osveži pozneje.')
+    setMessage(result ? t('messages.answerReady') : t('messages.jobRunning'))
   } catch (e) {
     // Remove pending entry on error
     documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== pendingId)
@@ -281,7 +322,7 @@ async function handleAsk(documentId, question) {
 
 function logout() {
   clearSession()
-  setMessage('Odjava je bila uspešna.')
+  setMessage(t('messages.logoutSuccess'))
 }
 
 async function handleDelete(documentId) {
@@ -289,7 +330,7 @@ async function handleDelete(documentId) {
     await deleteDocument(sessionToken.value, documentId)
     delete documentAnswers[documentId]
     await refreshDocuments()
-    setMessage('Dokument je bil izbrisan.')
+    setMessage(t('messages.documentDeleted'))
   } catch (e) {
     setError(e.message)
   }
@@ -301,7 +342,7 @@ async function handleDeleteAnswer(documentId, answerId) {
     if (documentAnswers[documentId]) {
       documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== answerId)
     }
-    setMessage('Odgovor je bil izbrisan.')
+    setMessage(t('messages.answerDeleted'))
   } catch (e) {
     setError(e.message)
   }
@@ -311,7 +352,7 @@ async function handleClearAnswers(documentId) {
   try {
     await clearDocumentAnswers(sessionToken.value, documentId)
     documentAnswers[documentId] = []
-    setMessage('Pogovor je bil počiščen.')
+    setMessage(t('messages.conversationCleared'))
   } catch (e) {
     setError(e.message)
   }
@@ -339,7 +380,7 @@ async function handleSetRole(userId, role) {
   try {
     await setUserRole(sessionToken.value, userId, role)
     await loadAdminData()
-    setMessage(`Vloga uporabnika je bila spremenjena na "${role}".`)
+    setMessage(t('messages.roleChanged', { role: translateRole(role) }))
   } catch (e) {
     setError(e.message)
   }
@@ -347,7 +388,7 @@ async function handleSetRole(userId, role) {
 
 function formatDate(iso) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('sl-SI', {
+  return new Date(iso).toLocaleDateString(language.value === 'en' ? 'en-US' : 'sl-SI', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -357,13 +398,14 @@ function formatDate(iso) {
 function formatDateTime(iso) {
   if (!iso) return ''
   const d = new Date(iso)
-  const date = d.toLocaleDateString('sl-SI', {
+  const locale = language.value === 'en' ? 'en-US' : 'sl-SI'
+  const date = d.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
-  const time = d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })
-  return `${date} ob ${time}`
+  const time = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+  return language.value === 'en' ? `${date} at ${time}` : `${date} ob ${time}`
 }
 
 export function useStore() {
@@ -387,6 +429,7 @@ export function useStore() {
     adminUsers,
     sidebarCollapsed,
     darkMode,
+    language,
 
     /* computed */
     isAuthenticated,
@@ -416,6 +459,12 @@ export function useStore() {
     handleDownload,
     handleSetRole,
     toggleDarkMode,
+    setLanguage,
+    toggleLanguage,
+    t,
+    countLabel,
+    translateStatus,
+    translateRole,
     formatDate,
     formatDateTime,
     sessionReady,

@@ -1,11 +1,13 @@
 <script setup>
   import { ref, computed } from 'vue'
+  import { useStore } from '../composables/useStore'
 
   defineProps({
     busy: { type: Boolean, default: false },
   })
 
   const emit = defineEmits(['upload', 'upload-batch'])
+  const { t, countLabel } = useStore()
   const fileQueue = ref([])
   const isDragOver = ref(false)
   const isUploading = ref(false)
@@ -99,19 +101,19 @@
     <div class="upload-summary-bar">
       <div class="summary-pill">
         <strong>{{ fileQueue.length }}</strong>
-        <span>Izbranih datotek</span>
+        <span>{{ t('upload.selectedFiles') }}</span>
       </div>
       <div class="summary-pill">
         <strong>{{ pendingCount }}</strong>
-        <span>Pripravljenih za nalaganje</span>
+        <span>{{ t('upload.pendingFiles') }}</span>
       </div>
       <div class="summary-pill" :class="{ success: doneCount }">
         <strong>{{ doneCount }}</strong>
-        <span>Uspešno naloženih</span>
+        <span>{{ t('upload.uploadedFiles') }}</span>
       </div>
       <div class="summary-pill" :class="{ danger: failedCount }">
         <strong>{{ failedCount }}</strong>
-        <span>Napak</span>
+        <span>{{ t('upload.errors') }}</span>
       </div>
     </div>
 
@@ -123,8 +125,8 @@
           <line x1="12" y1="3" x2="12" y2="15" />
         </svg>
       </div>
-      <p class="upload-title">Povleci PDF datoteke sem</p>
-      <p class="upload-hint">ali</p>
+      <p class="upload-title">{{ t('upload.dragPrompt') }}</p>
+      <p class="upload-hint">{{ t('common.or') }}</p>
       <label for="document-upload" class="upload-browse">
         <svg
           viewBox="0 0 24 24"
@@ -136,7 +138,7 @@
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
-        Izberi datoteke
+        {{ t('upload.browse') }}
       </label>
       <input
         id="document-upload"
@@ -146,29 +148,39 @@
         class="sr-only"
         @change="onFileChange"
       />
-      <p class="upload-formats">Podprti formati: PDF (do 15 MB na datoteko) · Več datotek hkrati</p>
+      <p class="upload-formats">{{ t('upload.formats') }}</p>
     </div>
 
     <div class="upload-guidance">
       <div class="guidance-item">
-        <span class="guidance-title">Več dokumentov</span>
-        <span class="guidance-text">Dodaj več PDF datotek hkrati in nato upravljaj nadaljnjo obdelavo iz pregleda dokumentov.</span>
+        <span class="guidance-title">{{ t('upload.moreDocuments') }}</span>
+        <span class="guidance-text">{{ t('upload.moreDocumentsText') }}</span>
       </div>
       <div class="guidance-item">
-        <span class="guidance-title">Jasen status</span>
-        <span class="guidance-text">Vsaka datoteka v čakalni vrsti prikazuje stanje nalaganja in jasno označi morebitno napako.</span>
+        <span class="guidance-title">{{ t('upload.clearStatus') }}</span>
+        <span class="guidance-text">{{ t('upload.clearStatusText') }}</span>
       </div>
       <div class="guidance-item">
-        <span class="guidance-title">Naslednji korak</span>
-        <span class="guidance-text">Po nalaganju odpri predogled dokumenta, sproži povzetek in nato zastavi vprašanja nad vsebino.</span>
+        <span class="guidance-title">{{ t('upload.nextAction') }}</span>
+        <span class="guidance-text">{{ t('upload.nextActionText') }}</span>
       </div>
     </div>
 
     <Transition name="fade">
       <div v-if="hasFiles" class="file-queue">
         <div class="queue-header">
-          <span class="queue-title">{{ fileQueue.length }} datotek v vrsti</span>
-          <button v-if="!isUploading" class="queue-clear" @click="clearQueue">Počisti</button>
+          <span class="queue-title"
+            >{{
+              countLabel(fileQueue.length, {
+                sl: ['datoteka', 'datoteki', 'datoteke', 'datotek'],
+                en: ['file', 'files'],
+              })
+            }}
+            {{ t('upload.queue') }}</span
+          >
+          <button v-if="!isUploading" class="queue-clear" @click="clearQueue">
+            {{ t('upload.clear') }}
+          </button>
         </div>
         <TransitionGroup name="list" tag="div" class="queue-list">
           <div
@@ -219,13 +231,17 @@
             <div class="qi-bar-wrap" v-if="item.status === 'uploading'">
               <div class="qi-bar" :style="{ width: item.progress + '%' }"></div>
             </div>
-            <span v-if="item.status === 'done'" class="qi-label qi-done-label">Naloženo</span>
-            <span v-if="item.status === 'failed'" class="qi-label qi-fail-label">Napaka</span>
+            <span v-if="item.status === 'done'" class="qi-label qi-done-label">{{
+              t('upload.uploaded')
+            }}</span>
+            <span v-if="item.status === 'failed'" class="qi-label qi-fail-label">{{
+              t('upload.failed')
+            }}</span>
             <button
               v-if="item.status === 'pending'"
               class="qi-remove"
               @click="removeFile(idx)"
-              title="Odstrani"
+              :title="t('common.remove')"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -263,7 +279,16 @@
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             {{
-              isUploading ? 'Nalagam...' : allDone ? 'Zaključeno' : `Naloži ${pendingCount} datotek`
+              isUploading
+                ? t('upload.uploading')
+                : allDone
+                  ? t('upload.completed')
+                  : t('upload.uploadCta', {
+                      count: countLabel(pendingCount, {
+                        sl: ['datoteko', 'datoteki', 'datoteke', 'datotek'],
+                        en: ['file', 'files'],
+                      }),
+                    })
             }}
           </button>
         </div>
@@ -274,12 +299,12 @@
 
 <style scoped>
   .upload-zone {
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    border: 1px solid var(--panel-border);
     border-radius: 28px;
     padding: 1.35rem;
     text-align: left;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--panel-bg);
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(12px);
     position: relative;

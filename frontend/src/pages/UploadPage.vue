@@ -5,11 +5,17 @@
   import UploadSection from '../components/UploadSection.vue'
 
   const router = useRouter()
-  const { uploadBusy, documents, summaryCount, handleUpload: storeUpload, refreshDocuments } =
-    useStore()
+  const {
+    uploadBusy,
+    documents,
+    summaryCount,
+    t,
+    handleUpload: storeUpload,
+    refreshDocuments,
+  } = useStore()
 
-  const readyCount = computed(() =>
-    documents.value.filter((document) => document.processing_status === 'ready').length,
+  const readyCount = computed(
+    () => documents.value.filter((document) => document.processing_status === 'ready').length,
   )
 
   async function onUpload(file, done) {
@@ -27,40 +33,42 @@
   <section class="page">
     <div class="upload-shell">
       <div class="upload-intro">
-        <span class="upload-kicker">Nalaganje dokumentov</span>
-        <h2 class="upload-title">Pripravi dokumente za analizo in nadaljnjo obdelavo.</h2>
+        <span class="upload-kicker">{{ t('upload.title') }}</span>
+        <h2 class="upload-title">{{ t('upload.pageTitle') }}</h2>
         <p class="upload-text">
-          Tukaj naložiš eno ali več PDF datotek, spremljaš pripravljenost sistema in nato nadaljuješ v pregled dokumentov ali povzetkov.
+          {{ t('upload.pageText') }}
         </p>
 
         <div class="upload-highlights">
           <div class="highlight-card">
             <strong>{{ documents.length }}</strong>
-            <span>Skupaj dokumentov</span>
+            <span>{{ t('upload.totalDocuments') }}</span>
           </div>
           <div class="highlight-card">
             <strong>{{ summaryCount }}</strong>
-            <span>Pripravljenih povzetkov</span>
+            <span>{{ t('upload.readySummaries') }}</span>
           </div>
           <div class="highlight-card">
             <strong>{{ readyCount }}</strong>
-            <span>Dokumentov pripravljenih za vprašanja</span>
+            <span>{{ t('upload.readyQuestions') }}</span>
           </div>
         </div>
 
         <div class="upload-actions">
-          <button class="btn-primary" @click="router.push('/documents')">Odpri dokumente</button>
+          <button class="btn-primary" @click="router.push('/documents')">
+            {{ t('upload.openDocuments') }}
+          </button>
         </div>
       </div>
 
       <div class="upload-side-notes">
         <div class="note-card">
-          <span class="note-label">Priporočilo</span>
-          <p>Najboljše rezultate dobiš pri PDF datotekah z berljivim besedilom in urejeno strukturo strani.</p>
+          <span class="note-label">{{ t('upload.recommendation') }}</span>
+          <p>{{ t('upload.recommendationText') }}</p>
         </div>
         <div class="note-card">
-          <span class="note-label">Nadaljevanje</span>
-          <p>Po nalaganju odpri predogled, sproži povzetek in nato uporabi vprašanja za podrobnejšo analizo vsebine.</p>
+          <span class="note-label">{{ t('upload.nextStep') }}</span>
+          <p>{{ t('upload.nextStepText') }}</p>
         </div>
       </div>
     </div>
@@ -86,8 +94,8 @@
 
   .upload-intro,
   .upload-side-notes {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 24px;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(12px);

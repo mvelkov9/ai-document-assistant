@@ -1,5 +1,6 @@
 <script setup>
   import { ref, nextTick, watch, computed } from 'vue'
+  import { useStore } from '../composables/useStore'
 
   import { renderMarkdown } from '../lib/markdown'
 
@@ -9,6 +10,7 @@
   })
 
   const emit = defineEmits(['ask', 'delete-answer', 'clear-answers'])
+  const { t, language, countLabel } = useStore()
 
   const questionDraft = ref('')
   const chatBody = ref(null)
@@ -45,12 +47,18 @@
 
   function formatTime(iso) {
     if (!iso) return ''
-    return new Date(iso).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })
+    return new Date(iso).toLocaleTimeString(language.value === 'en' ? 'en-US' : 'sl-SI', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
   function formatDate(iso) {
     if (!iso) return ''
-    return new Date(iso).toLocaleDateString('sl-SI', { day: 'numeric', month: 'short' })
+    return new Date(iso).toLocaleDateString(language.value === 'en' ? 'en-US' : 'sl-SI', {
+      day: 'numeric',
+      month: 'short',
+    })
   }
 
   /* Auto-scroll to bottom when answers change */
@@ -67,12 +75,17 @@
   <div class="chat-qa">
     <!-- Chat header with clear button -->
     <div v-if="sortedAnswers.length" class="chat-header">
-      <span class="chat-header-count">{{ sortedAnswers.length }} sporočil</span>
+      <span class="chat-header-count">{{
+        countLabel(sortedAnswers.length, {
+          sl: ['sporočilo', 'sporočili', 'sporočila', 'sporočil'],
+          en: ['message', 'messages'],
+        })
+      }}</span>
       <button
         v-if="!confirmClear"
         class="chat-clear-btn"
         @click="confirmClear = true"
-        title="Počisti pogovor"
+        :title="t('chat.clearConversation')"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6" />
@@ -80,12 +93,12 @@
             d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
           />
         </svg>
-        Počisti
+        {{ t('chat.clearConversation') }}
       </button>
       <div v-else class="chat-clear-confirm">
-        <span class="chat-clear-q">Počistiti ves pogovor?</span>
-        <button class="chat-clear-yes" @click="confirmAndClear">Da</button>
-        <button class="chat-clear-no" @click="confirmClear = false">Ne</button>
+        <span class="chat-clear-q">{{ t('chat.clearConfirm') }}</span>
+        <button class="chat-clear-yes" @click="confirmAndClear">{{ t('chat.yes') }}</button>
+        <button class="chat-clear-no" @click="confirmClear = false">{{ t('chat.no') }}</button>
       </div>
     </div>
 
@@ -98,8 +111,8 @@
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </div>
-        <p class="chat-empty-text">Zastavi vprašanje o tem dokumentu</p>
-        <p class="chat-empty-hint">AI bo poiskal odgovor v vsebini datoteke</p>
+        <p class="chat-empty-text">{{ t('chat.emptyTitle') }}</p>
+        <p class="chat-empty-hint">{{ t('chat.emptyHint') }}</p>
       </div>
 
       <!-- Messages -->
@@ -146,7 +159,7 @@
               <span class="chat-time">{{ formatTime(answer.created_at) }}</span>
               <button
                 class="chat-delete-btn"
-                title="Izbriši"
+                :title="t('chat.delete')"
                 @click="emit('delete-answer', answer.id)"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -169,14 +182,14 @@
         @keydown="handleKeydown"
         rows="1"
         maxlength="500"
-        placeholder="Napiši vprašanje..."
+        :placeholder="t('chat.placeholder')"
         class="chat-textarea"
       />
       <button
         class="chat-send-btn"
         :disabled="questionBusy || questionDraft.trim().length < 3"
         @click="handleSend"
-        title="Pošlji"
+        :title="t('chat.send')"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="22" y1="2" x2="11" y2="13" />

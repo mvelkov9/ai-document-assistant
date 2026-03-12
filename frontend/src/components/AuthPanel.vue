@@ -1,11 +1,13 @@
 <script setup>
   import { reactive, ref } from 'vue'
+  import { useStore } from '../composables/useStore'
 
   defineProps({
     busy: { type: Boolean, default: false },
   })
 
   const emit = defineEmits(['login', 'register'])
+  const { t } = useStore()
 
   const mode = ref('login')
 
@@ -29,9 +31,11 @@
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
         </svg>
       </div>
-      <h3 class="auth-title">{{ mode === 'login' ? 'Dobrodošli nazaj' : 'Ustvari račun' }}</h3>
+      <h3 class="auth-title">
+        {{ mode === 'login' ? t('auth.welcomeBack') : t('auth.createAccount') }}
+      </h3>
       <p class="auth-subtitle">
-        {{ mode === 'login' ? 'Prijavi se za dostop do dokumentov' : 'Registriraj se za začetek' }}
+        {{ mode === 'login' ? t('auth.loginSubtitle') : t('auth.registerSubtitle') }}
       </p>
     </div>
 
@@ -48,7 +52,7 @@
           <polyline points="10 17 15 12 10 7" />
           <line x1="15" y1="12" x2="3" y2="12" />
         </svg>
-        Prijava
+        {{ t('auth.login') }}
       </button>
       <button class="auth-tab" :class="{ active: mode === 'register' }" @click="mode = 'register'">
         <svg
@@ -63,7 +67,7 @@
           <line x1="20" y1="8" x2="20" y2="14" />
           <line x1="23" y1="11" x2="17" y2="11" />
         </svg>
-        Registracija
+        {{ t('auth.register') }}
       </button>
     </div>
 
@@ -83,13 +87,13 @@
               />
               <polyline points="22,6 12,13 2,6" />
             </svg>
-            Email
+            {{ t('auth.email') }}
           </label>
           <input
             id="login-email"
             v-model="loginForm.email"
             type="email"
-            placeholder="ime@primer.com"
+            :placeholder="t('auth.emailPlaceholder')"
             autocomplete="email"
             required
           />
@@ -106,13 +110,13 @@
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            Geslo
+            {{ t('auth.password') }}
           </label>
           <input
             id="login-password"
             v-model="loginForm.password"
             type="password"
-            placeholder="Najmanj 8 znakov"
+            :placeholder="t('auth.passwordPlaceholder')"
             minlength="8"
             autocomplete="current-password"
             required
@@ -141,7 +145,7 @@
             <polyline points="10 17 15 12 10 7" />
             <line x1="15" y1="12" x2="3" y2="12" />
           </svg>
-          {{ busy ? 'Prijavljam...' : 'Prijavi se' }}
+          {{ busy ? t('auth.loggingIn') : t('auth.signIn') }}
         </button>
       </form>
 
@@ -158,13 +162,13 @@
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            Polno ime
+            {{ t('auth.fullName') }}
           </label>
           <input
             id="reg-name"
             v-model="registerForm.full_name"
             type="text"
-            placeholder="Janez Novak"
+            :placeholder="t('auth.namePlaceholder')"
             autocomplete="name"
             required
           />
@@ -183,13 +187,13 @@
               />
               <polyline points="22,6 12,13 2,6" />
             </svg>
-            Email
+            {{ t('auth.email') }}
           </label>
           <input
             id="reg-email"
             v-model="registerForm.email"
             type="email"
-            placeholder="ime@primer.com"
+            :placeholder="t('auth.emailPlaceholder')"
             autocomplete="email"
             required
           />
@@ -206,13 +210,13 @@
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            Geslo
+            {{ t('auth.password') }}
           </label>
           <input
             id="reg-password"
             v-model="registerForm.password"
             type="password"
-            placeholder="Najmanj 8 znakov"
+            :placeholder="t('auth.passwordPlaceholder')"
             minlength="8"
             autocomplete="new-password"
             required
@@ -242,7 +246,7 @@
             <line x1="20" y1="8" x2="20" y2="14" />
             <line x1="23" y1="11" x2="17" y2="11" />
           </svg>
-          {{ busy ? 'Registriram...' : 'Ustvari račun' }}
+          {{ busy ? t('auth.registering') : t('auth.create') }}
         </button>
       </form>
     </Transition>

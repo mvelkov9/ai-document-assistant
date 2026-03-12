@@ -1,34 +1,20 @@
 <script setup>
-  import { ref } from 'vue'
+  import { computed, ref } from 'vue'
+  import { useStore } from '../composables/useStore'
 
   const emit = defineEmits(['dismiss', 'go-upload'])
   const step = ref(0)
+  const { t } = useStore()
 
-  const steps = [
-    {
-      title: 'Dobrodošli v DocAssist',
-      text: 'Kratek uvod pokaže, kako začneš z nalaganjem, pregledi, povzetki in vprašanji nad dokumenti.',
-      icon: 'welcome',
-    },
-    {
-      title: '1. Naloži PDF dokument',
-      text: 'Klikni "Naloži" v stranskem meniju ali povleci datoteke na nalagalno območje. Podpira se več datotek hkrati.',
-      icon: 'upload',
-    },
-    {
-      title: '2. Generiraj AI povzetek',
-      text: 'Klikni gumb "Povzetek" na kartici dokumenta. AI bo prebral vsebino in ustvaril strukturiran povzetek.',
-      icon: 'summary',
-    },
-    {
-      title: '3. Zastavi vprašanje',
-      text: 'Odpri chat in vprašaj karkoli o dokumentu. AI poišče odgovor v vsebini s pomočjo RAG-lite tehnologije.',
-      icon: 'question',
-    },
-  ]
+  const steps = computed(() => [
+    { title: t('onboarding.welcomeTitle'), text: t('onboarding.welcomeText'), icon: 'welcome' },
+    { title: t('onboarding.uploadTitle'), text: t('onboarding.uploadText'), icon: 'upload' },
+    { title: t('onboarding.summaryTitle'), text: t('onboarding.summaryText'), icon: 'summary' },
+    { title: t('onboarding.questionTitle'), text: t('onboarding.questionText'), icon: 'question' },
+  ])
 
   function next() {
-    if (step.value < steps.length - 1) step.value++
+    if (step.value < steps.value.length - 1) step.value++
     else emit('go-upload')
   }
 
@@ -40,7 +26,9 @@
 <template>
   <div class="wizard-backdrop">
     <div class="wizard-card">
-      <button class="wizard-close" @click="emit('dismiss')" title="Preskoči">&times;</button>
+      <button class="wizard-close" @click="emit('dismiss')" :title="t('onboarding.skip')">
+        &times;
+      </button>
 
       <div class="wizard-progress">
         <div
@@ -99,10 +87,12 @@
       </Transition>
 
       <div class="wizard-actions">
-        <button v-if="step > 0" class="wiz-btn wiz-btn-secondary" @click="prev">Nazaj</button>
+        <button v-if="step > 0" class="wiz-btn wiz-btn-secondary" @click="prev">
+          {{ t('onboarding.back') }}
+        </button>
         <span v-else></span>
         <button class="wiz-btn wiz-btn-primary" @click="next">
-          {{ step < steps.length - 1 ? 'Naprej' : 'Začni z nalaganjem' }}
+          {{ step < steps.length - 1 ? t('onboarding.next') : t('onboarding.start') }}
         </button>
       </div>
     </div>
@@ -122,8 +112,8 @@
     padding: 1rem;
   }
   .wizard-card {
-    background: rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: var(--panel-bg-strong);
+    border: 1px solid var(--panel-border);
     border-radius: 24px;
     padding: 2rem 2.5rem;
     max-width: 440px;

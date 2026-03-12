@@ -1,20 +1,11 @@
 <script setup>
-  import { computed } from 'vue'
+  import { computed, defineAsyncComponent } from 'vue'
   import { useStore } from '../composables/useStore'
-  import { Doughnut, Bar } from 'vue-chartjs'
-  import {
-    Chart as ChartJS,
-    ArcElement,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip,
-    Legend,
-  } from 'chart.js'
 
-  ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
+  const DoughnutChart = defineAsyncComponent(() => import('../components/charts/DoughnutChart.vue'))
+  const BarChart = defineAsyncComponent(() => import('../components/charts/BarChart.vue'))
 
-  const { adminStats, adminUsers, currentUser, handleSetRole, formatDate, formatDateTime } =
+  const { adminStats, adminUsers, currentUser, handleSetRole, formatDateTime, t, translateRole } =
     useStore()
 
   function formatBytes(bytes) {
@@ -60,7 +51,7 @@
       labels,
       datasets: [
         {
-          label: 'Odgovori po viru',
+          label: t('admin.sourceTitle'),
           data,
           backgroundColor: 'rgba(99, 102, 241, 0.7)',
           borderRadius: 6,
@@ -114,8 +105,8 @@
 
   const queuedJobs = computed(() => adminStats.value?.job_breakdown?.queued || 0)
 
-  const activeUsers = computed(() =>
-    adminUsers.value.filter((user) => Boolean(user.last_login_at)).length,
+  const activeUsers = computed(
+    () => adminUsers.value.filter((user) => Boolean(user.last_login_at)).length,
   )
 </script>
 
@@ -123,24 +114,22 @@
   <section class="page">
     <div class="admin-hero" v-if="adminStats">
       <div class="admin-hero-main">
-        <span class="admin-kicker">Administracija</span>
-        <h2 class="admin-title">Pregled sistema, uporabnikov in stanja obdelave dokumentov.</h2>
-        <p class="admin-text">
-          V enem pogledu spremljaš uporabo sistema, uspešnost obdelave ter upravljaš uporabniške vloge.
-        </p>
+        <span class="admin-kicker">{{ t('admin.kicker') }}</span>
+        <h2 class="admin-title">{{ t('admin.title') }}</h2>
+        <p class="admin-text">{{ t('admin.text') }}</p>
       </div>
       <div class="admin-hero-side">
         <div class="admin-side-card">
-          <span class="admin-side-label">Pripravljenost dokumentov</span>
+          <span class="admin-side-label">{{ t('admin.readiness') }}</span>
           <strong>{{ readyPercent }}%</strong>
-          <p>Dokumentov je že pripravljenih za pregled, vprašanja ali nadaljnjo uporabo.</p>
+          <p>{{ t('admin.readinessText') }}</p>
         </div>
         <div class="admin-side-card compact">
-          <span>Aktivni uporabniki</span>
+          <span>{{ t('admin.activeUsers') }}</span>
           <strong>{{ activeUsers }}</strong>
         </div>
         <div class="admin-side-card compact">
-          <span>Opravila v čakalni vrsti</span>
+          <span>{{ t('admin.queuedJobs') }}</span>
           <strong>{{ queuedJobs }}</strong>
         </div>
       </div>
@@ -149,47 +138,47 @@
     <div class="stats-row" v-if="adminStats">
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.users }}</span
-        ><span class="stat-lbl">Uporabnikov</span>
+        ><span class="stat-lbl">{{ t('admin.users') }}</span>
       </div>
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.admins }}</span
-        ><span class="stat-lbl">Adminov</span>
+        ><span class="stat-lbl">{{ t('admin.admins') }}</span>
       </div>
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.documents }}</span
-        ><span class="stat-lbl">Dokumentov</span>
+        ><span class="stat-lbl">{{ t('admin.documents') }}</span>
       </div>
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.summaries }}</span
-        ><span class="stat-lbl">Povzetkov</span>
+        ><span class="stat-lbl">{{ t('admin.summaries') }}</span>
       </div>
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.questions }}</span
-        ><span class="stat-lbl">Vprašanj</span>
+        ><span class="stat-lbl">{{ t('admin.questions') }}</span>
       </div>
       <div class="stat-tile">
         <span class="stat-num">{{ adminStats.jobs }}</span
-        ><span class="stat-lbl">Opravil</span>
+        ><span class="stat-lbl">{{ t('admin.jobs') }}</span>
       </div>
       <div class="stat-tile">
         <span class="stat-num">{{ formatBytes(adminStats.total_storage_bytes) }}</span
-        ><span class="stat-lbl">Poraba</span>
+        ><span class="stat-lbl">{{ t('admin.usage') }}</span>
       </div>
     </div>
 
     <!-- Charts row -->
     <div v-if="adminStats" class="charts-row">
       <div v-if="statusChartData" class="chart-card">
-        <h5 class="chart-title">Status dokumentov</h5>
-        <div class="chart-wrap"><Doughnut :data="statusChartData" :options="chartOpts" /></div>
+        <h5 class="chart-title">{{ t('admin.statusTitle') }}</h5>
+        <div class="chart-wrap"><DoughnutChart :data="statusChartData" :options="chartOpts" /></div>
       </div>
       <div v-if="sourceChartData" class="chart-card chart-card-wide">
-        <h5 class="chart-title">Odgovori po AI viru</h5>
-        <div class="chart-wrap"><Bar :data="sourceChartData" :options="barOpts" /></div>
+        <h5 class="chart-title">{{ t('admin.sourceTitle') }}</h5>
+        <div class="chart-wrap"><BarChart :data="sourceChartData" :options="barOpts" /></div>
       </div>
       <div v-if="jobChartData" class="chart-card">
-        <h5 class="chart-title">Opravila po statusu</h5>
-        <div class="chart-wrap"><Doughnut :data="jobChartData" :options="chartOpts" /></div>
+        <h5 class="chart-title">{{ t('admin.jobsTitle') }}</h5>
+        <div class="chart-wrap"><DoughnutChart :data="jobChartData" :options="chartOpts" /></div>
       </div>
     </div>
 
@@ -208,7 +197,7 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-          Registrirani uporabniki
+          {{ t('admin.registeredUsers') }}
         </h3>
         <span class="table-count">{{ adminUsers.length }}</span>
       </div>
@@ -216,12 +205,12 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Email</th>
-              <th>Ime</th>
-              <th>Vloga</th>
-              <th>Registriran</th>
-              <th>Zadnja prijava</th>
-              <th>Akcije</th>
+              <th>{{ t('common.email') }}</th>
+              <th>{{ t('admin.name') }}</th>
+              <th>{{ t('common.role') }}</th>
+              <th>{{ t('admin.registered') }}</th>
+              <th>{{ t('admin.lastLogin') }}</th>
+              <th>{{ t('admin.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -229,7 +218,7 @@
               <td class="td-email">{{ u.email }}</td>
               <td>{{ u.full_name }}</td>
               <td>
-                <span class="role-pill" :class="'rp-' + u.role">{{ u.role }}</span>
+                <span class="role-pill" :class="'rp-' + u.role">{{ translateRole(u.role) }}</span>
               </td>
               <td class="td-date">{{ formatDateTime(u.created_at) }}</td>
               <td class="td-date">{{ formatDateTime(u.last_login_at) || '—' }}</td>
@@ -239,27 +228,27 @@
                     v-if="u.role === 'user'"
                     class="btn-xs btn-promote"
                     @click="handleSetRole(u.id, 'admin')"
-                    title="Povišaj v admina"
+                    :title="t('admin.promoteTitle')"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
-                    Dodeli skrbnika
+                    {{ t('admin.assignAdmin') }}
                   </button>
                   <button
                     v-else
                     class="btn-xs btn-demote"
                     @click="handleSetRole(u.id, 'user')"
-                    title="Znižaj v uporabnika"
+                    :title="t('admin.demoteTitle')"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
-                    Nastavi uporabnika
+                    {{ t('admin.assignUser') }}
                   </button>
                 </template>
-                <span v-else class="td-you">Ti</span>
+                <span v-else class="td-you">{{ t('admin.you') }}</span>
               </td>
             </tr>
           </tbody>
@@ -285,8 +274,8 @@
   .admin-hero-main,
   .admin-hero-side {
     padding: 1.3rem 1.4rem;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 24px;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(12px);

@@ -2,8 +2,17 @@
   import { computed } from 'vue'
   import { useStore } from '../composables/useStore'
 
-  const { currentUser, documents, summaryCount, questionsCount, formatDate, formatDateTime } =
-    useStore()
+  const {
+    currentUser,
+    documents,
+    summaryCount,
+    questionsCount,
+    formatDate,
+    formatDateTime,
+    t,
+    translateRole,
+    translateStatus,
+  } = useStore()
 
   const totalSize = computed(() => {
     const bytes = documents.value.reduce((sum, d) => sum + (d.size_bytes || 0), 0)
@@ -28,27 +37,27 @@
           {{ currentUser.full_name?.charAt(0)?.toUpperCase() }}
         </div>
         <div class="profile-headline">
-          <span class="profile-kicker">Uporabniški profil</span>
+          <span class="profile-kicker">{{ t('profile.kicker') }}</span>
           <h2 class="profile-name">{{ currentUser.full_name }}</h2>
-          <p class="profile-subtitle">Pregled računa, aktivnosti in uporabe dokumentnega asistenta.</p>
+          <p class="profile-subtitle">{{ t('profile.subtitle') }}</p>
         </div>
         <span class="profile-role-tag" :class="'role-tag-' + currentUser.role">{{
-          currentUser.role
+          translateRole(currentUser.role)
         }}</span>
       </div>
 
       <div class="profile-summary-grid">
         <div class="summary-card">
           <strong>{{ documents.length }}</strong>
-          <span>Dokumentov v zbirki</span>
+          <span>{{ t('profile.docsCollection') }}</span>
         </div>
         <div class="summary-card">
           <strong>{{ summaryCount }}</strong>
-          <span>Pripravljenih povzetkov</span>
+          <span>{{ t('profile.readySummaries') }}</span>
         </div>
         <div class="summary-card">
           <strong>{{ processedPercent }}%</strong>
-          <span>Stopnja obdelanosti</span>
+          <span>{{ t('profile.completionRate') }}</span>
         </div>
       </div>
     </div>
@@ -56,40 +65,40 @@
     <div class="profile-panels">
       <div class="profile-panel">
         <div class="panel-header">
-          <h3>Osnovni podatki</h3>
-          <span class="panel-chip">Račun</span>
+          <h3>{{ t('profile.basics') }}</h3>
+          <span class="panel-chip">{{ t('profile.account') }}</span>
         </div>
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Email</span>
+            <span class="info-label">{{ t('common.email') }}</span>
             <span class="info-value">{{ currentUser.email }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Vloga</span>
-            <span class="info-value capitalize">{{ currentUser.role }}</span>
+            <span class="info-label">{{ t('profile.role') }}</span>
+            <span class="info-value capitalize">{{ translateRole(currentUser.role) }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Dokumenti</span>
+            <span class="info-label">{{ t('profile.documents') }}</span>
             <span class="info-value">{{ documents.length }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Povzetki</span>
+            <span class="info-label">{{ t('profile.summaries') }}</span>
             <span class="info-value">{{ summaryCount }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Vprašanja</span>
+            <span class="info-label">{{ t('profile.questions') }}</span>
             <span class="info-value">{{ questionsCount }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Skupna velikost</span>
+            <span class="info-label">{{ t('profile.totalSize') }}</span>
             <span class="info-value">{{ totalSize }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Registriran</span>
+            <span class="info-label">{{ t('profile.registered') }}</span>
             <span class="info-value">{{ formatDateTime(currentUser.created_at) || '—' }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Zadnja prijava</span>
+            <span class="info-label">{{ t('profile.lastLogin') }}</span>
             <span class="info-value">{{ formatDateTime(currentUser.last_login_at) || '—' }}</span>
           </div>
         </div>
@@ -97,33 +106,35 @@
 
       <div class="profile-panel profile-panel-side">
         <div class="panel-header">
-          <h3>Nedavna aktivnost</h3>
-          <span class="panel-chip">Pregled</span>
+          <h3>{{ t('profile.recentActivity') }}</h3>
+          <span class="panel-chip">{{ t('profile.overview') }}</span>
         </div>
 
         <div class="activity-card">
-          <span class="activity-label">Zadnji dokument</span>
-          <strong>{{ latestDocument?.original_filename || 'Ni še naloženega dokumenta' }}</strong>
+          <span class="activity-label">{{ t('profile.latestDocument') }}</span>
+          <strong>{{
+            latestDocument?.original_filename || t('profile.noUploadedDocument')
+          }}</strong>
           <p>
             {{
               latestDocument
-                ? `${formatDate(latestDocument.created_at) || 'Danes'} · ${latestDocument.processing_status}`
-                : 'Ko naložiš dokument, bo tukaj prikazan njegov trenutni status in čas dodajanja.'
+                ? `${formatDate(latestDocument.created_at) || t('profile.today')} · ${translateStatus(latestDocument.processing_status)}`
+                : t('profile.latestDocFallback')
             }}
           </p>
         </div>
 
         <div class="activity-list">
           <div class="activity-row">
-            <span>Skupna velikost zbirke</span>
+            <span>{{ t('profile.collectionSize') }}</span>
             <strong>{{ totalSize }}</strong>
           </div>
           <div class="activity-row">
-            <span>Vprašanja nad dokumenti</span>
+            <span>{{ t('profile.docQuestions') }}</span>
             <strong>{{ questionsCount }}</strong>
           </div>
           <div class="activity-row">
-            <span>Obdelanih dokumentov</span>
+            <span>{{ t('profile.processedDocs') }}</span>
             <strong>{{ processedPercent }}%</strong>
           </div>
         </div>
@@ -150,8 +161,8 @@
     align-items: center;
     gap: 1rem;
     padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 24px;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(12px);
@@ -229,8 +240,8 @@
 
   .summary-card {
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 22px;
     box-shadow: var(--shadow-sm);
     text-align: center;
@@ -257,8 +268,8 @@
 
   .profile-panel {
     padding: 1.2rem;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     border-radius: 24px;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(12px);

@@ -2,18 +2,17 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
-# Ensure the project root (/app) is on sys.path when running from scripts/
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from sqlalchemy import select
 
 from app.core.security import hash_password
 from app.db.session import SessionLocal, init_db
 from app.models.document import Document
-from app.models.user import User
 from app.repositories.document_repository import DocumentRepository
 from app.repositories.user_repository import UserRepository
 from app.services.storage_service import StorageService
+
+# Ensure the project root (/app) is on sys.path when running from scripts/
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 DEMO_EMAIL = "demo.user@example.com"
