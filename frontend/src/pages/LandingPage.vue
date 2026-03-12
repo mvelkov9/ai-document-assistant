@@ -20,7 +20,7 @@
             </svg>
           </div>
           <span class="brand-name">AI Document Assistant</span>
-          <span class="brand-version">v1.5.0</span>
+          <span class="brand-version">v1.5.3</span>
         </div>
         <div class="landing-nav-links">
           <a href="/docs" class="nav-link-top">API Docs</a>
@@ -88,7 +88,7 @@
     </main>
 
     <footer class="landing-footer">
-      <span>AI Document Assistant v1.5.0</span>
+      <span>AI Document Assistant v1.5.3</span>
       <span class="footer-dot">&middot;</span>
       <span>ALMA MATER EUROPAEA 2025/26</span>
       <span class="footer-dot">&middot;</span>
