@@ -7,7 +7,15 @@
   const BarChart = defineAsyncComponent(() => import('../components/charts/BarChart.vue'))
 
   const router = useRouter()
-  const { documentInsights, insightsBusy, t, formatDateTime, translateStatus, language, countLabel } = useStore()
+  const {
+    documentInsights,
+    insightsBusy,
+    t,
+    formatDateTime,
+    translateStatus,
+    language,
+    countLabel,
+  } = useStore()
 
   const insights = computed(
     () =>
@@ -245,11 +253,19 @@
           </div>
           <div class="activity-card activity-card-wide">
             <span>{{ t('workspace.lastUpload') }}</span>
-            <strong>{{ activity.last_upload_at ? formatDateTime(activity.last_upload_at) : t('workspace.noActivity') }}</strong>
+            <strong>{{
+              activity.last_upload_at
+                ? formatDateTime(activity.last_upload_at)
+                : t('workspace.noActivity')
+            }}</strong>
           </div>
           <div class="activity-card activity-card-wide">
             <span>{{ t('workspace.lastQuestion') }}</span>
-            <strong>{{ activity.last_question_at ? formatDateTime(activity.last_question_at) : t('workspace.noActivity') }}</strong>
+            <strong>{{
+              activity.last_question_at
+                ? formatDateTime(activity.last_question_at)
+                : t('workspace.noActivity')
+            }}</strong>
           </div>
         </div>
 
@@ -305,7 +321,11 @@
               <h3>{{ t('workspace.mostActive') }}</h3>
             </div>
             <div class="document-list">
-              <div v-for="item in insights.most_active_documents" :key="item.id" class="document-row">
+              <div
+                v-for="item in insights.most_active_documents"
+                :key="item.id"
+                class="document-row"
+              >
                 <div class="document-main">
                   <strong>{{ item.original_filename }}</strong>
                   <span>{{ item.answer_count }} · {{ badgeLabel(item.badge) }}</span>
@@ -320,7 +340,11 @@
               <h3>{{ t('workspace.readyForReview') }}</h3>
             </div>
             <div class="document-list">
-              <div v-for="item in insights.ready_for_review" :key="item.id" class="document-row detail-row">
+              <div
+                v-for="item in insights.ready_for_review"
+                :key="item.id"
+                class="document-row detail-row"
+              >
                 <div class="document-main">
                   <strong>{{ item.original_filename }}</strong>
                   <span>{{ t('workspace.summaryReady') }}</span>
@@ -335,7 +359,11 @@
               <h3>{{ t('workspace.needsAttention') }}</h3>
             </div>
             <div class="document-list">
-              <div v-for="item in insights.needs_attention" :key="item.id" class="document-row detail-row">
+              <div
+                v-for="item in insights.needs_attention"
+                :key="item.id"
+                class="document-row detail-row"
+              >
                 <div class="document-main">
                   <strong>{{ item.original_filename }}</strong>
                   <span>{{ reasonLabel(item) }}</span>
@@ -350,12 +378,18 @@
               <h3>{{ t('workspace.recentlyUploaded') }}</h3>
             </div>
             <div class="document-list">
-              <div v-for="item in insights.recently_uploaded" :key="item.id" class="document-row detail-row">
+              <div
+                v-for="item in insights.recently_uploaded"
+                :key="item.id"
+                class="document-row detail-row"
+              >
                 <div class="document-main">
                   <strong>{{ item.original_filename }}</strong>
                   <span>{{ formatDateTime(item.created_at) }}</span>
                 </div>
-                <span class="badge-chip">{{ item.has_summary ? t('workspace.summaryReady') : t('workspace.summaryMissing') }}</span>
+                <span class="badge-chip">{{
+                  item.has_summary ? t('workspace.summaryReady') : t('workspace.summaryMissing')
+                }}</span>
               </div>
             </div>
           </article>
@@ -567,19 +601,27 @@
   }
 
   .accent-primary {
-    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08), var(--shadow-md);
+    box-shadow:
+      inset 0 0 0 1px rgba(37, 99, 235, 0.08),
+      var(--shadow-md);
   }
 
   .accent-cyan {
-    box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.08), var(--shadow-md);
+    box-shadow:
+      inset 0 0 0 1px rgba(14, 165, 233, 0.08),
+      var(--shadow-md);
   }
 
   .accent-slate {
-    box-shadow: inset 0 0 0 1px rgba(71, 85, 105, 0.08), var(--shadow-md);
+    box-shadow:
+      inset 0 0 0 1px rgba(71, 85, 105, 0.08),
+      var(--shadow-md);
   }
 
   .accent-indigo {
-    box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.08), var(--shadow-md);
+    box-shadow:
+      inset 0 0 0 1px rgba(79, 70, 229, 0.08),
+      var(--shadow-md);
   }
 
   .activity-strip {

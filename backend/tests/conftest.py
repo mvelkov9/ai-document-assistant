@@ -1,3 +1,5 @@
+# ruff: noqa: E402
+
 import os
 
 # Disable rate limiting for tests — must be set before app modules are imported

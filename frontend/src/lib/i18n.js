@@ -182,7 +182,8 @@ const messages = {
       heroText:
         'Sistem iz dokumentov, povzetkov, oznak in vprašanj izdela operativni pogled, da takoj vidiš prioritete, tveganja in najbolj koristne dokumente.',
       workspaceScore: 'Ocena delovnega prostora',
-      scoreHint: 'Ocena temelji na pokritosti povzetkov, vprašanj, oznak in pripravljenosti dokumentov.',
+      scoreHint:
+        'Ocena temelji na pokritosti povzetkov, vprašanj, oznak in pripravljenosti dokumentov.',
       summaryCoverage: 'Pokritost povzetkov',
       questionCoverage: 'Pokritost vprašanj',
       tagCoverage: 'Pokritost oznak',
@@ -208,7 +209,8 @@ const messages = {
       needsAttention: 'Potrebuje pozornost',
       recentlyUploaded: 'Nedavno naloženo',
       emptyWorkspace: 'Delovni prostor je še prazen',
-      emptyText: 'Začni z nalaganjem PDF dokumentov. Nato se bo tukaj samodejno prikazal pregled pripravljenosti, aktivnosti in naslednjih korakov.',
+      emptyText:
+        'Začni z nalaganjem PDF dokumentov. Nato se bo tukaj samodejno prikazal pregled pripravljenosti, aktivnosti in naslednjih korakov.',
       summaryReady: 'Povzetek pripravljen',
       summaryMissing: 'Brez povzetka',
       statusLabel: 'Status',
@@ -229,23 +231,28 @@ const messages = {
       actions: {
         'start-workspace': {
           title: 'Začni delovni prostor',
-          description: 'Naloži prvi PDF dokument in odkleneš povzetke, vprašanja ter analitiko dokumentov.',
+          description:
+            'Naloži prvi PDF dokument in odkleneš povzetke, vprašanja ter analitiko dokumentov.',
         },
         'resolve-failed-processing': {
           title: 'Odpravi neuspešno obdelavo',
-          description: '{count} dokumentov je končalo v neuspešnem stanju obdelave in jih je smiselno ponovno obdelati ali zamenjati.',
+          description:
+            '{count} dokumentov je končalo v neuspešnem stanju obdelave in jih je smiselno ponovno obdelati ali zamenjati.',
         },
         'generate-missing-summaries': {
           title: 'Ustvari manjkajoče povzetke',
-          description: '{count} dokumentov še nima povzetka, kar upočasnjuje pregled in nadaljnja vprašanja nad vsebino.',
+          description:
+            '{count} dokumentov še nima povzetka, kar upočasnjuje pregled in nadaljnja vprašanja nad vsebino.',
         },
         'improve-document-labeling': {
           title: 'Izboljšaj označevanje dokumentov',
-          description: '{count} dokumentov nima oznak, zato je filtriranje in segmentacija zbirke slabša, kot bi lahko bila.',
+          description:
+            '{count} dokumentov nima oznak, zato je filtriranje in segmentacija zbirke slabša, kot bi lahko bila.',
         },
         'expand-document-interrogation': {
           title: 'Razširi vprašanja nad dokumenti',
-          description: '{count} dokumentov še ni bilo pregledanih z vprašanji in odgovori, zato je njihova informacijska vrednost še neizkoriščena.',
+          description:
+            '{count} dokumentov še ni bilo pregledanih z vprašanji in odgovori, zato je njihova informacijska vrednost še neizkoriščena.',
         },
       },
     },
@@ -568,7 +575,8 @@ const messages = {
       heroText:
         'The system turns documents, summaries, tags, and questions into an operational view so you can spot priorities, risks, and the most valuable files immediately.',
       workspaceScore: 'Workspace score',
-      scoreHint: 'The score is based on summary coverage, question coverage, tagging, and document readiness.',
+      scoreHint:
+        'The score is based on summary coverage, question coverage, tagging, and document readiness.',
       summaryCoverage: 'Summary coverage',
       questionCoverage: 'Question coverage',
       tagCoverage: 'Tag coverage',
@@ -594,7 +602,8 @@ const messages = {
       needsAttention: 'Needs attention',
       recentlyUploaded: 'Recently uploaded',
       emptyWorkspace: 'The workspace is still empty',
-      emptyText: 'Start by uploading PDF documents. This view will then automatically surface readiness, activity, and next steps.',
+      emptyText:
+        'Start by uploading PDF documents. This view will then automatically surface readiness, activity, and next steps.',
       summaryReady: 'Summary ready',
       summaryMissing: 'No summary yet',
       statusLabel: 'Status',
@@ -615,23 +624,28 @@ const messages = {
       actions: {
         'start-workspace': {
           title: 'Start the workspace',
-          description: 'Upload the first PDF to unlock summaries, questions, and document analytics.',
+          description:
+            'Upload the first PDF to unlock summaries, questions, and document analytics.',
         },
         'resolve-failed-processing': {
           title: 'Resolve failed processing',
-          description: '{count} documents ended in a failed processing state and should be retried or replaced.',
+          description:
+            '{count} documents ended in a failed processing state and should be retried or replaced.',
         },
         'generate-missing-summaries': {
           title: 'Generate missing summaries',
-          description: '{count} documents still lack summaries, which slows down review and follow-up questioning.',
+          description:
+            '{count} documents still lack summaries, which slows down review and follow-up questioning.',
         },
         'improve-document-labeling': {
           title: 'Improve document labeling',
-          description: '{count} documents have no tags, which weakens filtering and portfolio segmentation.',
+          description:
+            '{count} documents have no tags, which weakens filtering and portfolio segmentation.',
         },
         'expand-document-interrogation': {
           title: 'Expand document interrogation',
-          description: '{count} documents have not yet been explored with Q&A, so their information value is still underused.',
+          description:
+            '{count} documents have not yet been explored with Q&A, so their information value is still underused.',
         },
       },
     },

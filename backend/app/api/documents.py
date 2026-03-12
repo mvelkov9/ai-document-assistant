@@ -9,8 +9,8 @@ from app.core.rate_limit import get_client_ip
 from app.db.session import get_db
 from app.schemas.auth import UserPublic
 from app.schemas.document import (
-    DocumentListResponse,
     DocumentInsightsResponse,
+    DocumentListResponse,
     DocumentPublic,
     DocumentQuestionRequest,
     DocumentTagsRequest,
