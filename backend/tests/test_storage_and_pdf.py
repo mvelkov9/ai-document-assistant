@@ -152,16 +152,16 @@ class TestPdfService:
         assert "layout mode" in result
 
     def test_extract_text_corrupted_pdf(self):
-        """Test that corrupted PDF raises an exception."""
+        """Corrupted PDF returns empty string (graceful degradation)."""
         svc = PdfService()
-        with pytest.raises(Exception):
-            svc.extract_text(b"not a pdf at all")
+        result = svc.extract_text(b"not a pdf at all")
+        assert result == ""
 
     def test_extract_text_empty_bytes(self):
-        """Test that empty bytes raises an exception."""
+        """Empty bytes returns empty string (graceful degradation)."""
         svc = PdfService()
-        with pytest.raises(Exception):
-            svc.extract_text(b"")
+        result = svc.extract_text(b"")
+        assert result == ""
 
 
 # ── Integration: summarize with empty PDF text ───────────────────

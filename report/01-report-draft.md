@@ -433,6 +433,12 @@ V različici v1.4.0 so dodane naslednje izboljšave uporabniškega vmesnika:
 - **Kopiranje povzetka v odložišče**: vsak generirani povzetek ima gumb »Kopiraj«, ki z uporabo Clipboard API prekopira besedilo v sistemsko odložišče z vizualnim potrditvenim odzivom,
 - **Izboljšane animacije med AI obdelavo**: med generiranjem povzetka ali odgovora se na kartici dokumenta prikaže animiran svetleči trak in pulzirajoč okvir, ki uporabniku jasno sporočata, da operacija teče.
 
+V različici v1.4.1 je dodana podpora za skenirane in slikovne PDF dokumente:
+
+- **Tristopenjska ekstrakcija besedila**: sistem najprej poskuša z PyMuPDF (MuPDF), ki bistveno bolje obdeluje kompleksne pisave, tabele in kodiranja kot pypdf. Če PyMuPDF vrne premalo besedila (< 50 znakov), se poskuša s pypdf (vključno z layout načinom). Če tudi pypdf ne uspe, se aktivira OCR,
+- **OCR za skenirane dokumente (Tesseract)**: vsaka stran PDF-ja se renderira v sliko pri 300 DPI z uporabo PyMuPDF-ja, nato pa Tesseract opravi optično prepoznavanje znakov. Podprta sta slovenščina (`slv`) in angleščina (`eng`),
+- **Robustna obravnava napak**: vsaka stopnja ekstrakcije samostojno obravnava napake (poškodovani PDF, prazen tok bajtov), kar zagotavlja, da sistem nikoli ne preneha delovati — najslabši rezultat je prazen niz, ne pa sesutje aplikacije.
+
 ### 11.3 Razlikovanje od enostavne uporabe AI orodij
 
 Pomembno je poudariti, v čem se ta rešitev razlikuje od neposredne uporabe ChatGPT ali drugega AI orodja. Neposredna uporaba AI orodja omogoča posamezne poizvedbe brez konteksta, brez sledljivosti in brez integracije z obstoječo infrastrukturo. Implementirana rešitev pa ponuja:
@@ -496,6 +502,9 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | VPS gostovanje | Hetzner CX33 | Ubuntu 24.04 | 4 vCPU, 8 GB RAM, 80 GB disk |
 | Domena in TLS | doc-ai-assist.com | Let's Encrypt | HTTPS z avtomatskim podaljševanjem |
 | CI/CD | GitHub Actions | — | Lint, test s pokritostjo, Docker build, avtomatski deploy |
+| PDF ekstrakcija | PyMuPDF (fitz) | 1.25 | Primarni ekstraktor besedila iz PDF (boljši od pypdf za kompleksne pisave) |
+| OCR | Tesseract + pytesseract | 5.x / 0.3.13 | Optično prepoznavanje znakov za skenirane PDF dokumente |
+| Obdelava slik | Pillow | 11.2 | Renderiranje PDF strani v slike za OCR |
 | Lint | ruff | 0.11 | Preverjanje kakovosti Python kode |
 | Testiranje | pytest, pytest-cov | — | 107 avtomatiziranih testov v 9 datotekah (~90 % pokritost) |
 
@@ -511,7 +520,7 @@ Backend vsebuje **107 avtomatiziranih testov** v **9 testnih datotekah** s pribl
 - **test_document_flow.py** (6 testov) — validacija dolžine vprašanj (prekratka in predolga vprašanja), sinhrono povzemanje in dokumentni Q&A, asinhrona obdelava z job polling mehanizmom,
 - **test_admin_and_download.py** (9 testov) — administracijski endpointi (statistika platforme, seznam uporabnikov, sprememba vlog), zaščita admin endpointov, prenos dokumentov in cross-user preverjanje,
 - **test_delete_and_admin.py** (11 testov) — brisanje dokumentov s kaskadnim čiščenjem Q&A zapisov in jobov, odpornost na napake pri hrambi, upravljanje uporabniških vlog,
-- **test_storage_and_pdf.py** (16 testov) — MinIO upload/download/delete z mocki, obravnava S3 napak, PDF ekstrakcija besedila, layout-mode fallback, obravnava poškodovanih in praznih PDF datotek,
+- **test_storage_and_pdf.py** (16 testov) — MinIO upload/download/delete z mocki, obravnava S3 napak, PDF ekstrakcija besedila, layout-mode fallback, obravnava poškodovanih in praznih PDF datotek, graceful degradation za OCR fallback,
 - **test_summary_service.py** (32 testov) — BM25 chunking in rangiranje, tokenizacija, fallback povzetki, detekcija ponudnikov (Groq → Gemini → OpenAI), generiranje povzetkov in odgovorov,
 - **test_security.py** (9 testov) — bcrypt saltanje gesel, preverjanje gesel, potek žetona, zavrnitev potečenega žetona, zavrnitev manjkajočega uporabnika.
 
@@ -602,7 +611,7 @@ Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: po
 
 Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastnistvenostnim omejevanjem dostopa, bcrypt zaščito gesel, rate limitingom, Pydantic validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €7/mesec na lastnem VPS z brezplačnim Groq AI API, kar je bistveno ceneje od primerljivih upravljanih platform.
 
-Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za ločeno obdelavo, bogatejši Q&A kontekst z večvrstno pogovorno zgodovino, OCR podpora za skenirane dokumente, napredne varnostne politike (refresh token rotacija, account lockout) in uporaba vektorske shrambe za naprednejše semantično iskanje po dokumentih.
+Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za ločeno obdelavo, bogatejši Q&A kontekst z večvrstno pogovorno zgodovino, napredne varnostne politike (refresh token rotacija, account lockout) in uporaba vektorske shrambe za naprednejše semantično iskanje po dokumentih. OCR podpora za skenirane dokumente je bila v verziji v1.4.1 že implementirana s Tesseract in PyMuPDF.
 
 Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, ker jasno demonstrira razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije v realnem tehnološkem okolju — z živečo produkcijsko instanco na https://doc-ai-assist.com.
 

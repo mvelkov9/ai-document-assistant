@@ -60,6 +60,7 @@
 | 34 | Backup encryption | Completed | GPG AES-256 encryption, 7-day rotation, verification step |
 | 35 | UX & persistence v1.3.2 | Completed | Favicon, last-login tracking, Q&A history persistence, collapsible cards, sidebar tool links |
 | 36 | Frontend UX v1.4.0 | Completed | Dark mode, stats dashboard, copy summary, AI loading animations |
+| 37 | OCR support v1.4.1 | Completed | PyMuPDF + Tesseract OCR for scanned/image-based PDFs, 3-tier extraction (PyMuPDF → pypdf → OCR), Slovenian language pack |
 
 ## Current implementation state
 
@@ -101,6 +102,12 @@
 - Copy-to-clipboard button for AI summaries
 - Shimmer + pulse loading animations during AI processing
 - questionsCount computed property in store
+- PyMuPDF added as primary PDF text extractor (better than pypdf for complex fonts/tables)
+- Tesseract OCR fallback for scanned/image-based PDFs (slv+eng)
+- Pillow for PDF page rendering at 300 DPI before OCR
+- 3-tier PDF extraction pipeline: PyMuPDF → pypdf → OCR
+- Graceful degradation for corrupted/empty PDFs (no crashes)
+- tesseract-ocr + tesseract-ocr-slv installed in Docker image and CI
 
 ### Immediate next steps
 

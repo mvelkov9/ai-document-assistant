@@ -1,4 +1,4 @@
-# AI Document Assistant — v1.4.0
+# AI Document Assistant — v1.4.1
 
 AI Document Assistant is a semester project for the course *Integracija spletnih strani in servisi* (2025/26, ALMA MATER EUROPAEA). The solution targets **MOŽNOST 3 — Razvoj integrirane spletne storitve** and implements a multi-user web service for secure PDF upload, AI summarization, and document question-answering.
 
@@ -25,6 +25,7 @@ AI Document Assistant is a semester project for the course *Integracija spletnih
 | Database | PostgreSQL 17 |
 | Object storage | MinIO (S3-compatible) |
 | AI | Groq (free, Llama 4 Scout 17B-16E), Gemini, or OpenAI — with automatic fallback |
+| PDF extraction | PyMuPDF → pypdf → Tesseract OCR (3-tier, supports scanned PDFs) |
 | Reverse proxy | Nginx 1.27 with security headers, WebSocket proxy for Vite HMR |
 | Containerization | Docker Compose with PostgreSQL healthcheck (dev + prod overlay) |
 | CI/CD | GitHub Actions (lint, test, coverage, build, deploy) |
