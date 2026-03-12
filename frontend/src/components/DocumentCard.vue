@@ -5,12 +5,14 @@
     document: { type: Object, required: true },
     summaryBusy: { type: Boolean, default: false },
     questionBusy: { type: Boolean, default: false },
-    latestAnswer: { type: Object, default: null },
+    answers: { type: Array, default: () => [] },
+    collapsed: { type: Boolean, default: false },
   })
 
   const emit = defineEmits(['summarize', 'ask', 'delete', 'download'])
   const questionDraft = ref('')
   const confirmingDelete = ref(false)
+  const isCollapsed = ref(props.collapsed)
 
   function handleAsk() {
     const q = questionDraft.value.trim()
@@ -35,12 +37,24 @@
     const d = new Date(iso)
     return d.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' })
   }
+
+  function formatDateTime(iso) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return d.toLocaleDateString('sl-SI', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
 </script>
 
 <template>
-  <article class="doc-card">
+  <article class="doc-card" :class="{ 'is-collapsed': isCollapsed }">
     <!-- ── Header ── -->
-    <div class="doc-header">
+    <div class="doc-header" @click="isCollapsed = !isCollapsed" style="cursor: pointer">
       <div class="doc-icon-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -70,9 +84,28 @@
             </svg>
             {{ formatDate(document.created_at) }}
           </span>
+          <span v-if="answers.length" class="meta-badge meta-qa-count">
+            {{ answers.length }} V&amp;O
+          </span>
         </div>
       </div>
-      <div class="doc-actions">
+      <div class="doc-actions" @click.stop>
+        <button
+          class="btn-collapse"
+          @click="isCollapsed = !isCollapsed"
+          :title="isCollapsed ? 'Razširi' : 'Skrči'"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="btn-icon"
+            :class="{ rotated: !isCollapsed }"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
         <button
           class="btn-action btn-download"
           @click="emit('download', document.id, document.original_filename)"
@@ -136,161 +169,174 @@
       </div>
     </div>
 
-    <!-- ── Delete Confirmation ── -->
-    <Transition name="fade">
-      <div v-if="confirmingDelete" class="confirm-overlay">
-        <div class="confirm-card">
-          <div class="confirm-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6" />
-              <path
-                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-              />
-            </svg>
+    <!-- ── Collapsible Body ── -->
+    <Transition name="collapse">
+      <div v-show="!isCollapsed" class="doc-body">
+        <!-- ── Delete Confirmation ── -->
+        <Transition name="fade">
+          <div v-if="confirmingDelete" class="confirm-overlay">
+            <div class="confirm-card">
+              <div class="confirm-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  />
+                </svg>
+              </div>
+              <p class="confirm-text">
+                Izbrisati <strong>{{ document.original_filename }}</strong
+                >?
+              </p>
+              <p class="confirm-sub">
+                To bo trajno izbrisalo datoteko in vse povezane povzetke ter vprašanja.
+              </p>
+              <div class="confirm-actions">
+                <button class="btn-confirm btn-cancel" @click="confirmingDelete = false">
+                  Prekliči
+                </button>
+                <button class="btn-confirm btn-delete" @click="handleDelete">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="btn-icon-xs"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path
+                      d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                    />
+                  </svg>
+                  Izbriši
+                </button>
+              </div>
+            </div>
           </div>
-          <p class="confirm-text">
-            Izbrisati <strong>{{ document.original_filename }}</strong
-            >?
-          </p>
-          <p class="confirm-sub">
-            To bo trajno izbrisalo datoteko in vse povezane povzetke ter vprašanja.
-          </p>
-          <div class="confirm-actions">
-            <button class="btn-confirm btn-cancel" @click="confirmingDelete = false">
-              Prekliči
-            </button>
-            <button class="btn-confirm btn-delete" @click="handleDelete">
+        </Transition>
+
+        <!-- ── Summary Section ── -->
+        <div class="section summary-section">
+          <div class="section-label">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="label-icon"
+            >
+              <line x1="17" y1="10" x2="3" y2="10" />
+              <line x1="21" y1="6" x2="3" y2="6" />
+              <line x1="21" y1="14" x2="3" y2="14" />
+              <line x1="17" y1="18" x2="3" y2="18" />
+            </svg>
+            Povzetek
+          </div>
+          <div v-if="!document.summary_text" class="empty-summary">
+            <div class="empty-summary-graphic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                />
+              </svg>
+            </div>
+            <span>Klikni <strong>Povzetek</strong> za generiranje AI povzetka</span>
+          </div>
+          <div v-else class="summary-content">
+            <p class="summary-text">{{ document.summary_text }}</p>
+          </div>
+        </div>
+
+        <!-- ── Q&A Section ── -->
+        <div class="section qa-section">
+          <div class="section-label">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="label-icon"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Vprašanje
+          </div>
+          <div class="qa-input-row">
+            <textarea
+              v-model="questionDraft"
+              rows="2"
+              maxlength="500"
+              placeholder="Npr.: Kateri je glavni namen dokumenta?"
+            />
+            <button
+              class="btn-send"
+              :disabled="questionBusy || questionDraft.trim().length < 3"
+              @click="handleAsk"
+            >
               <svg
+                v-if="questionBusy"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
-                class="btn-icon-xs"
+                class="btn-icon spin"
               >
-                <polyline points="3 6 5 6 21 6" />
-                <path
-                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                />
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
               </svg>
-              Izbriši
+              <svg
+                v-else
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="btn-icon"
+              >
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+              Pošlji
             </button>
+          </div>
+
+          <!-- ── Answers History ── -->
+          <TransitionGroup name="answer" tag="div" class="answers-list">
+            <div v-for="answer in answers" :key="answer.id || answer.created_at" class="answer-box">
+              <div class="answer-header">
+                <div class="answer-label">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="label-icon"
+                  >
+                    <path
+                      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                    />
+                  </svg>
+                  <span>Odgovor</span>
+                </div>
+                <div class="answer-meta">
+                  <span class="source-badge">{{ answer.source_mode }}</span>
+                  <span v-if="answer.created_at" class="answer-time">{{
+                    formatDateTime(answer.created_at)
+                  }}</span>
+                </div>
+              </div>
+              <div class="answer-bubble answer-q">
+                <strong>V:</strong> {{ answer.question_text }}
+              </div>
+              <div class="answer-bubble answer-a"><strong>O:</strong> {{ answer.answer_text }}</div>
+            </div>
+          </TransitionGroup>
+
+          <div v-if="!answers.length" class="empty-qa">
+            <span>Še ni zastavljenih vprašanj za ta dokument.</span>
           </div>
         </div>
       </div>
     </Transition>
-
-    <!-- ── Summary Section ── -->
-    <div class="section summary-section">
-      <div class="section-label">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          class="label-icon"
-        >
-          <line x1="17" y1="10" x2="3" y2="10" />
-          <line x1="21" y1="6" x2="3" y2="6" />
-          <line x1="21" y1="14" x2="3" y2="14" />
-          <line x1="17" y1="18" x2="3" y2="18" />
-        </svg>
-        Povzetek
-      </div>
-      <div v-if="!document.summary_text" class="empty-summary">
-        <div class="empty-summary-graphic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-            />
-          </svg>
-        </div>
-        <span>Klikni <strong>Povzetek</strong> za generiranje AI povzetka</span>
-      </div>
-      <div v-else class="summary-content">
-        <p class="summary-text">{{ document.summary_text }}</p>
-      </div>
-    </div>
-
-    <!-- ── Q&A Section ── -->
-    <div class="section qa-section">
-      <div class="section-label">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          class="label-icon"
-        >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        Vprašanje
-      </div>
-      <div class="qa-input-row">
-        <textarea
-          v-model="questionDraft"
-          rows="2"
-          maxlength="500"
-          placeholder="Npr.: Kateri je glavni namen dokumenta?"
-        />
-        <button
-          class="btn-send"
-          :disabled="questionBusy || questionDraft.trim().length < 3"
-          @click="handleAsk"
-        >
-          <svg
-            v-if="questionBusy"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            class="btn-icon spin"
-          >
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-          </svg>
-          <svg
-            v-else
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            class="btn-icon"
-          >
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
-          Pošlji
-        </button>
-      </div>
-
-      <Transition name="answer">
-        <div v-if="latestAnswer" class="answer-box">
-          <div class="answer-header">
-            <div class="answer-label">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="label-icon"
-              >
-                <path
-                  d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-                />
-              </svg>
-              <span>Odgovor</span>
-            </div>
-            <span class="source-badge">{{ latestAnswer.source_mode }}</span>
-          </div>
-          <div class="answer-bubble answer-q">
-            <strong>V:</strong> {{ latestAnswer.question_text }}
-          </div>
-          <div class="answer-bubble answer-a">
-            <strong>O:</strong> {{ latestAnswer.answer_text }}
-          </div>
-        </div>
-      </Transition>
-    </div>
   </article>
 </template>
 
@@ -313,6 +359,52 @@
       0 0 0 1px rgba(99, 102, 241, 0.05);
   }
 
+  /* ── Collapse toggle ── */
+  .btn-collapse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .btn-collapse:hover {
+    background: var(--surface-alt);
+  }
+
+  .btn-collapse .btn-icon {
+    transition: transform 0.25s ease;
+  }
+
+  .btn-collapse .btn-icon.rotated {
+    transform: rotate(180deg);
+  }
+
+  /* ── Collapse transition ── */
+  .collapse-enter-active,
+  .collapse-leave-active {
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .collapse-enter-from,
+  .collapse-leave-to {
+    opacity: 0;
+    max-height: 0;
+  }
+
+  .collapse-enter-to,
+  .collapse-leave-from {
+    opacity: 1;
+    max-height: 2000px;
+  }
+
   /* ── Header ── */
   .doc-header {
     display: flex;
@@ -321,6 +413,10 @@
     padding: 1rem 1.25rem;
     background: var(--surface-alt);
     border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .is-collapsed .doc-header {
+    border-bottom: none;
   }
 
   .doc-icon-wrap {
@@ -378,6 +474,12 @@
   .meta-icon {
     width: 11px;
     height: 11px;
+  }
+
+  .meta-qa-count {
+    background: var(--primary-light);
+    border-color: rgba(99, 102, 241, 0.15);
+    color: var(--primary);
   }
 
   .status-dot {
@@ -625,9 +727,15 @@
     color: white;
   }
 
-  /* ── Answer Box ── */
-  .answer-box {
+  /* ── Answers List ── */
+  .answers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
     margin-top: 0.85rem;
+  }
+
+  .answer-box {
     padding: 1rem;
     background: var(--surface-alt);
     border-radius: var(--radius-sm);
@@ -649,6 +757,17 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
+    color: var(--text-light);
+  }
+
+  .answer-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .answer-time {
+    font-size: 0.68rem;
     color: var(--text-light);
   }
 
@@ -685,23 +804,15 @@
     color: var(--text);
   }
 
-  .answer-enter-active {
-    transition: all 0.3s ease;
-  }
-
-  .answer-enter-from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  /* ── Confirm Overlay ── */
-  .confirm-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(6px);
-    display: flex;
-    align-items: center;
+  .empty-qa {
+    margin-top: 0.65rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    color: var(--text-light);
+    border: 1px dashed var(--border);
+    text-align: center;
     justify-content: center;
     z-index: 10;
     border-radius: var(--radius-lg);

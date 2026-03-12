@@ -27,6 +27,7 @@ class AuthService:
             return None
         if not verify_password(password, user.password_hash):
             return None
+        self.user_repository.update_last_login(user)
         return UserPublic.model_validate(user)
 
     def get_user_by_email(self, email: str) -> UserPublic | None:

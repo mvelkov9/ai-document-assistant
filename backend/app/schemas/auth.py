@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -22,5 +24,7 @@ class UserPublic(BaseModel):
     email: EmailStr = Field(examples=["demo.user@example.com"])
     full_name: str = Field(examples=["Demo User"])
     role: str = Field(examples=["user"])
+    created_at: datetime
+    last_login_at: datetime | None = None
 
     model_config = {"from_attributes": True}

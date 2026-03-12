@@ -1,4 +1,4 @@
-# AI Document Assistant — v1.3.1
+# AI Document Assistant — v1.3.2
 
 AI Document Assistant is a semester project for the course *Integracija spletnih strani in servisi* (2025/26, ALMA MATER EUROPAEA). The solution targets **MOŽNOST 3 — Razvoj integrirane spletne storitve** and implements a multi-user web service for secure PDF upload, AI summarization, and document question-answering.
 
@@ -83,6 +83,7 @@ uvicorn app.main:app --reload
 | `POST` | `/api/v1/documents/{id}/summarize-jobs` | Summarize (async) |
 | `POST` | `/api/v1/documents/{id}/ask` | Q&A (sync) |
 | `POST` | `/api/v1/documents/{id}/ask-jobs` | Q&A (async) |
+| `GET` | `/api/v1/documents/{id}/answers` | Q&A history |
 | `DELETE` | `/api/v1/documents/{id}` | Delete document |
 | `GET` | `/api/v1/jobs/{id}` | Job status |
 | `GET` | `/api/v1/admin/users` | List all users (admin) |

@@ -143,6 +143,10 @@ class DocumentService:
     ) -> QuestionAnswerPublic:
         return await self.ask_document_question_for_owner(current_user.id, document_id, question)
 
+    def list_answers(self, document_id: str) -> list[QuestionAnswerPublic]:
+        records = self.qa_repository.list_for_document(document_id)
+        return [QuestionAnswerPublic.model_validate(r) for r in records]
+
     async def ask_document_question_for_owner(
         self,
         owner_id: str,

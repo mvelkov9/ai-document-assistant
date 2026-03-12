@@ -204,3 +204,13 @@ export async function setUserRole(token, userId, role) {
 
   return parseResponse(response)
 }
+
+export async function listDocumentAnswers(token, documentId) {
+  const response = await fetch(`${API_BASE_URL}/documents/${documentId}/answers`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  return parseResponse(response)
+}

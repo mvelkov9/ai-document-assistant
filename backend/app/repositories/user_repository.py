@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -19,6 +21,13 @@ class UserRepository:
             password_hash=password_hash,
             role=role,
         )
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def update_last_login(self, user: User) -> User:
+        user.last_login_at = datetime.now(UTC)
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)

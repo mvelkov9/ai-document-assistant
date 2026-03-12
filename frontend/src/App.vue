@@ -74,7 +74,7 @@
               </div>
               <div class="sb-text">
                 <span class="sb-name">DocAssist</span>
-                <span class="sb-ver">v1.3.1</span>
+                <span class="sb-ver">v1.3.2</span>
               </div>
             </div>
             <button
@@ -122,6 +122,51 @@
               </svg>
               <span class="nav-label" v-if="!sidebarCollapsed">Admin</span>
             </router-link>
+
+            <div v-if="isAdmin && !sidebarCollapsed" class="nav-divider"></div>
+            <span v-if="isAdmin && !sidebarCollapsed" class="nav-section-label">Orodja</span>
+
+            <a v-if="isAdmin" href="/docs" target="_blank" class="nav-item nav-item-ext">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              <span class="nav-label" v-if="!sidebarCollapsed">API Docs</span>
+              <svg
+                v-if="!sidebarCollapsed"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="ext-icon"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+            <a v-if="isAdmin" href="/redoc" target="_blank" class="nav-item nav-item-ext">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+              <span class="nav-label" v-if="!sidebarCollapsed">ReDoc</span>
+              <svg
+                v-if="!sidebarCollapsed"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="ext-icon"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
           </nav>
 
           <div class="sidebar-bottom">
@@ -176,7 +221,7 @@
 
           <!-- Footer -->
           <footer class="main-footer">
-            <span>AI Document Assistant v1.3.1</span>
+            <span>AI Document Assistant v1.3.2</span>
             <span class="footer-dot">&middot;</span>
             <span>ALMA MATER EUROPAEA 2025/26</span>
             <span class="footer-dot">&middot;</span>
@@ -371,6 +416,33 @@
     font-weight: 700;
     padding: 0.12rem 0.5rem;
     border-radius: 999px;
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.07);
+    margin: 0.5rem 0.85rem;
+  }
+
+  .nav-section-label {
+    display: block;
+    padding: 0.2rem 0.85rem 0.4rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #5a6070;
+  }
+
+  .nav-item-ext {
+    text-decoration: none;
+  }
+
+  .ext-icon {
+    width: 12px;
+    height: 12px;
+    margin-left: auto;
+    opacity: 0.5;
   }
 
   .sidebar-bottom {

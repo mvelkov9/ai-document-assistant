@@ -58,6 +58,7 @@
 | 32 | Continuous Deployment | Completed | SSH deploy step in GitHub Actions after CI, main branch only |
 | 33 | Grafana dashboard | Completed | Prometheus + Grafana containers, pre-provisioned FastAPI dashboard |
 | 34 | Backup encryption | Completed | GPG AES-256 encryption, 7-day rotation, verification step |
+| 35 | UX & persistence v1.3.2 | Completed | Favicon, last-login tracking, Q&A history persistence, collapsible cards, sidebar tool links |
 
 ## Current implementation state
 
@@ -86,6 +87,14 @@
 - GitHub Actions CI workflow scaffolded
 - backend document flow tests added
 - cost and organizational fit analysis documented
+- last_login_at tracking added to User model with Alembic migration
+- Q&A history endpoint (GET /documents/{id}/answers) added
+- frontend Q&A persistence with full answer history (no refresh loss)
+- collapsible document cards (auto-collapse 4th+) implemented
+- favicon (SVG with app branding) added
+- profile page expanded with created_at and last_login_at
+- admin sidebar links for API Docs, ReDoc added
+- Alembic migration 002_add_last_login_at created
 
 ### Immediate next steps
 
@@ -93,7 +102,6 @@
 2. Render Mermaid diagrams (architecture.mmd, data-flow.mmd) to PNG via mermaid.live
 3. Finalize Word document with screenshots, formatting, and table of contents
 4. Prepare for defense demo using https://doc-ai-assist.com
-| 35 | Video demo for defense | 3-minute screen recording walkthrough of UI + API docs + VPS deployment | ~1 hour |
 
 ## Verification log
 

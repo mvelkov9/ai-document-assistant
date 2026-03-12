@@ -10,6 +10,7 @@ import {
   getJobStatus,
   getCurrentUser,
   listDocuments,
+  listDocumentAnswers,
   loginUser,
   registerUser,
   setUserRole,
@@ -29,7 +30,7 @@ const dashboardBusy = ref(false)
 const uploadBusy = ref(false)
 const activeSummaryId = ref('')
 const activeQuestionId = ref('')
-const latestAnswers = reactive({})
+const documentAnswers = reactive({})
 const searchQuery = ref('')
 const sortField = ref('date')
 const adminStats = ref(null)
@@ -89,12 +90,28 @@ async function refreshDocuments() {
   }
 }
 
+async function loadAnswersForDocument(documentId) {
+  if (!sessionToken.value) return
+  try {
+    const answers = await listDocumentAnswers(sessionToken.value, documentId)
+    documentAnswers[documentId] = answers || []
+  } catch {
+    /* silently fail — answers may not be available */
+  }
+}
+
+async function loadAllAnswers() {
+  if (!sessionToken.value || !documents.value.length) return
+  await Promise.all(documents.value.map((d) => loadAnswersForDocument(d.id)))
+}
+
 async function bootstrapSession() {
   if (!sessionToken.value) return
   dashboardBusy.value = true
   try {
     currentUser.value = await getCurrentUser(sessionToken.value)
     await refreshDocuments()
+    await loadAllAnswers()
     if (isAdmin.value) await loadAdminData()
   } catch {
     clearSession()
@@ -187,11 +204,16 @@ async function handleAsk(documentId, question) {
     const job = await createQuestionJob(sessionToken.value, documentId, question)
     const result = await pollJob(job.id)
     if (result) {
-      latestAnswers[documentId] = {
+      const newAnswer = {
+        id: result.id || Date.now().toString(),
+        document_id: documentId,
         question_text: result.job_input || question,
         answer_text: result.result_text || 'Odgovor generiran brez vsebine.',
         source_mode: 'async-job',
+        created_at: new Date().toISOString(),
       }
+      if (!documentAnswers[documentId]) documentAnswers[documentId] = []
+      documentAnswers[documentId].unshift(newAnswer)
     }
     await refreshDocuments()
     setMessage(result ? 'Odgovor je bil generiran.' : 'Job se v teku. Osveži pozneje.')
@@ -210,7 +232,7 @@ function logout() {
 async function handleDelete(documentId) {
   try {
     await deleteDocument(sessionToken.value, documentId)
-    delete latestAnswers[documentId]
+    delete documentAnswers[documentId]
     await refreshDocuments()
     setMessage('Dokument je bil izbrisan.')
   } catch (e) {
@@ -258,7 +280,7 @@ export function useStore() {
     uploadBusy,
     activeSummaryId,
     activeQuestionId,
-    latestAnswers,
+    documentAnswers,
     searchQuery,
     sortField,
     adminStats,

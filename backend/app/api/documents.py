@@ -162,6 +162,25 @@ async def create_question_job(
 
 
 @router.get(
+    "/{document_id}/answers",
+    response_model=list[QuestionAnswerPublic],
+    summary="List Q&A history for a document",
+    description="Return all question-answer pairs for a specific document, ordered by newest first.",
+)
+def list_document_answers(
+    document_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserPublic = Depends(get_current_user),
+) -> list[QuestionAnswerPublic]:
+    service = DocumentService(db)
+    document = service.get_document(current_user, document_id)
+    if not document:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+    answers = service.list_answers(document_id)
+    return answers
+
+
+@router.get(
     "/{document_id}/download",
     summary="Download a document",
     description="Download the original PDF file from storage. Only the document owner can download.",

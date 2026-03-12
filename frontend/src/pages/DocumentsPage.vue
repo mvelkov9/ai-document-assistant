@@ -13,7 +13,7 @@
     filteredDocuments,
     activeSummaryId,
     activeQuestionId,
-    latestAnswers,
+    documentAnswers,
     handleSummarize,
     handleAsk,
     handleDelete,
@@ -86,12 +86,13 @@
     <div v-else class="doc-grid">
       <TransitionGroup name="list">
         <DocumentCard
-          v-for="doc in filteredDocuments"
+          v-for="(doc, index) in filteredDocuments"
           :key="doc.id"
           :document="doc"
           :summary-busy="activeSummaryId === doc.id"
           :question-busy="activeQuestionId === doc.id"
-          :latest-answer="latestAnswers[doc.id] || null"
+          :answers="documentAnswers[doc.id] || []"
+          :collapsed="index >= 3"
           @summarize="handleSummarize"
           @ask="handleAsk"
           @delete="handleDelete"

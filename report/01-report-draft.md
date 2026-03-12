@@ -195,13 +195,13 @@ Shema je upravljana z Alembic migracijami. Zacetna migracija (`001_initial.py`) 
 
 ### 7.5 API zasnova
 
-Backend izpostavlja 21 REST endpointov, razdeljenih v šest logičnih skupin:
+Backend izpostavlja 22 REST endpointov, razdeljenih v šest logičnih skupin:
 
 | Skupina | Endpointi | Opis |
 | --- | --- | --- |
 | Zdravje | `GET /health`, `GET /ready`, `GET /metrics` | Health check, preverjanje odvisnosti, Prometheus metrike |
 | Avtentikacija | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | Registracija, prijava, profil trenutnega uporabnika |
-| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs` | CRUD, prenos PDF, povzemanje, Q&A (sinhrono in asinhrono) |
+| Dokumenti | `POST /documents/upload`, `GET /documents`, `GET /documents/{id}`, `GET /documents/{id}/download`, `DELETE /documents/{id}`, `POST /documents/{id}/summarize`, `POST /documents/{id}/summarize-jobs`, `POST /documents/{id}/ask`, `POST /documents/{id}/ask-jobs`, `GET /documents/{id}/answers` | CRUD, prenos PDF, povzemanje, Q&A (sinhrono in asinhrono), zgodovina odgovorov |
 | Jobe | `GET /jobs/{id}` | Preverjanje statusa asinhrone obdelave |
 | Admin | `GET /admin/users`, `GET /admin/stats`, `PATCH /admin/users/{id}/role` | Seznam uporabnikov, statistike, upravljanje vlog |
 | Status | `GET /api/v1/status` | Pregled konfiguracije in zmožnosti API |
@@ -417,6 +417,14 @@ Slabosti resitve so predvsem operativne. VPS zahteva samostojno skrb za posodobi
 CI/CD pipeline vključuje tako neprekinjeno integracijo (lint, testi, build) kot neprekinjeno dostavo — ob uspešnem push na `main` vejo se avtomatsko sproži SSH deploy na produkcijski VPS (6. job v GitHub Actions). Skripta `deploy.sh` posodobi vsebnike brez ročnega posega.
 
 Frontend je v različici v1.3.0 nadgrajen z Vue Router 4, ki omogoča prave URL poti (`/documents`, `/upload`, `/profile`, `/admin`) in lazy-loading posameznih strani. Skupno stanje je centralizirano v composable modulu (`useStore.js`) namesto Pinia/Vuex, kar ohranja enostavnost brez zunanjega upravljalnika stanja. Navigacijska zaščita (navigation guards) preprečuje dostop neprijavljenim uporabnikom in omejuje admin strani. Uporabniški vmesnik vključuje sidebar navigacijo z router-link elementi, iskanje, sortiranje, administracijsko ploščo in odzivno zasnovo.
+
+V različici v1.3.2 je frontend dodatno izboljšan z naslednjimi funkcionalnostmi:
+
+- **Persistenca Q&A zgodovine**: vprašanja in odgovori se zdaj nalagajo iz backend API-ja (`GET /documents/{id}/answers`) ob zagonu seje, kar prepreči izgubo podatkov ob osvežitvi strani. Uporabnik lahko postavi več zaporednih vprašanj, ki se prikažejo kronološko,
+- **Zložljive dokumentne kartice**: kartice dokumentov se samodejno zložijo od 4. dokumenta naprej, kar izboljša preglednost pri večjem številu dokumentov. Vsaka kartica ima gumb za razširitev/zložitev,
+- **Favicon**: aplikacija ima lastno ikono v brskalniku (SVG z gradientom v barvah aplikacije),
+- **Sledenje zadnje prijave**: uporabniški model vključuje polje `last_login_at`, ki se posodobi ob vsaki prijavi. Profilna stran prikazuje tako datum registracije kot datum zadnje prijave,
+- **Sidebar povezave za orodja**: administratorji imajo v stranski navigaciji neposredne povezave do API Docs (Swagger UI) in ReDoc dokumentacije.
 
 ### 11.3 Razlikovanje od enostavne uporabe AI orodij
 

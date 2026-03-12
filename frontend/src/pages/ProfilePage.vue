@@ -1,7 +1,7 @@
 <script setup>
   import { useStore } from '../composables/useStore'
 
-  const { currentUser, documents, summaryCount } = useStore()
+  const { currentUser, documents, summaryCount, formatDate } = useStore()
 </script>
 
 <template>
@@ -31,6 +31,14 @@
       <div class="info-item">
         <span class="info-label">Povzetki</span>
         <span class="info-value">{{ summaryCount }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Registriran</span>
+        <span class="info-value">{{ formatDate(currentUser.created_at) || '—' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Zadnja prijava</span>
+        <span class="info-value">{{ formatDate(currentUser.last_login_at) || '—' }}</span>
       </div>
     </div>
   </section>
