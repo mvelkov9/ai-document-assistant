@@ -93,7 +93,7 @@
             id="login-email"
             v-model="loginForm.email"
             type="email"
-            :placeholder="t('auth.emailPlaceholder')"
+            :placeholder="t('auth.emailPlaceholder', { at: '@' })"
             autocomplete="email"
             required
           />
@@ -193,7 +193,7 @@
             id="reg-email"
             v-model="registerForm.email"
             type="email"
-            :placeholder="t('auth.emailPlaceholder')"
+            :placeholder="t('auth.emailPlaceholder', { at: '@' })"
             autocomplete="email"
             required
           />

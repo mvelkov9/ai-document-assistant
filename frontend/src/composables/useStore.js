@@ -214,8 +214,8 @@ async function handleLogin(form) {
     const tp = await loginUser(form)
     persistToken(tp.access_token)
     currentUser.value = await getCurrentUser(sessionToken.value)
-    await refreshDocuments()
-    if (isAdmin.value) await loadAdminData()
+    void refreshDocuments().then(loadAllAnswers)
+    if (isAdmin.value) void loadAdminData()
     setMessage(t('messages.loginSuccess'))
     return true
   } catch (e) {
@@ -322,6 +322,11 @@ async function handleAsk(documentId, question) {
 
 function logout() {
   clearSession()
+  adminStats.value = null
+  adminUsers.value = []
+  searchQuery.value = ''
+  selectedTag.value = ''
+  sortField.value = 'date'
   setMessage(t('messages.logoutSuccess'))
 }
 

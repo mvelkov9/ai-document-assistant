@@ -213,7 +213,7 @@
 
     <!-- ── Collapsible Body ── -->
     <Transition name="collapse">
-      <div v-show="!isCollapsed" class="doc-body">
+      <div v-if="!isCollapsed" class="doc-body">
         <!-- ── Delete Confirmation ── -->
         <Transition name="fade">
           <div v-if="confirmingDelete" class="confirm-overlay">
@@ -407,6 +407,8 @@
       border-color 0.25s ease,
       box-shadow 0.25s ease;
     box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+    content-visibility: auto;
+    contain-intrinsic-size: 360px;
   }
 
   .doc-card:hover {

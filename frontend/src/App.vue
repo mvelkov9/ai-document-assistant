@@ -35,13 +35,14 @@
   /* Provide store slices for child pages (e.g. LandingPage needs auth handlers) */
   async function loginAndRedirect(form) {
     const ok = await handleLogin(form)
-    if (ok) router.push('/documents')
+    if (ok && route.name !== 'documents') await router.replace('/documents')
   }
   provide('app', { authBusy, handleLogin: loginAndRedirect, handleRegister })
 
-  function handleLogout() {
+  async function handleLogout() {
     storeLogout()
-    router.push('/')
+    mobileMenuOpen.value = false
+    if (route.name !== 'landing') await router.replace('/')
   }
 
   /* Page metadata driven by current route */

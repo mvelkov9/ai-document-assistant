@@ -339,7 +339,7 @@
     </div>
 
     <div v-else class="doc-grid">
-      <TransitionGroup name="list">
+      <div class="doc-grid-list">
         <DocumentCard
           v-for="(doc, index) in filteredDocuments"
           :key="doc.id"
@@ -357,7 +357,7 @@
           @update-tags="handleUpdateTags"
           @download="handleDownload"
         />
-      </TransitionGroup>
+      </div>
     </div>
 
     <!-- Onboarding Wizard -->
@@ -371,6 +371,11 @@
   .page {
     flex: 1;
     padding: 1.5rem 2rem;
+  }
+
+  .doc-grid-list {
+    display: grid;
+    gap: 1rem;
   }
 
   .documents-hero {
