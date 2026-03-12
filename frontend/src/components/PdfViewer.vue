@@ -3,7 +3,10 @@
   import * as pdfjsLib from 'pdfjs-dist'
   import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
+  // Use the bundled worker URL; Vite emits it as a static asset
   pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
+  // Disable the worker range-request to avoid double-fetch issues in nginx
+  pdfjsLib.GlobalWorkerOptions.workerPort = null
 
   const props = defineProps({
     documentId: { type: String, required: true },

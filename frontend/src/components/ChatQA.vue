@@ -114,8 +114,24 @@
             >
           </div>
         </div>
+        <!-- Pending: show typing indicator instead of answer -->
+        <div v-if="answer._pending" class="chat-row chat-row-ai">
+          <div class="chat-avatar-ai">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+              />
+            </svg>
+          </div>
+          <div class="chat-bubble chat-bubble-ai chat-typing">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
         <!-- AI answer (left) -->
-        <div class="chat-row chat-row-ai">
+        <div v-else class="chat-row chat-row-ai">
           <div class="chat-avatar-ai">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="3" />
@@ -145,23 +161,6 @@
           </div>
         </div>
       </template>
-
-      <!-- Typing indicator -->
-      <div v-if="questionBusy" class="chat-row chat-row-ai">
-        <div class="chat-avatar-ai">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-            />
-          </svg>
-        </div>
-        <div class="chat-bubble chat-bubble-ai chat-typing">
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-        </div>
-      </div>
     </div>
 
     <!-- Input bar -->

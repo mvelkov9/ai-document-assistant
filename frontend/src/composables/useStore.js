@@ -238,24 +238,41 @@ async function handleSummarize(documentId) {
 
 async function handleAsk(documentId, question) {
   activeQuestionId.value = documentId
+
+  // Show the user's question immediately as a pending bubble
+  const pendingId = '__pending_' + Date.now()
+  const pendingEntry = {
+    id: pendingId,
+    document_id: documentId,
+    question_text: question,
+    answer_text: '',
+    source_mode: '',
+    created_at: new Date().toISOString(),
+    _pending: true,
+  }
+  if (!documentAnswers[documentId]) documentAnswers[documentId] = []
+  documentAnswers[documentId].push(pendingEntry)
+
   try {
     const job = await createQuestionJob(sessionToken.value, documentId, question)
     const result = await pollJob(job.id)
+
+    // Remove the pending entry and add the real one
+    documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== pendingId)
     if (result) {
-      const newAnswer = {
+      documentAnswers[documentId].push({
         id: result.id || Date.now().toString(),
         document_id: documentId,
         question_text: result.job_input || question,
         answer_text: result.result_text || 'Odgovor generiran brez vsebine.',
         source_mode: 'async-job',
         created_at: new Date().toISOString(),
-      }
-      if (!documentAnswers[documentId]) documentAnswers[documentId] = []
-      documentAnswers[documentId].unshift(newAnswer)
+      })
     }
-    await refreshDocuments()
     setMessage(result ? 'Odgovor je bil generiran.' : 'Job se v teku. Osveži pozneje.')
   } catch (e) {
+    // Remove pending entry on error
+    documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== pendingId)
     setError(e.message)
   } finally {
     activeQuestionId.value = ''

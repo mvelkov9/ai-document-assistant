@@ -11,8 +11,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'pdf-worker': ['pdfjs-dist'],
-          'chartjs': ['chart.js', 'vue-chartjs'],
+          chartjs: ['chart.js', 'vue-chartjs'],
         },
       },
     },
