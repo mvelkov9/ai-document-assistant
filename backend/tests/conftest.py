@@ -3,11 +3,12 @@ import os
 # Disable rate limiting for tests — must be set before app modules are imported
 os.environ["APP_ENV"] = "test"
 
-# Point to a dedicated test database on the same PostgreSQL instance BEFORE any
-# app module is imported.  app.db.session creates a module-level engine on first
-# import; without this early override it would bind to the production DB and
-# drop_all would wipe real data.
-os.environ["DATABASE_URL"] = "postgresql+psycopg://docassist:docassist@postgres:5432/docassist_test"
+# Resolve the database host: CI uses localhost, Docker uses the 'postgres' hostname.
+_DB_HOST = os.environ.get("DB_TEST_HOST", "postgres")
+_BASE_URL = f"postgresql+psycopg://docassist:docassist@{_DB_HOST}:5432"
+
+# Point to a dedicated test database BEFORE any app module is imported.
+os.environ["DATABASE_URL"] = f"{_BASE_URL}/docassist_test"
 
 from io import BytesIO
 
@@ -22,8 +23,7 @@ from app.services import processing_service as processing_service_module
 from app.services import summary_service as summary_service_module
 
 # ── Create the test database if it doesn't exist yet ─────────────
-_admin_url = "postgresql+psycopg://docassist:docassist@postgres:5432/docassist"
-_admin_engine = create_engine(_admin_url, isolation_level="AUTOCOMMIT", future=True)
+_admin_engine = create_engine(f"{_BASE_URL}/docassist", isolation_level="AUTOCOMMIT", future=True)
 with _admin_engine.connect() as _conn:
     exists = _conn.execute(text("SELECT 1 FROM pg_database WHERE datname = 'docassist_test'")).scalar()
     if not exists:
@@ -31,7 +31,7 @@ with _admin_engine.connect() as _conn:
 _admin_engine.dispose()
 
 
-_TEST_DB_URL = "postgresql+psycopg://docassist:docassist@postgres:5432/docassist_test"
+_TEST_DB_URL = f"{_BASE_URL}/docassist_test"
 
 
 @pytest.fixture(autouse=True)
