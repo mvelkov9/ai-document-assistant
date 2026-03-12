@@ -96,7 +96,7 @@ Sistem je zasnovan kot modularni monolit z zunanjimi integracijami. Sestavljajo 
 
 > 📸 **[POSNETEK 1: Arhitekturni diagram]** — Renderaj Mermaid diagram iz `docs/diagrams/architecture.mmd` v PNG (uporabi https://mermaid.live/). Vstavi kot **Slika 1 — „Logična arhitektura sistema“** v Word.
 
-1. Vue frontend za uporabniški vmesnik (sidebar navigacija z Dokumenti, Naloži, Profil in Admin stranmi),
+1. Vue frontend z Vue Router 4 za uporabniški vmesnik (sidebar navigacija z lazy-loaded stranmi: Dokumenti, Naloži, Profil in Admin),
 2. FastAPI backend za REST API in poslovno logiko s strukturiranim JSON logiranjem (structlog),
 3. PostgreSQL za hrambo metapodatkov in uporabniških zapisov, z Alembic migracijami za nadzorovano evolucijo sheme,
 4. MinIO za objektno hrambo PDF dokumentov, združljiv z AWS S3 API,
@@ -104,7 +104,7 @@ Sistem je zasnovan kot modularni monolit z zunanjimi integracijami. Sestavljajo 
 6. RAG-lite BM25 chunking za kontekstualni Q&A — besedilo se razdeli na segmente, rangira po relevantnosti, AI dobi samo top 5 segmentov,
 7. asinhroni job mehanizem za summary in Q&A obdelavo z obstojnimi job zapisi,
 8. slowapi rate limiter za zaščito avtentikacijskih (5/min) in AI endpointov (10/min),
-9. Prometheus metrike na `/metrics` endpointu za operativno opazljivost,
+9. Prometheus metrike na `/metrics` endpointu za operativno opazljivost, z Grafana dashboardom za vizualizacijo (request rate, latenca, napake),
 10. admin API z upravljanjem uporabniških vlog (promote/demote),
 11. Nginx reverse proxy za produkcijsko izpostavitev storitve z varnostnimi glavami, gzip kompresijo in TLS (Let's Encrypt).
 
@@ -172,7 +172,7 @@ Arhitekturni diagram je pripravljen tudi kot Mermaid artefakt v `docs/diagrams/a
 
 ### 7.3 Arhitekturne odločitve
 
-Izbira FastAPI je bila motivirana z enostavno izdelavo REST API, samodejno OpenAPI dokumentacijo in dobro podporo za asinhrone operacije. Vue je primeren zaradi majhne kompleksnosti, hitrega razvoja in preglednega enostrankarskega uporabniškega toka — frontend je razdeljen na več komponent (AuthPanel, UploadSection, DocumentCard), kar izboljša preglednost in vzdrževljivost.
+Izbira FastAPI je bila motivirana z enostavno izdelavo REST API, samodejno OpenAPI dokumentacijo in dobro podporo za asinhrone operacije. Vue je primeren zaradi majhne kompleksnosti, hitrega razvoja in preglednega uporabniškega toka — frontend je razdeljen na več strani (LandingPage, DocumentsPage, UploadPage, ProfilePage, AdminPage) z Vue Router 4 in composable state management vzorcem (`useStore.js`), kar izboljša preglednost, vzdrževljivost in omogoča lazy-loading posameznih strani za boljšo zmogljivost.
 
 MinIO je bil izbran zato, ker omogoča lokalno in produkcijsko uporabo enakega S3-kompatibilnega pristopa, kar izboljša prenosljivost arhitekture. Za podatkovno bazo je bil izbran PostgreSQL s SQLAlchemy ORM in Alembic migracijami, kar omogoča nadzorovano evolucijo sheme brez ročnega poseganja v bazo.
 
@@ -377,7 +377,7 @@ JWT dostopni zeton se v frontendu hrani v localStorage. To predstavlja potencial
 | Objektna hramba (MinIO na VPS) | vključeno v VPS | vključeno v VPS | Do ~40 GB na disku CX33 |
 | AI API — Groq (Llama 3.3 70B) | brezplačno | brezplačno | Free tier; fallback: Gemini, OpenAI |
 | Upravljanje baze (PostgreSQL na VPS) | vključeno v VPS | vključeno v VPS | Docker container |
-| Prometheus metrike | vključeno v VPS | vključeno v VPS | /metrics endpoint |
+| Prometheus + Grafana | vključeno v VPS | vključeno v VPS | Metrike, dashboard |
 | **Skupaj mesečno** | **~€6–7** | **~€6–7** | |
 
 ### 10.2 Primerjava z upravljano alternativo (Managed PaaS)
@@ -402,9 +402,36 @@ Pri vecjem stevilu uporabnikov ali pogostem AI prometu glavni strosek ni vec zgo
 
 ## 11. Kriticna ocena primernosti
 
+### 11.1 Prednosti rešitve
+
 Izbrana resitev je primerna za organizacijo, ki potrebuje cenovno ucinkovit sistem za dokumente in noce biti popolnoma odvisna od dragih upravljanih platform. Velika prednost je arhitekturna jasnost: uporabniki, dokumenti, objektna hramba, AI integracija in produkcijski deployment so jasno razmejeni.
 
-Slabosti resitve so predvsem operativne. VPS zahteva samostojno skrb za posodobitve, backup, TLS in delovanje vsebnikov. Poleg tega je trenutna asinhrona obdelava izvedena z background task pristopom v aplikaciji, kar je dovolj za manjši obseg, ni pa idealno za vecjo obremenitev.
+Dodatna prednost je modularna zasnova AI plasti. Sistem ne uporablja le enega ponudnika, temveč prioritetno verigo (Groq → Gemini → OpenAI → hevristični fallback), kar zagotavlja delovanje ne glede na razpoložljivost posameznega zunanjega API-ja. RAG-lite pristop z BM25 rangiranjem segmentov dokumenta zagotavlja, da AI ponudnik prejme le najrelevantnejše dele besedila, kar zmanjša porabo tokenov in izboljša kakovost odgovorov.
+
+Projekt vključuje tudi celovit testni nabor (107 avtomatiziranih testov v 9 datotekah s ~90-odstotno pokritostjo), kar je za študentski projekt nadpovprečno in dokazuje zrelost razvojnega procesa.
+
+### 11.2 Slabosti in omejitve
+
+Slabosti resitve so predvsem operativne. VPS zahteva samostojno skrb za posodobitve, TLS in delovanje vsebnikov. Varnostne kopije so avtomatizirane s skripto `backup.sh`, ki izvaja šifrirane posnetke (GPG AES-256) podatkovne baze in objektne hrambe z 7-dnevno rotacijo. Poleg tega je trenutna asinhrona obdelava izvedena z background task pristopom v aplikaciji, kar je dovolj za manjši obseg, ni pa idealno za vecjo obremenitev.
+
+CI/CD pipeline vključuje tako neprekinjeno integracijo (lint, testi, build) kot neprekinjeno dostavo — ob uspešnem push na `main` vejo se avtomatsko sproži SSH deploy na produkcijski VPS (6. job v GitHub Actions). Skripta `deploy.sh` posodobi vsebnike brez ročnega posega.
+
+Frontend je v različici v1.3.0 nadgrajen z Vue Router 4, ki omogoča prave URL poti (`/documents`, `/upload`, `/profile`, `/admin`) in lazy-loading posameznih strani. Skupno stanje je centralizirano v composable modulu (`useStore.js`) namesto Pinia/Vuex, kar ohranja enostavnost brez zunanjega upravljalnika stanja. Navigacijska zaščita (navigation guards) preprečuje dostop neprijavljenim uporabnikom in omejuje admin strani. Uporabniški vmesnik vključuje sidebar navigacijo z router-link elementi, iskanje, sortiranje, administracijsko ploščo in odzivno zasnovo.
+
+### 11.3 Razlikovanje od enostavne uporabe AI orodij
+
+Pomembno je poudariti, v čem se ta rešitev razlikuje od neposredne uporabe ChatGPT ali drugega AI orodja. Neposredna uporaba AI orodja omogoča posamezne poizvedbe brez konteksta, brez sledljivosti in brez integracije z obstoječo infrastrukturo. Implementirana rešitev pa ponuja:
+
+1. **večuporabniško okolje** z avtentikacijo in lastnistvenim omejevanjem dostopa — vsak uporabnik vidi samo svoje dokumente,
+2. **trajno hrambo dokumentov** v S3-kompatibilni objektni hrambi z metapodatki v relacijski bazi,
+3. **RAG-lite pristop** — besedilo se razdeli na segmente in rangira z BM25, AI ponudnik prejme le top 5 segmentov, kar je učinkovitejše od pošiljanja celotnega dokumenta,
+4. **stroškovno učinkovitost** — sistem stane ~€7/mesec na lastnem VPS, medtem ko komercialne AI storitve stanejo €20+/mesec na uporabnika,
+5. **popoln nadzor nad podatki** — dokumenti ne zapustijo lastne infrastrukture (razen segmentov, ki se pošljejo AI ponudniku),
+6. **operativno zrelost** — health checki, Prometheus metrike, strukturirano logiranje, CI pipeline, TLS.
+
+Cilj naloge torej ni bil razvoj drugačnega AI modela, temveč integracija obstoječih AI storitev v varno, sledljivo in arhitekturno utemeljeno oblačno storitev.
+
+### 11.4 Primernost za slovensko organizacijo
 
 Kljub omejitvam je resitev za izpitno nalogo zelo primerna, ker jasno demonstrira razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije.
 
@@ -419,6 +446,7 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | Plast | Tehnologija | Verzija | Namen |
 | --- | --- | --- | --- |
 | Frontend | Vue | 3.5 | Enostrankovska aplikacija |
+| Frontend routing | Vue Router | 4 | Lazy-loaded strani, navigacijska zaščita |
 | Frontend build | Vite | 5.4 | Razvojni strežnik in produkcijska gradnja |
 | Backend | FastAPI | 0.116 | REST API, OpenAPI, asinhrona podpora |
 | ORM | SQLAlchemy | 2.0 | Objektno-relacijsko mapiranje |
@@ -431,29 +459,34 @@ Po drugi strani tak model ni optimalen za okolja z visokimi zahtevami po skladno
 | AI — primarni | Groq (Llama 3.3 70B) | — | Generiranje povzetkov in odgovorov (brezplačno) |
 | AI — fallback | Gemini 2.0 Flash, OpenAI gpt-4o-mini | — | Nadomestni ponudniki ob nedostopnosti Groq |
 | RAG-lite | BM25 (rank-bm25) | — | Rangiranje segmentov dokumenta za Q&A |
-| Metrike | Prometheus (prometheus-fastapi-instrumentator) | — | /metrics endpoint za operativno opazljivost |
+| Metrike | Prometheus (prometheus-fastapi-instrumentator) | v3.4 | /metrics endpoint za operativno opazljivost |
+| Monitoring | Grafana | 11.6 | Dashboard za vizualizacijo metrik (request rate, latenca, napake) |
 | Admin API | FastAPI dependency | — | Administracijska plošča (uporabniki, statistika, vloge) |
 | Reverse proxy | Nginx | 1.27 | Varnostne glave, gzip, TLS (Let's Encrypt) |
 | Kontejnerizacija | Docker Compose | v2 | Razvojno in produkcijsko okolje |
 | VPS gostovanje | Hetzner CX33 | Ubuntu 24.04 | 4 vCPU, 8 GB RAM, 80 GB disk |
 | Domena in TLS | doc-ai-assist.com | Let's Encrypt | HTTPS z avtomatskim podaljševanjem |
-| CI/CD | GitHub Actions | — | Lint, test s pokritostjo, Docker build |
+| CI/CD | GitHub Actions | — | Lint, test s pokritostjo, Docker build, avtomatski deploy |
 | Lint | ruff | 0.11 | Preverjanje kakovosti Python kode |
-| Testiranje | pytest, pytest-cov | — | 39 avtomatiziranih testov v 5 datotekah |
+| Testiranje | pytest, pytest-cov | — | 107 avtomatiziranih testov v 9 datotekah (~90 % pokritost) |
 
 ### 12.2 Razvojna validacija
 
 Validacija projekta je potekala na več ravneh. Prva raven je bila razvojna validacija posameznih gradnikov, kjer so bili po posameznih fazah preverjeni Python moduli, testni primeri in konfiguracija Docker Compose.
 
-Backend vsebuje **39 avtomatiziranih testov** v **5 testnih datotekah**, ki pokrivajo:
+Backend vsebuje **107 avtomatiziranih testov** v **9 testnih datotekah** s približno 90-odstotno pokritostjo kode, ki pokrivajo:
 
-- **test_health.py** — zdravstveni endpointi (`/health`, `/ready`) in Prometheus metrike (`/metrics`),
-- **test_auth.py** — registracija, prijava, profil uporabnika, napake pri avtentikaciji (napačno geslo, neveljaven token, podvojen email), admin zaščita endpointov,
-- **test_documents.py** — nalaganje dokumentov, validacija tipov datotek, lastnistveno omejevanje dostopa med uporabniki, paginacija seznama dokumentov, prenos (download) dokumentov, brisanje dokumentov,
-- **test_document_flow.py** — validacija dolžine vprašanj (prekratka in predolga vprašanja), sinhrono povzemanje in dokumentni Q&A, asinhrona obdelava z job polling mehanizmom,
-- **test_admin.py** — administracijski endpointi (statistika platforme, seznam uporabnikov, sprememba vlog), zaščita admin endpointov pred nepooblaščenimi uporabniki.
+- **test_health.py** (5 testov) — zdravstveni endpointi (`/health`, `/ready`) in Prometheus metrike (`/metrics`),
+- **test_auth.py** (8 testov) — registracija, prijava, profil uporabnika, napake pri avtentikaciji (napačno geslo, neveljaven token, podvojen email), admin zaščita endpointov,
+- **test_documents.py** (11 testov) — nalaganje dokumentov, validacija tipov datotek, lastnistveno omejevanje dostopa med uporabniki, paginacija seznama dokumentov, prenos (download) dokumentov, brisanje dokumentov,
+- **test_document_flow.py** (6 testov) — validacija dolžine vprašanj (prekratka in predolga vprašanja), sinhrono povzemanje in dokumentni Q&A, asinhrona obdelava z job polling mehanizmom,
+- **test_admin_and_download.py** (9 testov) — administracijski endpointi (statistika platforme, seznam uporabnikov, sprememba vlog), zaščita admin endpointov, prenos dokumentov in cross-user preverjanje,
+- **test_delete_and_admin.py** (11 testov) — brisanje dokumentov s kaskadnim čiščenjem Q&A zapisov in jobov, odpornost na napake pri hrambi, upravljanje uporabniških vlog,
+- **test_storage_and_pdf.py** (16 testov) — MinIO upload/download/delete z mocki, obravnava S3 napak, PDF ekstrakcija besedila, layout-mode fallback, obravnava poškodovanih in praznih PDF datotek,
+- **test_summary_service.py** (32 testov) — BM25 chunking in rangiranje, tokenizacija, fallback povzetki, detekcija ponudnikov (Groq → Gemini → OpenAI), generiranje povzetkov in odgovorov,
+- **test_security.py** (9 testov) — bcrypt saltanje gesel, preverjanje gesel, potek žetona, zavrnitev potečenega žetona, zavrnitev manjkajočega uporabnika.
 
-Testi se izvajajo z `pytest` in `pytest-cov`, pokritost kode je merjena in vključena v CI pipeline. Minimalni prag pokritosti je nastavljen na 50 %.
+Testi se izvajajo z `pytest` in `pytest-cov`, pokritost kode je merjena in vključena v CI pipeline. Minimalni prag pokritosti je nastavljen na 70 %.
 
 ### 12.3 Operativna validacija
 
@@ -478,13 +511,15 @@ Po uspešnem deploymentu so bili vsi vsebniki (backend, frontend/proxy, PostgreS
 
 ### 12.4 CI/CD pipeline
 
-GitHub Actions CI pipeline izvaja štiri korake ob vsakem push ali pull request:
-1. **Lint** — preverjanje kakovosti kode z orodjem ruff,
-2. **Test** — zagon vseh 39 testov s pokritostjo (minimalni prag 50 %),
-3. **Frontend build** — preverjanje gradnje Vue.js frontend aplikacije,
-4. **Docker build** — preverjanje da se backend in frontend Docker sliki uspešno zgradita.
+GitHub Actions CI/CD pipeline izvaja šest ločenih jobov ob vsakem push ali pull request:
+1. **Backend lint** — preverjanje kakovosti Python kode z orodjem ruff (lint + format check),
+2. **Backend test** — zagon vseh 107 testov s pokritostjo (minimalni prag 70 %), uporaba pytest-cov,
+3. **Frontend lint** — preverjanje formatiranja s Prettier,
+4. **Frontend build** — preverjanje gradnje Vue.js frontend aplikacije z Vite,
+5. **Docker build** — preverjanje da se backend in frontend Docker sliki uspešno zgradita,
+6. **Deploy** — avtomatski SSH deployment na produkcijski VPS po uspešnem CI (samo ob push na `main` vejo), z uporabo `appleboy/ssh-action`.
 
-Vsi štirje koraki morajo uspeti, preden je pull request odobren za merge.
+Prvih pet jobov mora uspeti, preden je pull request odobren za merge. Deploy job se sproži le ob push na glavno vejo, kar zagotavlja neprekinjeno dostavo (continuous deployment). Pipeline zagotavlja kompatibilnost z Node 24 in Python 3.13.
 
 ### 12.5 End-to-end validacija
 
@@ -523,21 +558,22 @@ Polna end-to-end validacija je bila opravljena na produkcijskem okolju (https://
 
 > 📸 **[POSNETEK 12: ReDoc]** — Odpri https://doc-ai-assist.com/redoc. Vstavi kot **Slika 12 — „OpenAPI dokumentacija (ReDoc)“** v Word.
 
-8. **Prometheus metrike** — `/metrics` endpoint vrnil metrike v Prometheus formatu.
+8. **Prometheus metrike** — `/metrics` endpoint vrnil metrike v Prometheus formatu,
+9. **Grafana dashboard** — vizualizacija metrik (request rate, p95/p50 latenca, 5xx error rate) je dostopna na internem dashboardu.
 
 Vsi scenariji so bili uspešno izvedeni brez napak.
 
 ## 13. Zaključek
 
-Naloga je pokazala, da je mogoče razviti integrirano spletno storitev, ki presega raven enostavne demonstracije orodij. Implementirana rešitev združuje spletni uporabniški vmesnik (Vue 3.5), REST API (FastAPI), relacijsko podatkovno bazo (PostgreSQL 17), objektno hrambo (MinIO), AI integracijo s prioritetno verigo ponudnikov (Groq → Gemini → OpenAI), RAG-lite dokumentni Q&A z BM25 rangiranjem, administracijsko ploščo, Prometheus metrike in produkcijsko pot na VPS z avtomatskim TLS. Prav ta povezava med gradniki predstavlja bistvo sodobnih cloud-native oziroma cloud-style arhitektur.
+Naloga je pokazala, da je mogoče razviti integrirano spletno storitev, ki presega raven enostavne demonstracije orodij. Implementirana rešitev združuje spletni uporabniški vmesnik (Vue 3.5 z Vue Router 4), REST API (FastAPI), relacijsko podatkovno bazo (PostgreSQL 17), objektno hrambo (MinIO), AI integracijo s prioritetno verigo ponudnikov (Groq → Gemini → OpenAI), RAG-lite dokumentni Q&A z BM25 rangiranjem, administracijsko ploščo, Prometheus metrike z Grafana dashboardom in produkcijsko pot na VPS z avtomatskim TLS ter neprekinjeno dostavo. Prav ta povezava med gradniki predstavlja bistvo sodobnih cloud-native oziroma cloud-style arhitektur.
 
 Sistem je v celoti nameščen in dostopen na **https://doc-ai-assist.com** (Hetzner CX33, Ubuntu 24.04, Let's Encrypt TLS).
 
-Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI dokumentacijo (21 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in celovit CI/CD mehanizem prek GitHub Actions (lint, test, frontend build, Docker build). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Docker (vključno z multi-stage buildom), JWT avtentikacija z admin vlogami, integracija AI API s prioritetno verigo ponudnikov, RAG-lite BM25 pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus metrike za operativno opazljivost, administracijska plošča s statistiko in upravljanjem vlog, ter health in readiness endpointi.
+Sistem v tej obliki izpolnjuje vse minimalne tehnične zahteve za MOŽNOST 3: ponuja REST API z OpenAPI dokumentacijo (21 endpointov), integracijo z oblačnimi storitvami (PostgreSQL, MinIO, Groq AI API), gostovanje v oblaku prek Docker Compose na VPS in CI/CD mehanizem prek GitHub Actions (6 jobov: backend-lint, backend-test, frontend-lint, frontend-build, Docker build, deploy). Poleg minimalnih zahtev so bili realizirani tudi elementi za višjo oceno: kontejnerizacija z Docker (vključno z multi-stage buildom), JWT avtentikacija z admin vlogami, integracija AI API s prioritetno verigo ponudnikov, RAG-lite BM25 pristop za dokumentni Q&A, strukturirano logiranje (structlog), Prometheus metrike z Grafana dashboardom za operativno opazljivost, Vue Router 4 z lazy-loading stranmi, šifrirane varnostne kopije (GPG AES-256) z avtomatsko rotacijo, administracijska plošča s statistiko in upravljanjem vlog, ter health in readiness endpointi. Skupaj 107 avtomatiziranih testov v 9 datotekah pokriva ~90 % kode.
 
 Z vidika varnosti sistem naslavlja večino kategorij OWASP Top 10 (2021), vključno z lastnistvenostnim omejevanjem dostopa, bcrypt zaščito gesel, rate limitingom, Pydantic validacijo, varnostnimi glavami na reverse proxyju in HSTS. Z vidika stroškov je bilo dokazano, da je celotna rešitev izvedljiva za manj kot €7/mesec na lastnem VPS z brezplačnim Groq AI API, kar je bistveno ceneje od primerljivih upravljanih platform.
 
-Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za ločeno obdelavo, bogatejši Q&A kontekst z večvrstno pogovorno zgodovino, OCR podpora za skenirane dokumente, napredne varnostne politike (refresh token rotacija, account lockout), uporaba vektorske shrambe za naprednejše semantično iskanje po dokumentih, in Grafana dashboard za vizualizacijo Prometheus metrik.
+Rezultat naloge ni le delna prototipna aplikacija, temveč zasnova, ki jo je mogoče nadgrajevati v bolj resen sistem. Smiselne nadaljnje nadgradnje so: boljši worker model za ločeno obdelavo, bogatejši Q&A kontekst z večvrstno pogovorno zgodovino, OCR podpora za skenirane dokumente, napredne varnostne politike (refresh token rotacija, account lockout) in uporaba vektorske shrambe za naprednejše semantično iskanje po dokumentih.
 
 Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, ker jasno demonstrira razumevanje spletne integracije, oblačne arhitekture, varnosti, stroškov in praktične implementacije v realnem tehnološkem okolju — z živečo produkcijsko instanco na https://doc-ai-assist.com.
 
@@ -565,6 +601,7 @@ Kljub omejitvam je rešitev za izpitno nalogo zelo primerna, ker jasno demonstri
 20. rank-bm25 — BM25 Ranking Algorithm. Dostopno na: https://github.com/dorianbrown/rank_bm25
 21. Google Gemini API Documentation. Dostopno na: https://ai.google.dev/docs
 22. GitHub Actions Documentation. Dostopno na: https://docs.github.com/en/actions
-20. rank-bm25 — BM25 Ranking Algorithm. Dostopno na: https://github.com/dorianbrown/rank_bm25
-21. Google Gemini API Documentation. Dostopno na: https://ai.google.dev/docs
-22. GitHub Actions Documentation. Dostopno na: https://docs.github.com/en/actions
+23. passlib — Password Hashing Library for Python. Dostopno na: https://passlib.readthedocs.io/
+24. Vue Router Documentation. Dostopno na: https://router.vuejs.org/
+25. Grafana Documentation. Dostopno na: https://grafana.com/docs/
+24. Vite — Next Generation Frontend Tooling. Dostopno na: https://vitejs.dev/

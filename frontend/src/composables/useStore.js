@@ -1,0 +1,292 @@
+import { computed, reactive, ref } from 'vue'
+
+import {
+  createQuestionJob,
+  createSummaryJob,
+  deleteDocument,
+  downloadDocument,
+  getAdminStats,
+  getAdminUsers,
+  getJobStatus,
+  getCurrentUser,
+  listDocuments,
+  loginUser,
+  registerUser,
+  setUserRole,
+  uploadDocument,
+} from '../lib/api'
+
+const TOKEN_KEY = 'docassist-token'
+
+/* ── State (module-level singletons) ── */
+const sessionToken = ref(localStorage.getItem(TOKEN_KEY) || '')
+const currentUser = ref(null)
+const documents = ref([])
+const globalMessage = ref('')
+const globalError = ref('')
+const authBusy = ref(false)
+const dashboardBusy = ref(false)
+const uploadBusy = ref(false)
+const activeSummaryId = ref('')
+const activeQuestionId = ref('')
+const latestAnswers = reactive({})
+const searchQuery = ref('')
+const sortField = ref('date')
+const adminStats = ref(null)
+const adminUsers = ref([])
+const sidebarCollapsed = ref(false)
+
+/* ── Computed ── */
+const isAuthenticated = computed(() => Boolean(sessionToken.value && currentUser.value))
+const isAdmin = computed(() => currentUser.value?.role === 'admin')
+
+const filteredDocuments = computed(() => {
+  let docs = [...documents.value]
+  const q = searchQuery.value.trim().toLowerCase()
+  if (q) docs = docs.filter((d) => d.original_filename.toLowerCase().includes(q))
+  if (sortField.value === 'name')
+    docs.sort((a, b) => a.original_filename.localeCompare(b.original_filename))
+  else if (sortField.value === 'size') docs.sort((a, b) => b.size_bytes - a.size_bytes)
+  else if (sortField.value === 'status')
+    docs.sort((a, b) => a.processing_status.localeCompare(b.processing_status))
+  else docs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  return docs
+})
+
+const summaryCount = computed(() => documents.value.filter((d) => d.summary_text).length)
+
+/* ── Helpers ── */
+function setMessage(msg) {
+  globalError.value = ''
+  globalMessage.value = msg
+}
+function setError(msg) {
+  globalMessage.value = ''
+  globalError.value = msg
+}
+function persistToken(token) {
+  sessionToken.value = token
+  localStorage.setItem(TOKEN_KEY, token)
+}
+function clearSession() {
+  sessionToken.value = ''
+  currentUser.value = null
+  documents.value = []
+  localStorage.removeItem(TOKEN_KEY)
+}
+
+/* ── API actions ── */
+async function refreshDocuments() {
+  if (!sessionToken.value) return
+  dashboardBusy.value = true
+  try {
+    const r = await listDocuments(sessionToken.value)
+    documents.value = r.items || []
+  } catch (e) {
+    setError(e.message)
+  } finally {
+    dashboardBusy.value = false
+  }
+}
+
+async function bootstrapSession() {
+  if (!sessionToken.value) return
+  dashboardBusy.value = true
+  try {
+    currentUser.value = await getCurrentUser(sessionToken.value)
+    await refreshDocuments()
+    if (isAdmin.value) await loadAdminData()
+  } catch {
+    clearSession()
+  } finally {
+    dashboardBusy.value = false
+  }
+}
+
+async function loadAdminData() {
+  try {
+    adminStats.value = await getAdminStats(sessionToken.value)
+    adminUsers.value = await getAdminUsers(sessionToken.value)
+  } catch {
+    /* may fail for non-admin */
+  }
+}
+
+async function handleLogin(form) {
+  authBusy.value = true
+  try {
+    const tp = await loginUser(form)
+    persistToken(tp.access_token)
+    currentUser.value = await getCurrentUser(sessionToken.value)
+    await refreshDocuments()
+    if (isAdmin.value) await loadAdminData()
+    setMessage('Prijava je uspela.')
+    return true
+  } catch (e) {
+    setError(e.message)
+    return false
+  } finally {
+    authBusy.value = false
+  }
+}
+
+async function handleRegister(form) {
+  authBusy.value = true
+  try {
+    await registerUser(form)
+    setMessage('Registracija je uspela. Zdaj se prijavi z novim računom.')
+  } catch (e) {
+    setError(e.message)
+  } finally {
+    authBusy.value = false
+  }
+}
+
+async function handleUpload(file) {
+  uploadBusy.value = true
+  try {
+    await uploadDocument(sessionToken.value, file)
+    await refreshDocuments()
+    setMessage('Dokument je bil uspešno naložen.')
+    return true
+  } catch (e) {
+    setError(e.message)
+    return false
+  } finally {
+    uploadBusy.value = false
+  }
+}
+
+async function pollJob(jobId, maxAttempts = 15) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const job = await getJobStatus(sessionToken.value, jobId)
+    if (job.status === 'completed') return job
+    if (job.status === 'failed') throw new Error(job.error_message || 'Job failed.')
+    await new Promise((r) => setTimeout(r, 1200))
+  }
+  return null
+}
+
+async function handleSummarize(documentId) {
+  activeSummaryId.value = documentId
+  try {
+    const job = await createSummaryJob(sessionToken.value, documentId)
+    const result = await pollJob(job.id)
+    await refreshDocuments()
+    setMessage(result ? 'Povzetek je bil generiran.' : 'Job se v teku. Osveži pozneje.')
+  } catch (e) {
+    setError(e.message)
+  } finally {
+    activeSummaryId.value = ''
+  }
+}
+
+async function handleAsk(documentId, question) {
+  activeQuestionId.value = documentId
+  try {
+    const job = await createQuestionJob(sessionToken.value, documentId, question)
+    const result = await pollJob(job.id)
+    if (result) {
+      latestAnswers[documentId] = {
+        question_text: result.job_input || question,
+        answer_text: result.result_text || 'Odgovor generiran brez vsebine.',
+        source_mode: 'async-job',
+      }
+    }
+    await refreshDocuments()
+    setMessage(result ? 'Odgovor je bil generiran.' : 'Job se v teku. Osveži pozneje.')
+  } catch (e) {
+    setError(e.message)
+  } finally {
+    activeQuestionId.value = ''
+  }
+}
+
+function logout() {
+  clearSession()
+  setMessage('Odjava je bila uspešna.')
+}
+
+async function handleDelete(documentId) {
+  try {
+    await deleteDocument(sessionToken.value, documentId)
+    delete latestAnswers[documentId]
+    await refreshDocuments()
+    setMessage('Dokument je bil izbrisan.')
+  } catch (e) {
+    setError(e.message)
+  }
+}
+
+async function handleDownload(documentId, filename) {
+  try {
+    await downloadDocument(sessionToken.value, documentId, filename)
+  } catch (e) {
+    setError(e.message)
+  }
+}
+
+async function handleSetRole(userId, role) {
+  try {
+    await setUserRole(sessionToken.value, userId, role)
+    await loadAdminData()
+    setMessage(`Vloga uporabnika je bila spremenjena na "${role}".`)
+  } catch (e) {
+    setError(e.message)
+  }
+}
+
+function formatDate(iso) {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString('sl-SI', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+export function useStore() {
+  return {
+    /* state */
+    sessionToken,
+    currentUser,
+    documents,
+    globalMessage,
+    globalError,
+    authBusy,
+    dashboardBusy,
+    uploadBusy,
+    activeSummaryId,
+    activeQuestionId,
+    latestAnswers,
+    searchQuery,
+    sortField,
+    adminStats,
+    adminUsers,
+    sidebarCollapsed,
+
+    /* computed */
+    isAuthenticated,
+    isAdmin,
+    filteredDocuments,
+    summaryCount,
+
+    /* actions */
+    setMessage,
+    setError,
+    clearSession,
+    refreshDocuments,
+    bootstrapSession,
+    loadAdminData,
+    handleLogin,
+    handleRegister,
+    handleUpload,
+    handleSummarize,
+    handleAsk,
+    logout,
+    handleDelete,
+    handleDownload,
+    handleSetRole,
+    formatDate,
+  }
+}

@@ -54,6 +54,10 @@
 | 28 | Hardening v1.2.2 | Completed | PDF extraction fallback, VPS specs CX33, lint fixes |
 | 29 | Formatters v1.2.3 | Completed | Ruff format + prettier auto-formatting, CI format checks |
 | 30 | Testing & CI v1.2.4 | Completed | 107 tests (90% coverage), CI split to 5 jobs, Node 24 compat |
+| 31 | Vue Router v1.3.0 | Completed | Vue Router 4, page splitting (5 routes), composable store, nav guards |
+| 32 | Continuous Deployment | Completed | SSH deploy step in GitHub Actions after CI, main branch only |
+| 33 | Grafana dashboard | Completed | Prometheus + Grafana containers, pre-provisioned FastAPI dashboard |
+| 34 | Backup encryption | Completed | GPG AES-256 encryption, 7-day rotation, verification step |
 
 ## Current implementation state
 
@@ -85,9 +89,11 @@
 
 ### Immediate next steps
 
-1. Capture screenshots of running system for report (Phase 26)
-2. Finalize Word document with screenshots and submit
-3. Prepare for defense demo using https://doc-ai-assist.com
+1. Capture 16 screenshots of running system for report (see report/00-report-outline.md)
+2. Render Mermaid diagrams (architecture.mmd, data-flow.mmd) to PNG via mermaid.live
+3. Finalize Word document with screenshots, formatting, and table of contents
+4. Prepare for defense demo using https://doc-ai-assist.com
+| 35 | Video demo for defense | 3-minute screen recording walkthrough of UI + API docs + VPS deployment | ~1 hour |
 
 ## Verification log
 
@@ -314,6 +320,24 @@ After every completed implementation phase:
 - Fixed stale v1.2.1 version in App.vue landing footer
 - Version bumped to v1.2.4 in frontend (package.json, App.vue), README
 
+**Phase E19: Version 1.3.0 — Vue Router, CD, Grafana, backup encryption**
+
+Changes:
+- Vue Router 4 installed, 5 lazy-loaded routes: `/`, `/documents`, `/upload`, `/profile`, `/admin`
+- Monolithic App.vue (1900 lines) split into shell + 5 page components + composable store
+- Created `composables/useStore.js` with all shared reactive state and actions (module-level singletons)
+- Navigation guards: redirect unauthenticated to landing, redirect guests away from protected routes
+- `<router-link>` replaces manual `currentPage` state toggling in sidebar
+- Each page component is a separate Vite chunk (code splitting)
+- Added deploy job to GitHub Actions CI: SSH to VPS via `appleboy/ssh-action` after successful docker job, main branch only
+- Added Prometheus container (prom/prometheus:v3.4.1) scraping FastAPI `/metrics` every 15s
+- Added Grafana container (grafana/grafana:11.6.0) with auto-provisioned datasource and FastAPI dashboard
+- Grafana dashboard panels: request rate, p50/p95 latency, in-progress requests, 24h total, 5xx error rate, response size
+- Backup script enhanced: GPG AES-256 symmetric encryption (opt-in via `BACKUP_PASSPHRASE`), 7-day rotation, verification step
+- Docker Compose updated with `prometheus`, `grafana` services and volumes
+- Production overlay updated with restart policies for monitoring services
+- Version bumped to v1.3.0 in backend (main.py), frontend (package.json, App.vue, LandingPage.vue), README
+
 ## Supporting operational documents
 
 - `docs/professor-demo-checklist.md`
@@ -340,7 +364,7 @@ After every completed implementation phase:
 | REST API | ✅ Izpolnjeno | 14 endpointov, FastAPI, popolna OpenAPI dokumentacija |
 | Integracija z oblačno storitvijo | ✅ Izpolnjeno | PostgreSQL, MinIO (S3), Groq/Gemini/OpenAI AI API |
 | Gostovanje v oblaku | ⚠️ Pripravljeno, nepreverjeno | Docker Compose + prod overlay obstajata, VPS deployment ni dokazan |
-| Osnovni CI/CD | ✅ Izpolnjeno | GitHub Actions: ruff lint, pytest-cov, frontend build |
+| Osnovni CI/CD | ✅ Izpolnjeno | GitHub Actions: ruff lint, pytest-cov, frontend build, auto-deploy via SSH |
 | Dokumentacija API (OpenAPI) | ✅ Izpolnjeno | /docs (Swagger) + /redoc z opisi vseh endpointov |
 
 ### Elementi za višjo oceno — stanje
@@ -351,7 +375,7 @@ After every completed implementation phase:
 | Kubernetes ali managed platforma | ❌ Ni implementirano | Ni potrebno za pozitivno oceno, dobro za bonus |
 | Avtentikacija (JWT, OAuth2, OIDC) | ✅ | JWT HS256 z bcrypt, rate limiting |
 | Integracija AI API ali LLM | ✅ | Groq (Llama 3.3 70B) → Gemini → OpenAI → fallback |
-| Monitoring ali logging | ✅ | structlog JSON logging, /health, /ready, Prometheus /metrics endpoint |
+| Monitoring ali logging | ✅ | structlog JSON logging, /health, /ready, Prometheus /metrics, Grafana dashboard |
 | Infrastructure as Code | ❌ Ni implementirano | Ni Terraform/Ansible; Docker Compose je edini IaC |
 
 ### Ocenjevalni kriteriji naloge
@@ -375,7 +399,7 @@ After every completed implementation phase:
 
 4. ~~**AI integracija je plitva**~~ ✅ REŠENO v v1.2.0 — BM25 RAG-lite chunking: tekst se razdeli na segmente, rangira po relevantnosti za vprašanje, AI dobi samo top 5 chunkov.
 
-5. **CI/CD je samo CI, ni CD** — Pipeline izvaja lint+test+build+docker, ampak dejanski deployment je ročen (deploy.sh). Za polno oceno bi moral biti vsaj trigger za auto-deploy.
+5. ~~**CI/CD je samo CI, ni CD**~~ ✅ REŠENO v v1.3.0 — Dodan deploy job v GitHub Actions: SSH na VPS po uspešnem CI, avtomatski deploy ob push na main.
 
 6. ~~**Report nima posnetkov zaslona**~~ ✅ ZAKLJUČENO — Report in outline posodobljena z vsemi screenshot placeholderji (16 posnetkov). Student mora zajeti posnetke in jih vstaviti v Word dokument.
 

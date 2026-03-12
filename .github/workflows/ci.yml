@@ -129,3 +129,20 @@ jobs:
 
       - name: Build frontend Docker image
         run: docker build --target production --build-arg VITE_API_BASE_URL=/api/v1 -t docassist-frontend frontend/
+
+  deploy:
+    runs-on: ubuntu-24.04
+    needs: docker
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/doc-ai-assist
+            git pull origin main
+            bash infrastructure/scripts/deploy.sh

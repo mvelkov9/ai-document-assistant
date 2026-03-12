@@ -44,3 +44,11 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  prometheus:
+    restart: unless-stopped
+    ports: []
+
+  grafana:
+    restart: unless-stopped
+    ports: []

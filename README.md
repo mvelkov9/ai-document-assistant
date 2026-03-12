@@ -1,4 +1,4 @@
-# AI Document Assistant — v1.2.4
+# AI Document Assistant — v1.3.0
 
 AI Document Assistant is a semester project for the course *Integracija spletnih strani in servisi* (2025/26, ALMA MATER EUROPAEA). The solution targets **MOŽNOST 3 — Razvoj integrirane spletne storitve** and implements a multi-user web service for secure PDF upload, AI summarization, and document question-answering.
 
@@ -20,14 +20,15 @@ AI Document Assistant is a semester project for the course *Integracija spletnih
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Vue 3.5 + Vite 5, Inter font, sidebar layout with admin panel |
+| Frontend | Vue 3.5 + Vite 5 + Vue Router 4, Inter font, sidebar layout with admin panel |
 | Backend | Python 3.13, FastAPI 0.116, SQLAlchemy 2.0, Alembic |
 | Database | PostgreSQL 17 |
 | Object storage | MinIO (S3-compatible) |
 | AI | Groq (free, Llama 3.3 70B), Gemini, or OpenAI — with automatic fallback |
 | Reverse proxy | Nginx 1.27 with security headers, WebSocket proxy for Vite HMR |
 | Containerization | Docker Compose with PostgreSQL healthcheck (dev + prod overlay) |
-| CI/CD | GitHub Actions (lint, test, coverage, build) |
+| CI/CD | GitHub Actions (lint, test, coverage, build, deploy) |
+| Monitoring | Prometheus + Grafana dashboards |
 
 ## Quick Start
 
@@ -135,6 +136,14 @@ GitHub Actions pipeline (`.github/workflows/ci.yml`):
 3. **Frontend lint** — `prettier --check`
 4. **Frontend build** — `npm run build`
 5. **Docker** — Build backend and frontend images
+6. **Deploy** — SSH to VPS and run `deploy.sh` (main branch only)
+
+## Monitoring
+
+Prometheus scrapes FastAPI `/metrics` every 15 s. Grafana is pre-provisioned with a dashboard showing request rate, p50/p95 latency, error rate, and in-progress requests.
+
+- **Dev**: Grafana at http://localhost:3000, Prometheus at http://localhost:9090
+- **Prod**: Ports closed, access via SSH tunnel or Nginx location
 
 ## Demo Seed
 
