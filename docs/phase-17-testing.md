@@ -17,15 +17,15 @@ Strengthen the project with repeatable automated checks for backend user flows, 
 | File | Tests | Coverage |
 | --- | --- | --- |
 | `test_health.py` | 5 | Health, status, readiness, auth flow, duplicate registration |
-| `test_document_flow.py` | 6 | Upload, summarize, Q&A, async jobs, job status |
+| `test_document_flow.py` | 7 | Upload, summarize, Q&A, async jobs, job status |
 | `test_auth.py` | 8 | Short password, invalid email, missing fields, wrong password, nonexistent user, no token, invalid token, duplicate email |
-| `test_documents.py` | 11 | Non-PDF upload, no auth upload, 404 document, cross-user access, pagination, empty list, limit cap, 404 summarize, short question, long question, 404 job |
+| `test_documents.py` | 13 | Non-PDF upload, no auth upload, 404 document, cross-user access, pagination, empty list, limit cap, 404 summarize, short question, long question, 404 job |
 | `test_admin_and_download.py` | 9 | Admin stats, admin users, 403 regular user, 401 unauthorized, document download (happy/404/cross-user), Prometheus metrics |
 | `test_summary_service.py` | 32 | Chunking, BM25 ranking, fallback modes, provider detection, Groq/Gemini/OpenAI dispatch with mocked httpx (success, 429 retry, auth failure, max retries) |
 | `test_delete_and_admin.py` | 11 | Document deletion (success, nonexistent, cross-user, unauthenticated, cascade, storage failure tolerance), admin role management (promote/demote, self-change blocked, invalid role, nonexistent user, forbidden) |
 | `test_storage_and_pdf.py` | 16 | StorageService (upload, download, delete, S3Error, bucket creation), PdfService (text extraction, layout fallback, corruption, empty bytes), integration (empty PDF→422, storage failure→503) |
-| `test_security.py` | 9 | Password hashing (different salts, correct/wrong verify), JWT token creation (subject, expiry, custom expiry), expired/missing-subject/nonexistent-user token rejection |
-| **Total** | **107** | **~90% coverage** |
+| `test_security.py` | 10 | Password hashing (different salts, correct/wrong verify), JWT token creation (subject, expiry, custom expiry), expired/missing-subject/nonexistent-user token rejection |
+| **Total** | **111** | **87% coverage** |
 
 ## Shared fixtures (conftest.py)
 
@@ -68,16 +68,24 @@ Tests run in CI with:
 pytest --cov=app --cov-report=term-missing --cov-fail-under=70
 ```
 
+Recommended local execution from the repository root:
+
+```bash
+docker compose build backend
+docker compose run --rm -e PYTHONPATH=/app backend pytest
+docker compose run --rm -e PYTHONPATH=/app backend pytest --cov=app --cov-report=term-missing
+```
+
 **Update (v1.2.0):** Test suite expanded to 39 tests across 5 files. Added `test_admin_and_download.py` with 9 tests covering admin stats/users (admin role, 403 for regular users, 401 unauthorized), document download (happy/404/cross-user), and Prometheus metrics endpoint.
 
-**Update (v1.2.4):** Test suite expanded to **107 tests** across **9 files** with **~90% code coverage**. Added 4 new test files: `test_summary_service.py` (32 tests — chunking, BM25 ranking, AI provider dispatch with mocked httpx), `test_delete_and_admin.py` (11 tests — document deletion and admin role management), `test_storage_and_pdf.py` (16 tests — S3 storage and PDF extraction), `test_security.py` (9 tests — password hashing and JWT tokens). CI coverage threshold raised from 50% to 70%.
+**Update (v1.5.3):** Test suite currently contains **111 tests** across **9 files** with measured backend coverage of **87%**. Recommended local execution is now documented via `docker compose run`, because that path matches the project runtime dependencies more reliably than an ad hoc host Python setup.
 
 ## Current limitations
 
 - no end-to-end browser automation
 - no container-based integration tests with live MinIO and PostgreSQL in CI
 - no load or security-specific test automation
-- the documented Docker deployment path is stronger than the ad hoc in-container pytest path, which should be standardized if containerized test execution becomes a project requirement
+- test execution is now standardized around `docker compose run` for local verification, while CI still uses direct `pytest` inside GitHub Actions
 
 ## Next step
 

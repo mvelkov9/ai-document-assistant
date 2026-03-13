@@ -43,11 +43,11 @@ oblak, FastAPI, Vue, PostgreSQL, MinIO, AI, JWT, Docker, VPS, OpenAPI, Groq, RAG
 
 This project presents the development of an integrated web service for secure multi-user document management. The solution allows users to register, log in, upload PDF documents, generate AI-based summaries, and ask questions about the content of a selected document. The system follows a modern cloud-oriented architecture where the frontend is implemented in Vue, the backend in FastAPI, metadata is stored in PostgreSQL, and uploaded files are stored in MinIO, an S3-compatible object storage service. The AI layer supports multiple external providers (Groq with Llama 4 Scout, Google Gemini, or OpenAI) with automatic fallback, which reduces mandatory costs and allows demonstration in constrained environments. A RAG-lite approach using BM25 ranking of document chunks is implemented for contextual Q&A.
 
-The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX33 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 107 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
+The project focuses strongly on service integration, security, and operational feasibility. The implementation includes JWT-based authentication, ownership-based access control, health and readiness endpoints, structured JSON logging (structlog), Prometheus metrics, and a production Docker Compose deployment on a Hetzner CX33 VPS at https://doc-ai-assist.com with Let's Encrypt TLS. Long-running operations are handled through an asynchronous processing workflow with persistent job records, which makes the architecture more realistic and scalable. The system includes 111 automated tests, a GitHub Actions CI pipeline, and an admin panel with user role management.
 
 The project demonstrates that an architecturally relevant and secure cloud-style service can be implemented using open technologies and a limited budget. In addition to implementation details, the report includes a security review, cost analysis, and a critical comparison with a managed-platform alternative.
 
-The system includes 107 automated tests in 9 test files with approximately 90% code coverage.
+The system includes 111 automated tests in 9 test files with 87% measured backend code coverage.
 
 ### Keywords
 
@@ -541,7 +541,7 @@ Po uspešnem deploymentu so bili ključni aplikacijski vsebniki v stanju healthy
 
 GitHub Actions CI/CD pipeline izvaja šest ločenih jobov ob vsakem pushu ali pull requestu:
 1. **Backend lint** — preverjanje kakovosti Python-kode z orodjem ruff (lint + format check),
-2. **Backend test** — zagon vseh 107 testov s pokritostjo (minimalni prag 70 %), z uporabo pytest-cov,
+2. **Backend test** — zagon vseh 111 testov s pokritostjo (minimalni prag 70 %), z uporabo pytest-cov,
 3. **Frontend lint** — preverjanje formatiranja s Prettier,
 4. **Frontend build** — preverjanje gradnje Vue.js frontend aplikacije z Vite,
 5. **Docker build** — preverjanje da se backend in frontend Docker sliki uspešno zgradita,

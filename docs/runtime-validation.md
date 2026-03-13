@@ -31,7 +31,7 @@
 
 ## Automated test suite
 
-- 107 test cases across 9 test files (~90% code coverage)
+- 111 test cases across 9 test files (87% measured backend coverage)
 - Covers: auth validation, document operations, pagination, access control, error handling, async jobs, admin endpoints, document download, Prometheus metrics, AI summary service, storage service, PDF extraction, password hashing, JWT tokens
 - Uses mocked storage and AI layers for deterministic execution
 - Coverage threshold enforced in CI (≥70%)

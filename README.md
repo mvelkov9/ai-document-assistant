@@ -35,7 +35,7 @@ AI Document Assistant is a semester project for the course *Integracija spletnih
 
 ### Prerequisites
 - Docker & Docker Compose
-- (Optional) Node 22, Python 3.13 for local dev
+- (Optional) Node 22, Python 3.13 with `venv` support for local dev
 
 ### Full Stack (Docker)
 
@@ -63,6 +63,12 @@ cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+```
+
+If `python3 -m venv` fails on Debian/Ubuntu, install the missing OS package first:
+
+```bash
+sudo apt install python3.13-venv
 ```
 
 ## API Endpoints
@@ -124,13 +130,23 @@ In production, the deploy script runs `alembic upgrade head` automatically.
 
 ## Testing
 
+Recommended local test path from the repository root:
+
+```bash
+docker compose build backend
+docker compose run --rm -e PYTHONPATH=/app backend pytest
+docker compose run --rm -e PYTHONPATH=/app backend pytest --cov=app --cov-report=term-missing
+```
+
+If you already have a working local Python environment inside `backend/`, you can also run:
+
 ```bash
 cd backend
 pytest                                         # Run all tests
 pytest --cov=app --cov-report=term-missing     # With coverage
 ```
 
-Test suite covers: auth validation, upload constraints, document access control, pagination, workspace insights, Q&A validation, async jobs, health endpoints, admin endpoints, document download, Prometheus metrics, AI summary service, storage operations, PDF extraction, password hashing, JWT tokens. 107 test cases across 9 test files (~90% code coverage).
+Test suite covers: auth validation, upload constraints, document access control, pagination, workspace insights, Q&A validation, async jobs, health endpoints, admin endpoints, document download, Prometheus metrics, AI summary service, storage operations, PDF extraction, password hashing, JWT tokens. 111 test cases across 9 test files (current measured coverage: 87%).
 
 Rate limiting is automatically disabled when `APP_ENV=test` to prevent cascade failures.
 

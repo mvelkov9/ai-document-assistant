@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from time import perf_counter
 
 import structlog
@@ -35,9 +36,16 @@ limiter = Limiter(
     enabled=settings.app_env != "test",
 )
 
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db()
+    yield
+
+
 app = FastAPI(
     title=settings.project_name,
     version="1.5.3",
+    lifespan=lifespan,
     description=(
         "REST API for the AI Document Assistant — a semester project at ALMA MATER EUROPAEA.\n\n"
         "**Core features:**\n"
@@ -100,11 +108,6 @@ try:
     Instrumentator().instrument(app).expose(app, endpoint="/metrics", tags=["monitoring"])
 except ImportError:
     pass  # Optional dependency
-
-
-@app.on_event("startup")
-def on_startup() -> None:
-    init_db()
 
 
 @app.middleware("http")

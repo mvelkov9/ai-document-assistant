@@ -40,7 +40,7 @@
 | 14 | Docker profiles | Completed | Multi-stage Dockerfiles, production overlay, non-root |
 | 15 | CI/CD | Completed | GitHub Actions: ruff lint, pytest-cov, frontend build |
 | 16 | Observability | Completed | Structured JSON logging (structlog), readiness endpoint |
-| 17 | Testing | Completed | 30 test cases, auth/doc/pagination/error coverage |
+| 17 | Testing | Completed | 111 backend tests, auth/doc/pagination/error coverage |
 | 18 | Costs and fit | Completed | Cost tables with real pricing, PaaS comparison |
 | 19 | VPS deployment | Completed | Deployed on Hetzner CX33, TLS, doc-ai-assist.com |
 | 20 | Frontend expansion | Completed | Search, filter, sort, user profile |
@@ -53,7 +53,7 @@
 | 27 | GUI overhaul v1.2.1 | Completed | Sidebar layout, admin role management |
 | 28 | Hardening v1.2.2 | Completed | PDF extraction fallback, VPS specs CX33, lint fixes |
 | 29 | Formatters v1.2.3 | Completed | Ruff format + prettier auto-formatting, CI format checks |
-| 30 | Testing & CI v1.2.4 | Completed | 107 tests (90% coverage), CI evolved into 6 jobs including deploy, Node 24 compat |
+| 30 | Testing & CI v1.2.4 | Completed | 111 tests (87% coverage), CI evolved into 6 jobs including deploy, Node 24 compat |
 | 31 | Vue Router v1.3.0 | Completed | Vue Router 4, page splitting (5 routes), composable store, nav guards |
 | 32 | Continuous Deployment | Completed | SSH deploy step in GitHub Actions after CI, main branch only |
 | 33 | Grafana dashboard | Completed | Prometheus + Grafana containers, pre-provisioned FastAPI dashboard |
@@ -156,7 +156,7 @@
 
 1. Capture the mandatory 16 screenshots for the Word report, plus 4 optional GUI screenshots (PDF viewer, chat Q&A, charts, mobile layout)
 2. Render both Mermaid diagrams (`architecture.mmd`, `data-flow.mmd`) to PNG and insert them into the report
-3. Unify the final written materials around the actual current numbers: 24 endpoints, 6 CI/CD jobs, 107 tests, ~90% coverage, 70% CI threshold
+3. Unify the final written materials around the actual current numbers: 24 endpoints, 6 CI/CD jobs, 111 tests, 87% coverage, 70% CI threshold
 4. Add one honest limitations subsection to the report: BackgroundTasks durability, missing frontend pagination, localStorage JWT trade-off, markdown sanitization follow-up
 5. Rehearse a short defense flow on https://doc-ai-assist.com: login, upload, summarize, ask, download, admin, Swagger
 
@@ -456,7 +456,7 @@ After every completed implementation phase:
 - Version bumped to v1.2.3 in backend (FastAPI), frontend (package.json, App.vue), README
 
 **Phase E18: Version 1.2.4 — Comprehensive test coverage & CI improvements**
-- Expanded test suite from 39 to **107 tests** across **9 files** with **~90% code coverage**
+- Expanded test suite from 39 to **111 tests** across **9 files** with **87% measured backend coverage**
 - Added `test_summary_service.py` (32 tests): chunking, BM25 ranking, AI provider dispatch with mocked httpx
 - Added `test_delete_and_admin.py` (11 tests): document deletion, admin role management
 - Added `test_storage_and_pdf.py` (16 tests): S3 storage operations, PDF text extraction
@@ -659,7 +659,7 @@ Koraki:
 
 ### Phase 26: Report finalizacija s posnetki ✅ ZAKLJUČENO
 
-**Status:** Report in outline v celoti posodobljena. 16 screenshot placeholderjev vstavljen v report draft. Stroškovna analiza, tehnološka tabela, zaključek, reference — vse posodobljeno na dejansko stanje (Groq, BM25, 107 testov, VPS €5.49, doc-ai-assist.com). Student mora zajeti posnetke in jih vstaviti v Word dokument.
+**Status:** Report in outline v celoti posodobljena. 16 screenshot placeholderjev vstavljen v report draft. Stroškovna analiza, tehnološka tabela, zaključek, reference — vse posodobljeno na dejansko stanje (Groq, BM25, 111 testov, VPS €5.49, doc-ai-assist.com). Student mora zajeti posnetke in jih vstaviti v Word dokument.
 
 Posnetki za 01-report-draft.md in Word dokument:
 1. Posnetek 1: Arhitekturni diagram (Mermaid → PNG iz architecture.mmd)

@@ -24,7 +24,7 @@ The CI/CD pipeline now runs six jobs:
 
 ### backend-test (depends on backend-lint)
 - Runs `pytest --cov=app --cov-report=term-missing --cov-fail-under=70`
-- Enforces minimum 70% code coverage threshold (actual: ~90%)
+- Enforces minimum 70% code coverage threshold (current measured result: 87%)
 - Uses `pytest-cov` for coverage measurement
 - PostgreSQL 17 service container for integration tests
 
