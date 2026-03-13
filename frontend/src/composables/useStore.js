@@ -318,8 +318,7 @@ async function handleAsk(documentId, question) {
 
     // Remove the pending entry and add the real one
     documentAnswers[documentId] = documentAnswers[documentId].filter((a) => a.id !== pendingId)
-    if (result)
-      await Promise.all([refreshDocuments(), loadAnswersForDocument(documentId), refreshInsights()])
+    if (result) await Promise.all([loadAnswersForDocument(documentId), refreshInsights()])
     setMessage(result ? t('messages.answerReady') : t('messages.jobRunning'))
   } catch (e) {
     // Remove pending entry on error

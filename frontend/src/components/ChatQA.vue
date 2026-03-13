@@ -14,6 +14,7 @@
 
   const questionDraft = ref('')
   const chatBody = ref(null)
+  const questionInput = ref(null)
   const confirmClear = ref(false)
 
   function confirmAndClear() {
@@ -32,6 +33,7 @@
     if (q.length < 3) return
     emit('ask', q)
     questionDraft.value = ''
+    nextTick(() => questionInput.value?.focus())
   }
 
   function handleKeydown(e) {
@@ -67,6 +69,16 @@
     async () => {
       await nextTick()
       if (chatBody.value) chatBody.value.scrollTop = chatBody.value.scrollHeight
+    },
+  )
+
+  watch(
+    () => props.questionBusy,
+    async (isBusy, wasBusy) => {
+      if (wasBusy && !isBusy) {
+        await nextTick()
+        questionInput.value?.focus()
+      }
     },
   )
 </script>
@@ -178,6 +190,7 @@
     <!-- Input bar -->
     <div class="chat-input-bar">
       <textarea
+        ref="questionInput"
         v-model="questionDraft"
         @keydown="handleKeydown"
         rows="1"
