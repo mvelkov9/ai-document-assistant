@@ -1,50 +1,50 @@
 sequenceDiagram
-    actor U as User
-    participant F as Vue SPA<br/>(Router + Pages)
-    participant N as Nginx<br/>(Security Headers)
-    participant R as Rate Limiter<br/>(slowapi)
-    participant B as FastAPI Backend<br/>(structlog)
-    participant P as PostgreSQL<br/>(Alembic)
+    actor U as Uporabnik
+    participant F as Vue spletna aplikacija
+    participant N as Nginx
+    participant R as Omejevanje zahtevkov
+    participant B as FastAPI zaledna storitev
+    participant P as PostgreSQL
     participant M as MinIO
-    participant A as AI Provider Chain<br/>(Groq/Gemini/OpenAI/Fallback)
+    participant A as Veriga AI ponudnikov
 
-    U->>F: Register or login
-    F->>N: Auth request
-    N->>R: Forward (5/min limit)
-    R->>B: Validated request
-    B->>P: Read or write user
-    B-->>F: JWT token
+    U->>F: Registracija ali prijava
+    F->>N: Avtentikacijski zahtevek
+    N->>R: Posredovanje zahtevka
+    R->>B: Preverjen zahtevek
+    B->>P: Branje ali zapis uporabnika
+    B-->>F: JWT žeton
 
-    U->>F: Upload PDF
-    F->>N: Multipart upload + JWT
-    N->>B: Forward
-    B->>M: Store file bytes
-    B->>P: Store document metadata
-    B-->>F: Document metadata
+    U->>F: Nalaganje PDF dokumenta
+    F->>N: Multipart zahtevek + JWT
+    N->>B: Posredovanje
+    B->>M: Shranitev datoteke
+    B->>P: Shranitev metapodatkov
+    B-->>F: Potrditev in podatki dokumenta
 
-    U->>F: List documents
+    U->>F: Prikaz seznama dokumentov
     F->>N: GET /documents
-    N->>B: Forward
-    B->>P: Query with offset/limit + count
-    B-->>F: {items, total, skip, limit}
+    N->>B: Posredovanje
+    B->>P: Poizvedba po dokumentih
+    B-->>F: Seznam dokumentov
 
-    U->>F: Trigger async summary
-    F->>N: Create summary job
-    N->>R: Forward (10/min limit)
-    R->>B: Validated request
-    B->>P: Store processing job
-    B-->>F: Job queued (202)
-    B->>M: Download PDF
-    B->>A: Extract text and generate summary
-    B->>P: Update document summary and job status
-    F->>B: Poll job status
-    B-->>F: Completed job and updated document state
+    U->>F: Sprožitev asinhronega povzetka
+    F->>N: Zahtevek za ustvarjanje opravila
+    N->>R: Posredovanje zahtevka
+    R->>B: Preverjen zahtevek
+    B->>P: Ustvari zapis opravila
+    B-->>F: Opravilo v čakalni vrsti
+    B->>M: Pridobi PDF dokument
+    B->>A: Izluščenje besedila in generiranje povzetka
+    B->>P: Posodobitev povzetka in statusa opravila
+    F->>B: Preverjanje stanja opravila
+    B-->>F: Zaključeno opravilo in rezultat
 
-    U->>F: Ask question over document
-    F->>N: Question request + JWT
-    N->>R: Forward (10/min limit)
-    R->>B: Validated request (3-500 chars)
-    B->>M: Download PDF
-    B->>A: Rank chunks (BM25) and generate answer
-    B->>P: Store Q&A record
-    B-->>F: Answer payload
+    U->>F: Vprašanje nad dokumentom
+    F->>N: Zahtevek z vprašanjem + JWT
+    N->>R: Posredovanje zahtevka
+    R->>B: Preverjen zahtevek
+    B->>M: Pridobi PDF dokument
+    B->>A: Rangiranje odsekov in generiranje odgovora
+    B->>P: Shranitev vprašanja in odgovora
+    B-->>F: Odgovor sistema

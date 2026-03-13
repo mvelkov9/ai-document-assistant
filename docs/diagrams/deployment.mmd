@@ -1,0 +1,21 @@
+flowchart TB
+    User[Uporabnik]
+    Internet[Internet]
+    Domain[Domena doc-ai-assist.com]
+    TLS[HTTPS / TLS]
+
+    subgraph VPS[Hetzner VPS]
+        Nginx[Nginx<br/>Obratni posredniški strežnik]
+        Frontend[Frontend vsebnik<br/>Vue aplikacija]
+        Backend[Backend vsebnik<br/>FastAPI]
+        Postgres[(PostgreSQL vsebnik)]
+        Minio[(MinIO vsebnik)]
+        Metrics[Prometheus / Grafana]
+    end
+
+    User --> Internet --> Domain --> TLS --> Nginx
+    Nginx --> Frontend
+    Nginx --> Backend
+    Backend --> Postgres
+    Backend --> Minio
+    Backend --> Metrics

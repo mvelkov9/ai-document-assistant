@@ -1,0 +1,25 @@
+sequenceDiagram
+    actor U as Uporabnik
+    participant F as Vue spletna aplikacija
+    participant N as Nginx
+    participant B as FastAPI zaledna storitev
+    participant P as PostgreSQL
+    participant M as MinIO
+    participant A as AI-storitvena plast
+
+    U->>F: Zahteva za povzetek dokumenta
+    F->>N: POST zahtevek + JWT
+    N->>B: Posredovanje zahtevka
+    B->>P: Ustvari zapis opravila
+    B-->>F: Vrne ID opravila in status queued
+
+    B->>M: Pridobi PDF dokument
+    B->>B: Izlušči besedilo
+    B->>A: Pošlje besedilo v povzemanje
+    A-->>B: Vrne povzetek
+
+    B->>P: Shrani povzetek
+    B->>P: Posodobi status opravila
+
+    F->>B: Preveri stanje opravila
+    B-->>F: Status completed in rezultat
